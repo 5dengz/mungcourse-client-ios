@@ -1,0 +1,27 @@
+digraph Database {
+  // 그래프 설정
+  rankdir=LR;
+  node [shape=record, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9];
+  
+  // 테이블 노드
+  User [label="{User|id: BIGINT (PK)\lsub: VARCHAR\lemail: VARCHAR\lname: VARCHAR\lprovider: VARCHAR\l}"];
+  
+  Dog [label="{Dog|id: BIGINT (PK)\ldog_img_url: VARCHAR\lname: VARCHAR\lbirthday: DATE\lbreed: VARCHAR\lweight: FLOAT\lhas_arthritis: BOOLEAN\lhas_allergy: BOOLEAN\luser_id: BIGINT (FK)\l}"];
+  
+  Walk [label="{Walk|id: BIGINT (PK)\ldistance_km: FLOAT\lduration_sec: INT\lcalories: INT\lgps_data: TEXT\lcreated_at: DATETIME\luser_id: BIGINT (FK)\l}"];
+  
+  Walk_Dog [label="{Walk_Dog|walk_id: BIGINT (FK)\ldog_id: BIGINT (PK, FK)\l}"];
+  
+  routine_info [label="{routine_info|id: BIGINT (PK)\lname: VARCHAR\lalarm_time: TIME\luser_id: BIGINT (FK)\l}"];
+  
+  daily_routine [label="{daily_routine|id: BIGINT (PK)\lday_of_week: ENUM\lis_completed: BOOLEAN\lroutine_info_id: BIGINT (FK)\l}"];
+  
+  // 관계 (엣지)
+  Dog -> User [label="user_id → id"];
+  Walk -> User [label="user_id → id"];
+  Walk_Dog -> Walk [label="walk_id → id"];
+  Walk_Dog -> Dog [label="dog_id → id"];
+  routine_info -> User [label="user_id → id"];
+  daily_routine -> routine_info [label="routine_info_id → id"];
+}
