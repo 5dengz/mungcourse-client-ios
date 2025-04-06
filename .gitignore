@@ -1,0 +1,57 @@
+# Xcode
+#
+# gitignore 파일 작성
+#
+## Build generated
+build/
+DerivedData/
+
+## 시스템 파일
+.DS_Store
+
+## 사용자 설정
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+
+## 기타
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+*.xcuserstate
+
+## Obj-C/Swift 특정
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+#
+.build/
+
+# CocoaPods
+#
+Pods/
+*.xcworkspace
+
+# Carthage
+#
+Carthage/Build/
+
+# fastlane
+#
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
