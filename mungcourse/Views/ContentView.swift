@@ -16,27 +16,47 @@ struct ContentView: View {
             // 각 탭에 새로 생성한 뷰를 연결합니다.
             HomeView()
                 .tabItem {
-                    Label("홈", systemImage: "house.fill")
+                    Label {
+                        Text("홈")
+                    } icon: {
+                        Image("home") // Asset Catalog 아이콘 사용
+                    }
                 }
 
             StartWalkView() // 분리된 뷰 사용
                 .tabItem {
-                    Label("산책 시작", systemImage: "figure.walk")
+                    Label {
+                        Text("산책 시작")
+                    } icon: {
+                        Image("map") // Asset Catalog 아이콘 사용
+                    }
                 }
 
             RoutineSettingsView() // 분리된 뷰 사용
                 .tabItem {
-                    Label("루틴 설정", systemImage: "gearshape.fill")
+                    Label {
+                        Text("루틴 설정")
+                    } icon: {
+                        Image("route") // Asset Catalog 아이콘 사용
+                    }
                 }
 
             WalkHistoryView() // 분리된 뷰 사용
                 .tabItem {
-                    Label("산책 기록", systemImage: "list.bullet")
+                    Label {
+                        Text("산책 기록")
+                    } icon: {
+                        Image("history") // Asset Catalog 아이콘 사용
+                    }
                 }
 
             ProfileTabView() // 분리된 뷰 사용
                 .tabItem {
-                    Label("프로필", systemImage: "person.fill")
+                    Label {
+                        Text("프로필")
+                    } icon: {
+                        Image("profile") // Asset Catalog 아이콘 사용
+                    }
                 }
         }
         .accentColor(themeColor) // 탭 바 아이콘 및 텍스트 색상 설정

@@ -7,10 +7,6 @@
 		<string>remote-notification</string>
 		<string>location</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>
