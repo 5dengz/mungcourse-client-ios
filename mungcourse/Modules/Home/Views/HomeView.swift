@@ -3,12 +3,12 @@ import SwiftUI
 struct HomeView: View {
     var body: some View {
         ScrollView { // 내용이 길어질 수 있으므로 ScrollView 사용
-            VStack(spacing: 20) { // 섹션 간 간격 설정
+            VStack(spacing: 35) { // 섹션 간 간격을 20에서 35로 늘림
                 ProfileArea()
                 ButtonArea()
-                NearbyTrailsArea() // 호출
-                WalkIndexArea() // 순서 변경 및 호출
-                PastRoutesArea() // 호출
+                NearbyTrailsView()
+                WalkIndexView()
+                PastRoutesView()
                 Spacer() // 남은 공간 채우기
             }
             .padding() // 전체적인 패딩 추가

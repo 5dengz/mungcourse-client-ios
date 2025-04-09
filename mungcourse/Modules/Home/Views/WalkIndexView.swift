@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct WalkIndexArea: View {
+struct WalkIndexView: View { // <- 이름 변경
     var body: some View {
         VStack(alignment: .leading, spacing: 10) { // 전체를 VStack으로 감싸고 정렬 및 간격 설정
             // 상단 영역: 제목과 더보기 버튼
@@ -31,6 +31,6 @@ struct WalkIndexArea: View {
 }
 
 #Preview {
-    WalkIndexArea()
+    WalkIndexView() // <- 이름 변경
         .padding()
 }
