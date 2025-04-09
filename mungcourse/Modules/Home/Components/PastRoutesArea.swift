@@ -45,8 +45,7 @@ struct PastRoutesArea: View {
                 }
             }
         }
-        .padding()
-        .background(Color.gray.opacity(0.1)) // 배경색 약간 추가
+        //.padding()
         .cornerRadius(10)
     }
 }

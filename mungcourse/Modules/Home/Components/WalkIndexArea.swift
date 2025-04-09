@@ -25,8 +25,7 @@ struct WalkIndexArea: View {
                 .background(Color.gray.opacity(0.2))
                 .cornerRadius(8) // 코너 라운딩 약간 줄임
         }
-        .padding() // 전체 컴포넌트에 패딩 적용
-        .background(Color.gray.opacity(0.1)) // 배경색 약간 추가
+        //.padding() // 전체 컴포넌트에 패딩 적용
         .cornerRadius(10)
     }
 }
