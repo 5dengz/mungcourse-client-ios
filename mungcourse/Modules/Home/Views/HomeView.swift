@@ -31,7 +31,7 @@ struct ProfileArea: View {
         HStack(alignment: .top, spacing: 15) { // 상단 정렬 및 요소 간 간격
             VStack(alignment: .leading, spacing: 5) { // 세로 정렬 및 간격
                 Text("반가워요") // 첫 줄 분리
-                    .font(.custom("Pretendard-Regular", size: 24))
+                    .font(.system(size: 24)) // 기본 시스템 폰트 사용
 
                 HStack(spacing: 8) { // 버튼과 "보호자님!" 텍스트를 가로로 묶음
                     Button {
@@ -56,11 +56,11 @@ struct ProfileArea: View {
                             alignment: .bottomLeading // 텍스트 하단 왼쪽에 정렬
                         )
                     }
-                    .font(.custom("Pretendard-Regular", size: 24)) // 버튼 내부 요소 폰트 적용
+                    .font(.system(size: 24)) // 기본 시스템 폰트 사용
                     .buttonStyle(.plain) // 기본 버튼 스타일 제거하여 텍스트처럼 보이게 함
 
                     Text("보호자님!") // "보호자님!" 텍스트
-                        .font(.custom("Pretendard-Regular", size: 24))
+                        .font(.system(size: 24)) // 기본 시스템 폰트 사용
                 } // HStack (버튼 + 보호자님!) 끝
 
                 // --- 드롭다운 목록 코드 완전 제거 ---

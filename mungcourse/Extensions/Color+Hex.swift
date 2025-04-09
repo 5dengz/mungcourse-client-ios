@@ -15,7 +15,9 @@ extension Color {
         case 8: // ARGB (32-bit)
             (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
-            (a, r, g, b) = (1, 1, 1, 0) // Default to an invalid color maybe? Or use black/white?
+            // 잘못된 hex 코드 입력 시 clear 색상 반환
+            self = .clear
+            return // 초기화 중단
         }
 
         self.init(
