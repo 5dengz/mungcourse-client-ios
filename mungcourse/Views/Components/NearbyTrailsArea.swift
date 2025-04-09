@@ -2,14 +2,24 @@ import SwiftUI
 
 struct NearbyTrailsArea: View {
     var body: some View {
-        // TODO: 실제 주변 산책로 데이터 연동 및 UI 구현 필요
-        VStack(alignment: .leading) {
-            Text("주변 산책로")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.bottom, 5)
+        VStack(alignment: .leading, spacing: 10) { // 전체 VStack, 정렬 및 간격 설정
+            // 상단 영역: 제목과 더보기 버튼
+            HStack {
+                Text("주변 산책로") // 제목
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+                Button("더보기") {
+                    // TODO: 더보기 액션 구현
+                    print("주변 산책로 더보기 탭됨")
+                }
+                .font(.callout)
+                .foregroundColor(.gray)
+            }
+            .padding(.bottom, 5)
 
-            // 예시: 가로 스크롤 뷰 또는 리스트 형태
+            // 콘텐츠 영역 (기존 가로 스크롤 뷰)
+            // TODO: 실제 주변 산책로 데이터 연동 및 UI 구현 필요
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
                     ForEach(0..<5) { _ in // 임시 데이터

@@ -2,14 +2,24 @@ import SwiftUI
 
 struct PastRoutesArea: View {
     var body: some View {
-        // TODO: 실제 지난 경로 데이터 연동 및 UI 구현 필요
-        VStack(alignment: .leading) {
-            Text("지난 경로")
-                .font(.title2)
-                .fontWeight(.bold)
-                .padding(.bottom, 5)
+        VStack(alignment: .leading, spacing: 10) { // 전체 VStack, 정렬 및 간격 설정
+            // 상단 영역: 제목과 더보기 버튼
+            HStack {
+                Text("지난 경로") 
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+                Button("더보기") {
+                    // TODO: 더보기 액션 구현
+                    print("과거 산책 기록 더보기 탭됨")
+                }
+                .font(.callout)
+                .foregroundColor(.gray)
+            }
+            .padding(.bottom, 5)
 
-            // 예시: 리스트 형태
+            // 콘텐츠 영역 (기존 리스트)
+            // TODO: 실제 지난 경로 데이터 연동 및 UI 구현 필요
             VStack(spacing: 10) {
                 ForEach(0..<3) { index in // 임시 데이터
                     HStack {

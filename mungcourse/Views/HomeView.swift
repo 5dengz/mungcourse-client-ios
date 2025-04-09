@@ -6,9 +6,9 @@ struct HomeView: View {
             VStack(spacing: 20) { // 섹션 간 간격 설정
                 ProfileArea()
                 ButtonArea()
-                NearbyTrailsArea()
-                WalkIndexArea()
-                PastRoutesArea()
+                NearbyTrailsArea() // 호출
+                WalkIndexArea() // 순서 변경 및 호출
+                PastRoutesArea() // 호출
                 Spacer() // 남은 공간 채우기
             }
             .padding() // 전체적인 패딩 추가
@@ -19,6 +19,7 @@ struct HomeView: View {
 
 // --- Placeholder Views ---
 
+// ProfileArea는 그대로 유지
 struct ProfileArea: View {
     // TODO: 실제 강아지 데이터 목록 로드 및 선택 로직 구현 필요
     @State private var dogName = "몽실이" // @State로 변경하여 값 변경 가능하도록 함
@@ -123,18 +124,9 @@ struct ButtonArea: View {
     }
 }
 
-// NearbyTrailsArea struct removed - moved to Components/NearbyTrailsArea.swift
+// --- WalkIndexArea, PastRoutesArea, NearbyTrailsArea 정의 제거 ---
+// 이들은 별도의 파일로 분리되었으므로 여기서 제거합니다.
 
-struct WalkIndexArea: View {
-    var body: some View {
-        Text("산책 지수 영역")
-            .frame(maxWidth: .infinity, minHeight: 100)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(10)
-    }
-}
-
-// PastRoutesArea struct removed - moved to Components/PastRoutesArea.swift
 
 // Preview for HomeView itself, if needed for isolated development
 #Preview {
