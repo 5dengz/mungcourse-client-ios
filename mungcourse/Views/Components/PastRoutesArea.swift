@@ -4,7 +4,7 @@ struct PastRoutesArea: View {
     var body: some View {
         // TODO: 실제 지난 경로 데이터 연동 및 UI 구현 필요
         VStack(alignment: .leading) {
-            Text("최근 산책 경로")
+            Text("지난 경로")
                 .font(.title2)
                 .fontWeight(.bold)
                 .padding(.bottom, 5)

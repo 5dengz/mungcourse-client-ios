@@ -74,7 +74,7 @@ struct ProfileArea: View {
                 .frame(width: 60, height: 60) // 이미지 크기 설정
                 .foregroundColor(.gray) // 아이콘 색상 설정
         }
-        .padding() // HStack 내부 패딩 추가
+        .padding(.vertical) // 좌우 패딩 제거, 상하 패딩만 유지
         // .background(Color.gray.opacity(0.1)) // 필요하다면 배경색 추가
         // .cornerRadius(10) // 필요하다면 코너 라운딩 추가
         .confirmationDialog("강아지 선택", isPresented: $showingDogSelection, titleVisibility: .visible) {
