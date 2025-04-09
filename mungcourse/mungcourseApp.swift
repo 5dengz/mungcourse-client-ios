@@ -10,7 +10,8 @@ import SwiftData
 
 @main
 struct mungcourseApp: App {
-    @State private var isLoading = true // 로딩 상태를 관리하는 State 변수 추가
+    @State private var isMinimumTimePassed = false // 최소 시간(2초) 경과 여부
+    @State private var isContentLoaded = false   // ContentView 로드(표시) 여부
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -26,19 +27,24 @@ struct mungcourseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if isLoading {
+            // 최소 시간이 경과하지 않았거나, ContentView가 아직 로드되지 않았다면 LoadingView 표시
+            if !isMinimumTimePassed || !isContentLoaded {
                 LoadingView()
                     .onAppear {
-                        // 2초 후에 로딩 상태를 false로 변경하여 ContentView 표시
+                        // 2초 후에 isMinimumTimePassed를 true로 설정
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                            self.isLoading = false
+                            self.isMinimumTimePassed = true
                         }
                     }
             } else {
                 ContentView()
                     .modelContainer(sharedModelContainer) // ContentView에만 modelContainer 적용
+                    .onAppear {
+                        // ContentView가 화면에 나타나면 isContentLoaded를 true로 설정
+                        // 실제 앱에서는 데이터 로딩 완료 시점에 이 상태를 변경해야 더 정확합니다.
+                        self.isContentLoaded = true
+                    }
             }
         }
-        // WindowGroup 전체에 modelContainer를 적용하지 않고 ContentView에만 적용
     }
 }
