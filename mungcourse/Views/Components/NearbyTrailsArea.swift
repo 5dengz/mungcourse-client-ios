@@ -6,8 +6,8 @@ struct NearbyTrailsArea: View {
             // 상단 영역: 제목과 더보기 버튼
             HStack {
                 Text("주변 산책로") // 제목
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                 Spacer()
                 Button("더보기") {
                     // TODO: 더보기 액션 구현

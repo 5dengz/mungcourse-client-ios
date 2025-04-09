@@ -6,8 +6,8 @@ struct WalkIndexArea: View {
             // 상단 영역: 제목과 더보기 버튼
             HStack {
                 Text("산책 지수") // 제목
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                 Spacer() // 제목과 버튼 사이 공간 최대화
                 Button("더보기") {
                     // TODO: 더보기 액션 구현

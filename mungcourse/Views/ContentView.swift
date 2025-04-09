@@ -42,7 +42,7 @@ struct ContentView: View {
                 .tabItem {
                     Label {
                         Text("산책 기록")
-                    } icon: {
+                    } icon: {   
                         Image("history") // Asset Catalog 아이콘 사용
                     }
                 }
