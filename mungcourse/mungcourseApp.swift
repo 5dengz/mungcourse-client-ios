@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct mungcourseApp: App {
+    @State private var isLoading = true // 로딩 상태를 관리하는 State 변수 추가
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,8 +26,19 @@ struct mungcourseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if isLoading {
+                LoadingView()
+                    .onAppear {
+                        // 2초 후에 로딩 상태를 false로 변경하여 ContentView 표시
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            self.isLoading = false
+                        }
+                    }
+            } else {
+                ContentView()
+                    .modelContainer(sharedModelContainer) // ContentView에만 modelContainer 적용
+            }
         }
-        .modelContainer(sharedModelContainer)
+        // WindowGroup 전체에 modelContainer를 적용하지 않고 ContentView에만 적용
     }
 }
