@@ -94,10 +94,32 @@ struct ProfileArea: View {
 
 struct ButtonArea: View {
     var body: some View {
-        Text("버튼 영역")
-            .frame(maxWidth: .infinity, minHeight: 50)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(10)
+        HStack(spacing: 9) { // 버튼 좌우 배치 및 간격 9px 설정
+            // TODO: 실제 기능 및 색상, 아이콘 확정 필요
+            // Renamed from ReusableButtonStyleButton
+            MainButton(
+                title: "산책 시작",
+                imageName: "start_walk", // Use asset image name
+                backgroundColor: Color.accentColor, // 앱의 액센트 컬러 사용
+                action: {
+                    print("산책 시작 버튼 탭됨")
+                    // TODO: 산책 시작 화면으로 네비게이션 또는 관련 로직 구현
+                }
+            )
+
+            // Renamed from ReusableButtonStyleButton
+            MainButton(
+                title: "코스 선택",
+                imageName: "select_course", // Use asset image name
+                backgroundColor: Color.white,
+                foregroundColor: Color.accentColor, // 텍스트 색상을 accentColor로 설정
+                action: {
+                    print("코스 선택 버튼 탭됨") // print 메시지 수정
+                    // TODO: 경로 만들기 화면으로 네비게이션 또는 관련 로직 구현
+                }
+            )
+        }
+        // HStack 전체에 대한 추가적인 패딩이나 프레임 설정은 필요시 여기에 추가
     }
 }
 
