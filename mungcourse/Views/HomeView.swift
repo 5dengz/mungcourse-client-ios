@@ -114,14 +114,7 @@ struct ButtonArea: View {
     }
 }
 
-struct NearbyTrailsArea: View {
-    var body: some View {
-        Text("주변 산책로 영역")
-            .frame(maxWidth: .infinity, minHeight: 150)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(10)
-    }
-}
+// NearbyTrailsArea struct removed - moved to Components/NearbyTrailsArea.swift
 
 struct WalkIndexArea: View {
     var body: some View {
@@ -132,14 +125,7 @@ struct WalkIndexArea: View {
     }
 }
 
-struct PastRoutesArea: View {
-    var body: some View {
-        Text("지난 경로 영역")
-            .frame(maxWidth: .infinity, minHeight: 150)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(10)
-    }
-}
+// PastRoutesArea struct removed - moved to Components/PastRoutesArea.swift
 
 // Preview for HomeView itself, if needed for isolated development
 #Preview {
