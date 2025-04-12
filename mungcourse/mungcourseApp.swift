@@ -11,6 +11,8 @@ import SwiftData
 @main
 struct mungcourseApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("authToken") private var authToken: String = "" // 추후 토큰 저장용
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
 
     var sharedModelContainer: ModelContainer = {
@@ -31,13 +33,23 @@ struct mungcourseApp: App {
             ZStack {
                 // 로딩 완료 후 보여줄 메인 컨텐츠 결정
                 if !showLoadingScreen {
-                    if hasCompletedOnboarding {
+                    // 토큰이 있으면 온보딩과 로그인 화면을 건너뛰고 바로 홈 화면으로 이동
+                    if !authToken.isEmpty {
+                        // 토큰이 유효한 경우 (추후 검증 로직 추가)
                         ContentView()
                             .modelContainer(sharedModelContainer)
-                            // ContentView 로딩 관련 로직은 필요 시 ContentView 내부에서 처리
-                    } else {
+                    } else if !hasCompletedOnboarding {
+                        // 1. 온보딩 미완료: 온보딩 화면 표시
                         OnboardingView()
                         // OnboardingView 내에서 완료 시 hasCompletedOnboarding = true 로 설정
+                    } else if !isLoggedIn {
+                        // 2. 온보딩 완료, 로그인 안 됨: 로그인 화면 표시
+                        LoginView()
+                        // LoginView 내에서 로그인 완료 시 isLoggedIn = true 로 설정
+                    } else {
+                        // 3. 로그인 완료: 메인 컨텐츠 표시
+                        ContentView()
+                            .modelContainer(sharedModelContainer)
                     }
                 }
 
