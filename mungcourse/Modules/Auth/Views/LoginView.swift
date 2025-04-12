@@ -1,19 +1,28 @@
 import SwiftUI
+import Combine
 
 struct LoginView: View {
-    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
-    @AppStorage("authToken") private var authToken: String = ""
+    // ViewModel 사용
+    @StateObject private var viewModel = LoginViewModel()
     
     var body: some View {
         VStack {
+            Spacer()
+            
+            // 로고 이미지
+            Image("logo_white")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200, height: 200)
+                .padding(.bottom, 50)
+            
             Spacer()
             
             // 로그인 버튼들
             VStack(spacing: 16) {
                 // 카카오 로그인 버튼
                 Button(action: {
-                    // 카카오 로그인 처리 (추후 구현)
-                    performKakaoLogin()
+                    viewModel.loginWithKakao()
                 }) {
                     HStack {
                         Image(systemName: "message.fill")
@@ -28,11 +37,11 @@ struct LoginView: View {
                     .background(Color.yellow)
                     .cornerRadius(10)
                 }
+                .disabled(viewModel.isLoading)
                 
                 // 애플 로그인 버튼
                 Button(action: {
-                    // 애플 로그인 처리 (추후 구현)
-                    performAppleLogin()
+                    viewModel.loginWithApple()
                 }) {
                     HStack {
                         Image(systemName: "apple.logo")
@@ -47,40 +56,34 @@ struct LoginView: View {
                     .background(Color.black)
                     .cornerRadius(10)
                 }
+                .disabled(viewModel.isLoading)
+                
+                // 로딩 인디케이터
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                        .scaleEffect(1.5)
+                        .padding(.top, 10)
+                }
+                
+                // 오류 메시지
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding(.top, 10)
+                }
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 50)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.white)
-    }
-    
-    // 카카오 로그인 함수 (추후 실제 구현)
-    private func performKakaoLogin() {
-        print("카카오 로그인 시도")
-        // 실제 로그인 구현 시 이 부분에 코드 추가
-        // 로그인 API 호출하여 토큰 받아오기
-        // let token = api.login(provider: "kakao", ...) 
-        
-        // 성공 시 토큰 저장 및 로그인 상태 변경
-        let mockToken = "kakao_mock_auth_token_\(UUID().uuidString)"
-        self.authToken = mockToken
-        self.isLoggedIn = true
-        print("카카오 로그인 성공: 토큰 저장됨")
-    }
-    
-    // 애플 로그인 함수 (추후 실제 구현)
-    private func performAppleLogin() {
-        print("애플 로그인 시도")
-        // 실제 로그인 구현 시 이 부분에 코드 추가
-        // 로그인 API 호출하여 토큰 받아오기
-        // let token = api.login(provider: "apple", ...) 
-        
-        // 성공 시 토큰 저장 및 로그인 상태 변경
-        let mockToken = "apple_mock_auth_token_\(UUID().uuidString)"
-        self.authToken = mockToken
-        self.isLoggedIn = true
-        print("애플 로그인 성공: 토큰 저장됨")
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.accentColor.opacity(0.8), Color.accentColor]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }
 
