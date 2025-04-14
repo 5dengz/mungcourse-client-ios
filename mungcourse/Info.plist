@@ -10,9 +10,9 @@
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>NMFClientId</key>
-	<string>o6lgh535oz</string>
+	<string>5s28pgywc5</string>
 	<key>NMFClientSecret</key>
-	<string>YLUIBOMKJ4ACuRU9NQze2xuKMxHkDLnhnjjLpsqk</string>
+	<string>jyfC8sxiG8VYDyQcm1Os2uJNmvTYpHG9P8LUL0zf</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import NMapsMap // 네이버 지도 SDK 임포트
 
 @main
 struct mungcourseApp: App {
@@ -25,6 +26,11 @@ struct mungcourseApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+
+    // 앱 초기화 시 네이버 지도 SDK 인증
+    init() {
+        NMFAuthManager.shared().ncpKeyId = "5s28pgywc5" // Info.plist에 있는 클라이언트 ID와 동일하게 설정
+    }
 
     var body: some Scene {
         WindowGroup {
