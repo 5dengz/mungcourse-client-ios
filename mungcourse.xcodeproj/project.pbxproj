@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 56F78F012DAD051800B3CC88 /* NMapsMap */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		56F1231E2DA2C33700632733 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = mungcourse;
 			packageProductDependencies = (
+				56F78F012DAD051800B3CC88 /* NMapsMap */,
 			);
 			productName = mungcourse;
 			productReference = 56F1230C2DA2C33500632733 /* mungcourse.app */;
@@ -591,6 +597,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		56F78F012DAD051800B3CC88 /* NMapsMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
+			productName = NMapsMap;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 56F123042DA2C33500632733 /* Project object */;
 }
