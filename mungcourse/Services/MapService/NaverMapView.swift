@@ -27,7 +27,7 @@ struct NaverMapView: UIViewRepresentable {
         
         // Set delegate
         mapView.mapView.touchDelegate = context.coordinator
-        mapView.mapView.addCameraDelegate(context.coordinator)
+        mapView.mapView.addCameraDelegate(delegate: context.coordinator)
         
         // Configure user location tracking
         if showUserLocation {
