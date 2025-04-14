@@ -9,5 +9,18 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
+	<key>NMFClientId</key>
+	<string>o6lgh535oz</string>
+	<key>NMFClientSecret</key>
+	<string>YLUIBOMKJ4ACuRU9NQze2xuKMxHkDLnhnjjLpsqk</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>naversearchapp</string>
+		<string>naversearchthirdlogin</string>
+	</array>
 </dict>
 </plist>

@@ -208,6 +208,9 @@
 			);
 			mainGroup = 56F123032DA2C33500632733;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56F1230D2DA2C33500632733 /* Products */;
 			projectDirPath = "";
@@ -577,6 +580,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.21.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 56F123042DA2C33500632733 /* Project object */;
 }
