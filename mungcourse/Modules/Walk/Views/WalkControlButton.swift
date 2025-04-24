@@ -22,7 +22,7 @@ struct WalkControlButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor("pointRed")
+                        .foregroundColor(Color("pointRed"))
                 }
                 .frame(width: 54, height: 54)
                 .background(Color("main50"))
@@ -33,7 +33,7 @@ struct WalkControlButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor("pointRed")
+                        .foregroundColor(Color("pointRed"))
                 }
                 .frame(width: 54, height: 54)
                 .background(Color("main50"))
@@ -44,7 +44,7 @@ struct WalkControlButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor("pointRed")
+                        .foregroundColor(Color("pointRed"))
                 }
                 .frame(width: 54, height: 54)
                 .background(Color("main50"))
@@ -65,7 +65,7 @@ struct WalkControlButton: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color(UIColor("gray900")))
+        .background(Color("gray900"))
     }
 }
 

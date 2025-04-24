@@ -6,17 +6,17 @@ struct RoundTripTimeView: View {
     var body: some View {
         HStack(spacing: 4) {
             Text("왕복")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor("black10")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Color("black"))
             Text(timeString)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor("main")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(Color("main"))
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
         .background(
             Capsule() // Capsule 모양 사용 (양쪽 끝이 둥근 형태)
-                .fill(Color("pointRed").opacity(0.85)) // 약간 투명한 흰색 배경
+                .fill(Color("white")) // 약간 투명한 흰색 배경
         )
         // cornerRadius 13은 Capsule 모양으로 대체합니다.
         // 만약 사각형 모서리 둥글림을 원하시면 Capsule 대신 RoundedRectangle 사용

@@ -8,10 +8,10 @@ struct StatItem: View {
         VStack(spacing: 8) {
             Text(label)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor("gray900")
+                .foregroundColor(Color("gray900"))
             Text(value)
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor("main")
+                .foregroundColor(Color("main"))
         }
         .frame(maxWidth: .infinity)
     }
