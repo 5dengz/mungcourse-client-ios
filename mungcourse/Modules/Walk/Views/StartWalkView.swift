@@ -22,52 +22,28 @@ struct StartWalkView: View {
                 .edgesIgnoringSafeArea(.all)
             }
             
-            // Bottom stats panel with shadow and rounded corners
-            VStack(spacing: 0) {
-                WalkStatsBar(
-                    distance: viewModel.formattedDistance,
-                    duration: viewModel.formattedDuration,
-                    calories: viewModel.formattedCalories
-                )
-                
-                WalkControlButton(
-                    state: viewModel.isPaused ? .paused : (viewModel.isWalking ? .active : .notStarted),
-                    onStart: {
-                        viewModel.startWalk()
-                    },
-                    onPause: {
-                        viewModel.pauseWalk()
-                    },
-                    onResume: {
-                        viewModel.resumeWalk()
-                    },
-                    onEnd: {
-                        completedSession = viewModel.endWalk()
-                        if completedSession != nil {
-                            showCompleteAlert = true
-                        }
+            // Bottom controller panel
+            WalkControllerView(
+                distance: viewModel.formattedDistance,
+                duration: viewModel.formattedDuration,
+                calories: viewModel.formattedCalories,
+                state: viewModel.isPaused ? .paused : (viewModel.isWalking ? .active : .notStarted),
+                onStart: { viewModel.startWalk() },
+                onPause: { viewModel.pauseWalk() },
+                onResume: { viewModel.resumeWalk() },
+                onEnd: {
+                    completedSession = viewModel.endWalk()
+                    if completedSession != nil {
+                        showCompleteAlert = true
                     }
-                )
-            }
-            .background(Color(UIColor.systemBackground))
-            .cornerRadius(20, corners: [.topLeft, .topRight])
-            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: -5)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("산책 시작")
-                    .font(.headline)
-            }
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.primary)
                 }
-            }
+            )
         }
+        .navigationBarHidden(true)
+        .overlay(
+            WalkHeaderView(title: "산책 시작", onBack: { dismiss() }),
+            alignment: .top
+        )
         .alert("산책 완료", isPresented: $showCompleteAlert) {
             Button("확인") {
                 dismiss()

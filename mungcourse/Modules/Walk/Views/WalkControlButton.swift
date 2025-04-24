@@ -17,28 +17,25 @@ struct WalkControlButton: View {
         HStack(spacing: 24) {
             switch state {
             case .notStarted:
-                // Just show the Start button when not started
                 Button(action: onStart) {
                     Text("시작")
                         .font(.system(size: 18, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color.accentColor)
                         .foregroundColor(.white)
-                        .cornerRadius(12)
                 }
+                .frame(width: 54, height: 54)
+                .background(Color.accentColor)
+                .cornerRadius(12)
                 
             case .active:
                 // Show Pause and End buttons when active
                 Button(action: onPause) {
                     Text("일시정지")
                         .font(.system(size: 18, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color(UIColor.systemGray5))
                         .foregroundColor(.primary)
-                        .cornerRadius(12)
                 }
+                .frame(width: 54, height: 54)
+                .background(Color(UIColor.systemGray5))
+                .cornerRadius(12)
                 
                 Button(action: onEnd) {
                     Text("완료")
@@ -55,12 +52,11 @@ struct WalkControlButton: View {
                 Button(action: onResume) {
                     Text("계속")
                         .font(.system(size: 18, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color.accentColor)
                         .foregroundColor(.white)
-                        .cornerRadius(12)
                 }
+                .frame(width: 54, height: 54)
+                .background(Color.accentColor)
+                .cornerRadius(12)
                 
                 Button(action: onEnd) {
                     Text("완료")
