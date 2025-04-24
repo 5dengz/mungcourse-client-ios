@@ -29,7 +29,7 @@ struct MainButton: View {
                     .overlay( // 테두리를 위한 오버레이
                         RoundedRectangle(cornerRadius: 9)
                             // 배경색이 흰색일 때만 #D9D9D9 테두리, 아닐 경우 투명
-                            .stroke(backgroundColor == .white ? Color(hex: "D9D9D9") : Color.clear, lineWidth: 1)
+                            .stroke(backgroundColor == .white ? .gray400 : Color.clear, lineWidth: 1)
                     )
 
                 // 좌측 상단 텍스트
