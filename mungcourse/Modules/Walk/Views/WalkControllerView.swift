@@ -29,7 +29,7 @@ struct WalkControllerView: View {
         }
         .frame(maxWidth: .infinity)
         .background(
-            Color("gray900")
+            Color("white")
                 .ignoresSafeArea(edges: .bottom)
         )
         .cornerRadius(20, corners: [.topLeft, .topRight])

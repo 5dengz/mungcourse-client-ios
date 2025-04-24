@@ -22,10 +22,10 @@ struct WalkControlButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(Color("pointRed"))
+                        .foregroundColor(Color("white"))
                 }
                 .frame(width: 54, height: 54)
-                .background(Color("main50"))
+                .background(Color("main"))
                 .clipShape(Circle())
             case .notStarted:
                 Button(action: onStart) {
@@ -33,10 +33,10 @@ struct WalkControlButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(Color("pointRed"))
+                        .foregroundColor(Color("white"))
                 }
                 .frame(width: 54, height: 54)
-                .background(Color("main50"))
+                .background(Color("main"))
                 .clipShape(Circle())
             case .paused:
                 Button(action: onResume) {
@@ -44,10 +44,10 @@ struct WalkControlButton: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(Color("pointRed"))
+                        .foregroundColor(Color("white"))
                 }
                 .frame(width: 54, height: 54)
-                .background(Color("main50"))
+                .background(Color("main"))
                 .clipShape(Circle())
             }
 
@@ -57,7 +57,7 @@ struct WalkControlButton: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
-                    .foregroundColor(Color("main50"))
+                    .foregroundColor(Color("main"))
             }
             .frame(width: 54, height: 54)
             .background(Color("white"))
@@ -65,7 +65,6 @@ struct WalkControlButton: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color("gray900"))
     }
 }
 
