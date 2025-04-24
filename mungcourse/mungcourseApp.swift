@@ -6,26 +6,12 @@
 //
 
 import SwiftUI
-import SwiftData
-import NMapsMap // 네이버 지도 SDK 임포트
+import NMapsMap // 네이버 지도 SDK 임포트 (SwiftData 제거)
 
 @main
 struct mungcourseApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
-
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
 
     // 앱 초기화 시 네이버 지도 SDK 인증
     init() {
@@ -39,8 +25,6 @@ struct mungcourseApp: App {
                 if !showLoadingScreen {
                     if hasCompletedOnboarding {
                         ContentView()
-                            .modelContainer(sharedModelContainer)
-                            // ContentView 로딩 관련 로직은 필요 시 ContentView 내부에서 처리
                     } else {
                         OnboardingView()
                         // OnboardingView 내에서 완료 시 hasCompletedOnboarding = true 로 설정
