@@ -28,10 +28,12 @@ struct WalkControllerView: View {
             .padding(.top, 24)
         }
         .frame(maxWidth: .infinity)
-        .background(Color(UIColor.systemBackground))
+        .background(
+            Color("gray900")
+                .ignoresSafeArea(edges: .bottom)
+        )
         .cornerRadius(20, corners: [.topLeft, .topRight])
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: -5)
-        .edgesIgnoringSafeArea(.bottom)
+        .shadow(color: Color("black10").opacity(0.1), radius: 10, x: 0, y: -5)
     }
 }
 

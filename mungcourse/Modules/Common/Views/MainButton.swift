@@ -9,9 +9,9 @@ struct MainButton: View {
     let foregroundColor: Color // 전경색(텍스트, 아이콘) 파라미터 추가
     let action: () -> Void
 
-    // 기본 foregroundColor를 .white로 설정하는 편의 init 추가
+    // 기본 foregroundColor("white25")로 설정하는 편의 init 추가
     // Updated init parameter name
-    init(title: String, imageName: String, backgroundColor: Color, foregroundColor: Color = .white, action: @escaping () -> Void) {
+    init(title: String, imageName: String, backgroundColor: Color, foregroundColor: Color = Color("white25"), action: @escaping () -> Void) {
         self.title = title
         self.imageName = imageName // Updated property assignment
         self.backgroundColor = backgroundColor
@@ -29,7 +29,7 @@ struct MainButton: View {
                     .overlay( // 테두리를 위한 오버레이
                         RoundedRectangle(cornerRadius: 9)
                             // 배경색이 흰색일 때만 #D9D9D9 테두리, 아닐 경우 투명
-                            .stroke(backgroundColor == .white ? .gray400 : Color.clear, lineWidth: 1)
+                            .stroke(backgroundColor == .white ? Color("gray900") : Color.clear, lineWidth: 1)
                     )
 
                 // 좌측 상단 텍스트
@@ -63,16 +63,16 @@ struct MainButton: View {
     VStack(spacing: 20) {
         HStack(spacing: 9) {
             // Updated preview to use imageName (using SF Symbols for simplicity here, replace if needed)
-            MainButton(title: "산책 시작", imageName: "figure.walk", backgroundColor: .blue) {
+            MainButton(title: "산책 시작", imageName: "figure.walk", backgroundColor: Color("main")) {
                 print("산책 시작 버튼 탭됨")
             }
             // Updated preview to use imageName
-            MainButton(title: "코스 선택", imageName: "pencil.and.outline", backgroundColor: .white, foregroundColor: .accentColor) {
+            MainButton(title: "코스 선택", imageName: "pencil.and.outline", backgroundColor: .white, foregroundColor: Color("pointYellow")) {
                 print("코스 선택 버튼 탭됨")
             }
         }
         // Updated preview to use imageName
-        MainButton(title: "기록 보기", imageName: "list.bullet", backgroundColor: Color(UIColor.systemGray5), foregroundColor: .black) {
+        MainButton(title: "기록 보기", imageName: "list.bullet", backgroundColor: Color("main"), foregroundColor: Color("black10")) {
             print("기록 보기 버튼 탭됨")
         }
     }

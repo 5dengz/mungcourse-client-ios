@@ -7,12 +7,11 @@ struct StatItem: View {
     var body: some View {
         VStack(spacing: 8) {
             Text(label)
-                .font(.subheadline)
-                .foregroundColor(.gray)
-                
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor("gray900")
             Text(value)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.primary)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor("main")
         }
         .frame(maxWidth: .infinity)
     }
@@ -28,14 +27,14 @@ struct WalkStatsBar: View {
             StatItem(label: "거리(km)", value: distance)
             Divider()
                 .frame(width: 1, height: 22)
-                .background(Color(UIColor.systemGray4))
+                .background(Color("pointRed"))
             StatItem(label: "시간", value: duration)
             Divider()
                 .frame(width: 1, height: 22)
-                .background(Color(UIColor.systemGray4))
+                .background(Color("pointRed"))
             StatItem(label: "칼로리", value: calories)
         }
-        .background(Color(UIColor.systemBackground))
+        .background(Color("pointRed"))
         .padding(.vertical, 8)
     }
 }

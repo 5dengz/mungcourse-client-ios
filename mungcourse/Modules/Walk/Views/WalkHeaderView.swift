@@ -11,7 +11,7 @@ struct WalkHeaderView: View {
                 HStack {
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(.primary)
+                            .foregroundColor("main")
                     }
                     Spacer()
                     Text(title)
@@ -22,8 +22,8 @@ struct WalkHeaderView: View {
                 .padding(.horizontal)
                 .frame(height: 75)
                 .padding(.top, topInset)
-                .background(Color(UIColor.systemBackground))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .background(Color(UIColor("gray900")))
+                .shadow(color: Color("black10").opacity(0.1), radius: 5, x: 0, y: 2)
                 Spacer()
             }
             .edgesIgnoringSafeArea(.top)

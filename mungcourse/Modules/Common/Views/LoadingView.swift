@@ -3,7 +3,7 @@ import SwiftUI
 struct LoadingView: View {
     var body: some View {
         ZStack {
-            Color("AccentColor")
+            Color("gray900")
                 .ignoresSafeArea() // 전체 화면을 배경색으로 채웁니다.
 
             Image("logo_white")
