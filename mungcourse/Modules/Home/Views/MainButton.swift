@@ -29,15 +29,15 @@ struct MainButton: View {
                     .overlay( // 테두리를 위한 오버레이
                         RoundedRectangle(cornerRadius: 9)
                             // 배경색이 흰색일 때만 #D9D9D9 테두리, 아닐 경우 투명
-                            .stroke(backgroundColor == .white ? Color("gray900") : Color.clear, lineWidth: 1)
+                            .stroke(backgroundColor == Color("white") ? Color("gray900") : Color.clear, lineWidth: 0.5)
                     )
 
                 // 좌측 상단 텍스트
                 Text(title)
                     .font(.headline) // 적절한 폰트 설정
-                    .foregroundColor(foregroundColor) // 파라미터로 받은 전경색 사용
+                    .foregroundColor(Color("white")) // 파라미터로 받은 전경색 사용
                     .padding([.top, .leading], 12) // 내부 패딩
-                    .fontWeight(.heavy) // 세미볼드로 변경
+                    .fontWeight(.semibold) // 세미볼드로 변경
 
                 // 우측 하단 아이콘
                 HStack { // 아이콘을 우측으로 보내기 위한 HStack
@@ -57,24 +57,4 @@ struct MainButton: View {
         }
         .buttonStyle(.plain) // 기본 버튼 스타일 제거하여 커스텀 스타일 적용
     }
-}
-
-#Preview {
-    VStack(spacing: 20) {
-        HStack(spacing: 9) {
-            // Updated preview to use imageName (using SF Symbols for simplicity here, replace if needed)
-            MainButton(title: "산책 시작", imageName: "figure.walk", backgroundColor: Color("main")) {
-                print("산책 시작 버튼 탭됨")
-            }
-            // Updated preview to use imageName
-            MainButton(title: "코스 선택", imageName: "pencil.and.outline", backgroundColor: .white, foregroundColor: Color("pointYellow")) {
-                print("코스 선택 버튼 탭됨")
-            }
-        }
-        // Updated preview to use imageName
-        MainButton(title: "기록 보기", imageName: "list.bullet", backgroundColor: Color("main"), foregroundColor: Color("black10")) {
-            print("기록 보기 버튼 탭됨")
-        }
-    }
-    .padding()
 }

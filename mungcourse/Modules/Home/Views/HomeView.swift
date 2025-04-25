@@ -41,18 +41,18 @@ struct ProfileArea: View {
                         HStack(spacing: 4) { // 이름과 아이콘 가로 배치
                             Text(dogName)
                             .fontWeight(.bold)
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(Color("AccentColor")) // 텍스트 색상 통일
                             // .underline() // 표준 밑줄 제거
 
                         Image(systemName: "chevron.down") // 아래 화살표 아이콘 추가
                             .font(.caption) // 아이콘 크기 약간 작게
-                            .foregroundColor(.accentColor) // 아이콘 색상 통일
+                            .foregroundColor(Color("AccentColor")) // 아이콘 색상 통일
                     }
                     .overlay( // 밑줄 효과를 위한 오버레이
                         Rectangle() // 사각형으로 밑줄 생성
-                            .frame(height: 1) // 밑줄 두께
+                            .frame(height: 2) // 밑줄 두께
                             .offset(y: 3) // 텍스트 아래로 위치 조정 (값을 조절하여 간격 변경)
-                            .foregroundColor(.accentColor), // 밑줄 색상
+                            .foregroundColor(Color("AccentColor")), // 밑줄 색상
                             alignment: .bottomLeading // 텍스트 하단 왼쪽에 정렬
                         )
                     }
@@ -69,7 +69,7 @@ struct ProfileArea: View {
 
             Spacer() // 텍스트 영역과 프로필 이미지 사이 공간 최대화
 
-            Image(systemName: "person.crop.circle.fill") // 시스템 프로필 아이콘 사용
+            Image("profile_empty") // 시스템 프로필 아이콘 사용
                 .resizable()
                 .scaledToFit()
                 .frame(width: 60, height: 60) // 이미지 크기 설정
@@ -101,7 +101,8 @@ struct ButtonArea: View {
             MainButton(
                 title: "산책 시작",
                 imageName: "start_walk", // Use asset image name
-                backgroundColor: Color.accentColor, // 앱의 액센트 컬러 사용
+                backgroundColor: Color("AccentColor"), // 앱의 액센트 컬러 사용
+                foregroundColor: Color("white"),
                 action: {
                     print("산책 시작 버튼 탭됨")
                     // TODO: 산책 시작 화면으로 네비게이션 또는 관련 로직 구현
@@ -112,21 +113,16 @@ struct ButtonArea: View {
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course", // Use asset image name
-                backgroundColor: Color.white,
-                foregroundColor: Color.accentColor, // 텍스트 색상을 accentColor로 설정
+                backgroundColor: Color("white"),
+                foregroundColor: Color("main"), // 텍스트 색상을 accentColor로 설정
                 action: {
                     print("코스 선택 버튼 탭됨") // print 메시지 수정
                     // TODO: 경로 만들기 화면으로 네비게이션 또는 관련 로직 구현
                 }
             )
         }
-        // HStack 전체에 대한 추가적인 패딩이나 프레임 설정은 필요시 여기에 추가
     }
 }
-
-// --- WalkIndexArea, PastRoutesArea, NearbyTrailsArea 정의 제거 ---
-// 이들은 별도의 파일로 분리되었으므로 여기서 제거합니다.
-
 
 // Preview for HomeView itself, if needed for isolated development
 #Preview {
