@@ -48,7 +48,7 @@ struct StartWalkView: View {
         .ignoresSafeArea(.container, edges: .bottom)
         .navigationBarHidden(true)
         .overlay(
-            WalkHeaderView(title: "산책 시작", onBack: { dismiss() }),
+            WalkHeaderView(onBack: { dismiss() }),
             alignment: .top
         )
         .alert("산책 완료", isPresented: $showCompleteAlert) {

@@ -1,23 +1,28 @@
 import SwiftUI
 
 struct WalkHeaderView: View {
-    let title: String
     let onBack: () -> Void
 
     var body: some View {
         GeometryReader { proxy in
             let topInset = proxy.safeAreaInsets.top
             VStack(spacing: 0) {
-                HStack {
-                    Button(action: onBack) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(Color("black"))
-                    }
-                    Spacer()
-                    Text(title)
+                ZStack {
+                    Text("산책 시작")
                         .font(.headline)
-                    Spacer()
-                    Color.clear.frame(width: 24)
+                        .frame(maxWidth: .infinity)
+                    HStack {
+                        Button(action: onBack) {
+                            Image("arrow_back")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 16, height: 16)
+                                .foregroundColor(Color("black"))
+                        }
+                        .padding(.leading, 16)
+                        Spacer()
+                        Color.clear.frame(width: 32) // 우측 여백 확보
+                    }
                 }
                 .padding(.horizontal)
                 .frame(height: 75)
@@ -34,10 +39,10 @@ struct WalkHeaderView: View {
 #if DEBUG
 struct WalkHeaderView_Previews: PreviewProvider {
     static var previews: some View {
-        WalkHeaderView(title: "산책 시작") {
+        WalkHeaderView {
             // back
         }
         .previewLayout(.sizeThatFits)
     }
 }
-#endif 
+#endif
