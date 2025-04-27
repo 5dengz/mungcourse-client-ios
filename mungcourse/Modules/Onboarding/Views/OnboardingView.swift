@@ -49,7 +49,7 @@ struct OnboardingView: View {
             HStack(spacing: 8) {
                 ForEach(0..<pages.count, id: \.self) { index in
                     Circle()
-                        .fill(currentPage == index ? Color.accentColor : Color.gray.opacity(0.3))
+                        .fill(currentPage == index ? Color.main : Color.gray.opacity(0.3))
                         .frame(width: 8, height: 8)
                 }
             }
@@ -71,7 +71,7 @@ struct OnboardingView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.accentColor)
+                    .background(Color.main)
                     .cornerRadius(10)
             }
             .padding(.horizontal, 30)

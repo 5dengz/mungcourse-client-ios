@@ -1,5 +1,6 @@
 import SwiftUI
 import NMapsMap
+import QuartzCore
 
 struct NaverMapView: UIViewRepresentable {
     @Binding var centerCoordinate: NMGLatLng
@@ -23,18 +24,42 @@ struct NaverMapView: UIViewRepresentable {
         mapView.mapView.touchDelegate = context.coordinator
         mapView.mapView.addCameraDelegate(delegate: context.coordinator)
         
-        if showUserLocation {
-            mapView.mapView.positionMode = trackingMode
-            mapView.mapView.locationOverlay.hidden = false
-        } else {
-            mapView.mapView.positionMode = .disabled
-            mapView.mapView.locationOverlay.hidden = true
-        }
+        // 기본 위치 오버레이 숨기기
+        mapView.mapView.positionMode = .disabled
+        mapView.mapView.locationOverlay.hidden = true
         
+        // 커스텀 발바닥 마커 생성
+        let paw = NMFMarker()
+        if let pawImage = UIImage(named: "pinpoint_paw") {
+            paw.iconImage = NMFOverlayImage(image: pawImage)
+        }
+        paw.width = 25
+        paw.height = 32
+        paw.anchor = CGPoint(x: 0.5, y: 1.0)
+        paw.position = centerCoordinate
+        paw.mapView = mapView.mapView
+        context.coordinator.pawMarker = paw
+        
+        // 커스텀 이펙트 뷰 생성 및 애니메이션
+        let effectView = UIImageView(image: UIImage(named: "pinpoint_effect"))
+        effectView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        let point = mapView.mapView.projection.point(from: centerCoordinate)
+        effectView.center = point
+        mapView.addSubview(effectView)
+        context.coordinator.effectView = effectView
+        let pulseAnim = CABasicAnimation(keyPath: "transform.scale")
+        pulseAnim.fromValue = 0.5
+        pulseAnim.toValue = 2.0
+        pulseAnim.duration = 1.0
+        pulseAnim.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        pulseAnim.repeatCount = Float.infinity
+        effectView.layer.add(pulseAnim, forKey: "pulse")
+        
+        // 카메라 이동
         let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate, zoomTo: zoomLevel)
         mapView.mapView.moveCamera(cameraUpdate)
         
-        // Use coordinator to manage the path overlay.
+        // 경로 오버레이 업데이트
         context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
         
         return mapView
@@ -53,15 +78,16 @@ struct NaverMapView: UIViewRepresentable {
             mapView.mapView.moveCamera(cameraUpdate)
         }
         
-        if showUserLocation {
-            mapView.mapView.positionMode = trackingMode
-            mapView.mapView.locationOverlay.hidden = false
-        } else {
-            mapView.mapView.positionMode = .disabled
-            mapView.mapView.locationOverlay.hidden = true
+        // 기본 My-LocationOverlay 숨김 및 마커 위치 업데이트
+        mapView.mapView.positionMode = .disabled
+        mapView.mapView.locationOverlay.hidden = true
+        context.coordinator.pawMarker?.position = centerCoordinate
+        if let effectView = context.coordinator.effectView {
+            let point = mapView.mapView.projection.point(from: centerCoordinate)
+            effectView.center = point
         }
         
-        // Update the path overlay using the coordinator.
+        // 경로 오버레이 업데이트
         context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
     }
     
@@ -71,8 +97,9 @@ struct NaverMapView: UIViewRepresentable {
     
     class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
         var parent: NaverMapView
-        // Store the current path overlay.
         var pathOverlay: NMFPath?
+        var pawMarker: NMFMarker?
+        var effectView: UIImageView?
         
         init(_ parent: NaverMapView) {
             self.parent = parent

@@ -6,20 +6,44 @@ struct StartWalkView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showCompleteAlert = false
     @State private var completedSession: WalkSession? = nil
+    @State private var effectScale: CGFloat = 0.5
+    @State private var effectOpacity: Double = 1.0
     
     var body: some View {
         ZStack(alignment: .bottom) {
             // Content area
             VStack(spacing: 0) {
                 // Map View
-                NaverMapView(
-                    centerCoordinate: $viewModel.centerCoordinate,
-                    zoomLevel: $viewModel.zoomLevel,
-                    pathCoordinates: $viewModel.pathCoordinates,
-                    showUserLocation: true,
-                    trackingMode: .direction
-                )
-                .edgesIgnoringSafeArea(.all)
+                ZStack {
+                    // Map View
+                    NaverMapView(
+                        centerCoordinate: $viewModel.centerCoordinate,
+                        zoomLevel: $viewModel.zoomLevel,
+                        pathCoordinates: $viewModel.pathCoordinates,
+                        showUserLocation: true,
+                        trackingMode: .direction
+                    )
+                    .edgesIgnoringSafeArea(.all)
+                    
+                    ZStack {
+                        Image("pinpoint_effect")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .scaleEffect(effectScale)
+                            .opacity(effectOpacity)
+                        Image("pinpoint_paw")
+                            .resizable()
+                            .frame(width: 25, height: 32)
+                    }
+                    .onAppear {
+                        effectScale = 0.5
+                        effectOpacity = 1.0
+                        withAnimation(Animation.easeOut(duration: 1).repeatForever(autoreverses: false)) {
+                            effectScale = 2.0
+                            effectOpacity = 0.0
+                        }
+                    }
+                }
             }
             
             // Bottom controller panel
