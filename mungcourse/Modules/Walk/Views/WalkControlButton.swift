@@ -18,33 +18,30 @@ struct WalkControlButton: View {
             switch state {
             case .active:
                 Button(action: onPause) {
-                    Image(systemName: "pause.fill")
+                    Image("button_stop")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(Color("white"))
+                        .frame(width: 14, height: 20)
                 }
                 .frame(width: 54, height: 54)
                 .background(Color("main"))
                 .clipShape(Circle())
             case .notStarted:
                 Button(action: onStart) {
-                    Image(systemName: "play.fill")
+                    Image("button_play")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(Color("white"))
                 }
                 .frame(width: 54, height: 54)
                 .background(Color("main"))
                 .clipShape(Circle())
             case .paused:
                 Button(action: onResume) {
-                    Image(systemName: "play.fill")
+                    Image("button_play")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(Color("white"))
                 }
                 .frame(width: 54, height: 54)
                 .background(Color("main"))
@@ -53,15 +50,15 @@ struct WalkControlButton: View {
 
             // 산책 끝내기 버튼
             Button(action: onEnd) {
-                Image(systemName: "square.fill")
+                Image("button_end")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(Color("main"))
+                    .frame(width: 16, height: 16)
             }
             .frame(width: 54, height: 54)
             .background(Color("white"))
             .clipShape(Circle())
+            .shadow(color: Color("black").opacity(0.13), radius: 12, x: 2, y: 2)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
