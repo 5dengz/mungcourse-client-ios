@@ -20,29 +20,11 @@ struct StartWalkView: View {
                         centerCoordinate: $viewModel.centerCoordinate,
                         zoomLevel: $viewModel.zoomLevel,
                         pathCoordinates: $viewModel.pathCoordinates,
+                        userLocation: $viewModel.userLocation,
                         showUserLocation: true,
                         trackingMode: .direction
                     )
                     .edgesIgnoringSafeArea(.all)
-                    
-                    ZStack {
-                        Image("pinpoint_effect")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .scaleEffect(effectScale)
-                            .opacity(effectOpacity)
-                        Image("pinpoint_paw")
-                            .resizable()
-                            .frame(width: 25, height: 32)
-                    }
-                    .onAppear {
-                        effectScale = 0.5
-                        effectOpacity = 1.0
-                        withAnimation(Animation.easeOut(duration: 1).repeatForever(autoreverses: false)) {
-                            effectScale = 2.0
-                            effectOpacity = 0.0
-                        }
-                    }
                 }
             }
             

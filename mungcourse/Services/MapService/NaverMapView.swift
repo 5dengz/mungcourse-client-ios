@@ -6,6 +6,7 @@ struct NaverMapView: UIViewRepresentable {
     @Binding var centerCoordinate: NMGLatLng
     @Binding var zoomLevel: Double
     @Binding var pathCoordinates: [NMGLatLng]
+    @Binding var userLocation: NMGLatLng?
     
     var onMapTapped: ((NMGLatLng) -> Void)?
     var onUserLocationUpdated: ((NMGLatLng) -> Void)?
@@ -29,22 +30,32 @@ struct NaverMapView: UIViewRepresentable {
         mapView.mapView.locationOverlay.hidden = true
         
         // 커스텀 발바닥 마커 생성
+        let pawImage = UIImage(named: "pinpoint_paw")
+        if pawImage == nil {
+            print("[디버그] pinpoint_paw 이미지를 불러오지 못했습니다.")
+        } else {
+            print("[디버그] pinpoint_paw 이미지 정상 로드됨")
+        }
         let paw = NMFMarker()
-        if let pawImage = UIImage(named: "pinpoint_paw") {
+        if let pawImage = pawImage {
             paw.iconImage = NMFOverlayImage(image: pawImage)
         }
         paw.width = 25
         paw.height = 32
         paw.anchor = CGPoint(x: 0.5, y: 1.0)
-        paw.position = centerCoordinate
+        if let userLocation = userLocation {
+            paw.position = userLocation
+        }
         paw.mapView = mapView.mapView
         context.coordinator.pawMarker = paw
-        
         // 커스텀 이펙트 뷰 생성 및 애니메이션
         let effectView = UIImageView(image: UIImage(named: "pinpoint_effect"))
         effectView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        let point = mapView.mapView.projection.point(from: centerCoordinate)
-        effectView.center = point
+        if let userLocation = userLocation {
+            let point = mapView.mapView.projection.point(from: userLocation)
+            effectView.center = point
+        }
+        // effectView가 pawMarker보다 먼저 addSubview되어야 z순서가 아래로 감
         mapView.addSubview(effectView)
         context.coordinator.effectView = effectView
         let pulseAnim = CABasicAnimation(keyPath: "transform.scale")
@@ -64,7 +75,7 @@ struct NaverMapView: UIViewRepresentable {
         
         return mapView
     }
-    
+
     func updateUIView(_ mapView: NMFNaverMapView, context: Context) {
         if mapView.mapView.cameraPosition.target != centerCoordinate {
             let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate)
@@ -81,10 +92,13 @@ struct NaverMapView: UIViewRepresentable {
         // 기본 My-LocationOverlay 숨김 및 마커 위치 업데이트
         mapView.mapView.positionMode = .disabled
         mapView.mapView.locationOverlay.hidden = true
-        context.coordinator.pawMarker?.position = centerCoordinate
-        if let effectView = context.coordinator.effectView {
-            let point = mapView.mapView.projection.point(from: centerCoordinate)
-            effectView.center = point
+        // 마커와 이펙트 위치를 userLocation 기준으로 업데이트
+        if let userLocation = userLocation {
+            context.coordinator.pawMarker?.position = userLocation
+            if let effectView = context.coordinator.effectView {
+                let point = mapView.mapView.projection.point(from: userLocation)
+                effectView.center = point
+            }
         }
         
         // 경로 오버레이 업데이트

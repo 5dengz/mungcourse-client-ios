@@ -17,7 +17,8 @@ class StartWalkViewModel: ObservableObject {
     // Walk state
     @Published var isWalking: Bool = false
     @Published var isPaused: Bool = false
-    
+    @Published var userLocation: NMGLatLng? = nil
+
     // Services
     private let walkTrackingService: WalkTrackingService
     private var cancellables = Set<AnyCancellable>()
@@ -30,10 +31,14 @@ class StartWalkViewModel: ObservableObject {
         
         // Subscribe to location updates from the tracking service
         walkTrackingService.$currentLocation
-            .compactMap { $0 }
             .sink { [weak self] location in
                 guard let self = self else { return }
-                self.centerCoordinate = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
+                if let location = location {
+                    let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
+                    self.userLocation = coord
+                } else {
+                    self.userLocation = nil
+                }
             }
             .store(in: &cancellables)
         
