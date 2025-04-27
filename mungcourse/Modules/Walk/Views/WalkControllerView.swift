@@ -15,7 +15,8 @@ struct WalkControllerView: View {
             WalkStatsBar(
                 distance: distance,
                 duration: duration,
-                calories: calories
+                calories: calories,
+                isActive: state == .active // 산책 중일 때만 main 컬러
             )
             .padding(.top, 30)
             WalkControlButton(
@@ -53,4 +54,4 @@ struct WalkControllerView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
-#endif 
+#endif
