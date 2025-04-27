@@ -27,6 +27,8 @@ struct WalkControllerView: View {
                 onEnd: onEnd
             )
             .padding(.top, 24)
+            .padding(.bottom, 30)
+            .ignoresSafeArea(.container, edges: .bottom)
         }
         .frame(maxWidth: .infinity)
         .background(
