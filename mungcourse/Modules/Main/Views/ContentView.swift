@@ -37,7 +37,7 @@ struct ContentView: View {
             Group {
                 switch selectedTab {
                 case .home:
-                    HomeView()
+                    HomeView(selectedTab: $selectedTab)
                 case .startWalk:
                     StartWalkView()
                 case .routine:

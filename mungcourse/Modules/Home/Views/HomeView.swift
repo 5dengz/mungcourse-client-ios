@@ -1,19 +1,20 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var selectedTab: ContentView.Tab
     var body: some View {
-        ScrollView { // 내용이 길어질 수 있으므로 ScrollView 사용
-            VStack(spacing: 35) { // 섹션 간 간격을 20에서 35로 늘림
-                ProfileArea()
+        ScrollView {
+            VStack(spacing: 35) {
+                ProfileArea(selectedTab: $selectedTab)
                 ButtonArea()
                 NearbyTrailsView()
                 WalkIndexView()
                 PastRoutesView()
-                Spacer() // 남은 공간 채우기
+                Spacer()
             }
-            .padding() // 전체적인 패딩 추가
+            .padding()
         }
-        .navigationTitle("홈") // 네비게이션 타이틀 설정 (필요시 NavigationView로 감싸야 함)
+        .navigationTitle("홈")
     }
 }
 
@@ -21,6 +22,7 @@ struct HomeView: View {
 
 // ProfileArea는 그대로 유지
 struct ProfileArea: View {
+    @Binding var selectedTab: ContentView.Tab
     // TODO: 실제 강아지 데이터 목록 로드 및 선택 로직 구현 필요
     @State private var dogName = "몽실이" // @State로 변경하여 값 변경 가능하도록 함
     // TODO: 실제 강아지 목록 데이터 필요
@@ -40,19 +42,17 @@ struct ProfileArea: View {
                     } label: {
                         HStack(spacing: 4) { // 이름과 아이콘 가로 배치
                             Text(dogName)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color("AccentColor")) // 텍스트 색상 통일
-                            // .underline() // 표준 밑줄 제거
-
-                        Image(systemName: "chevron.down") // 아래 화살표 아이콘 추가
-                            .font(.caption) // 아이콘 크기 약간 작게
-                            .foregroundColor(Color("AccentColor")) // 아이콘 색상 통일
-                    }
-                    .overlay( // 밑줄 효과를 위한 오버레이
-                        Rectangle() // 사각형으로 밑줄 생성
-                            .frame(height: 2) // 밑줄 두께
-                            .offset(y: 3) // 텍스트 아래로 위치 조정 (값을 조절하여 간격 변경)
-                            .foregroundColor(Color("AccentColor")), // 밑줄 색상
+                                .fontWeight(.bold)
+                                .foregroundColor(Color("AccentColor")) // 텍스트 색상 통일
+                            Image(systemName: "chevron.down") // 아래 화살표 아이콘 추가
+                                .font(.caption) // 아이콘 크기 약간 작게
+                                .foregroundColor(Color("AccentColor")) // 아이콘 색상 통일
+                        }
+                        .overlay( // 밑줄 효과를 위한 오버레이
+                            Rectangle() // 사각형으로 밑줄 생성
+                                .frame(height: 2) // 밑줄 두께
+                                .offset(y: 3) // 텍스트 아래로 위치 조정 (값을 조절하여 간격 변경)
+                                .foregroundColor(Color("AccentColor")), // 밑줄 색상
                             alignment: .bottomLeading // 텍스트 하단 왼쪽에 정렬
                         )
                     }
@@ -69,17 +69,21 @@ struct ProfileArea: View {
 
             Spacer() // 텍스트 영역과 프로필 이미지 사이 공간 최대화
 
-            Image("profile_empty") // 시스템 프로필 아이콘 사용
-                .resizable()
-                .scaledToFit()
-                .frame(width: 60, height: 60) // 이미지 크기 설정
-                .foregroundColor(.gray) // 아이콘 색상 설정
+            Button(action: {
+                selectedTab = .profile
+            }) {
+                Image("profile_empty") // 시스템 프로필 아이콘 사용
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 60, height: 60) // 이미지 크기 설정
+                    .foregroundColor(.gray) // 아이콘 색상 설정
+            }
         }
         .padding(.vertical) // 좌우 패딩 제거, 상하 패딩만 유지
         
         .confirmationDialog("강아지 선택", isPresented: $showingDogSelection, titleVisibility: .visible) {
             // 사용 가능한 모든 강아지 목록을 버튼으로 표시
-            ForEach(availableDogs, id: \.self) { name in
+            ForEach(availableDogs, id: \ .self) { name in
                 Button(name) {
                     dogName = name // 선택된 이름으로 업데이트
                 }
