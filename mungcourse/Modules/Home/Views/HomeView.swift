@@ -76,8 +76,7 @@ struct ProfileArea: View {
                 .foregroundColor(.gray) // 아이콘 색상 설정
         }
         .padding(.vertical) // 좌우 패딩 제거, 상하 패딩만 유지
-        // .background(Color.gray.opacity(0.1)) // 필요하다면 배경색 추가
-        // .cornerRadius(10) // 필요하다면 코너 라운딩 추가
+        
         .confirmationDialog("강아지 선택", isPresented: $showingDogSelection, titleVisibility: .visible) {
             // 사용 가능한 모든 강아지 목록을 버튼으로 표시
             ForEach(availableDogs, id: \.self) { name in
@@ -95,28 +94,24 @@ struct ProfileArea: View {
 
 struct ButtonArea: View {
     var body: some View {
-        HStack(spacing: 9) { // 버튼 좌우 배치 및 간격 9px 설정
-            // TODO: 실제 기능 및 색상, 아이콘 확정 필요
-            // Renamed from ReusableButtonStyleButton
+        HStack(spacing: 9) {
             MainButton(
                 title: "산책 시작",
-                imageName: "start_walk", // Use asset image name
-                backgroundColor: Color("AccentColor"), // 앱의 액센트 컬러 사용
+                imageName: "start_walk",
+                backgroundColor: Color("AccentColor"),
                 foregroundColor: Color("white"),
                 action: {
                     print("산책 시작 버튼 탭됨")
                     // TODO: 산책 시작 화면으로 네비게이션 또는 관련 로직 구현
                 }
             )
-
-            // Renamed from ReusableButtonStyleButton
             MainButton(
                 title: "코스 선택",
-                imageName: "select_course", // Use asset image name
+                imageName: "select_course",
                 backgroundColor: Color("white"),
-                foregroundColor: Color("main"), // 텍스트 색상을 accentColor로 설정
+                foregroundColor: Color("main"),
                 action: {
-                    print("코스 선택 버튼 탭됨") // print 메시지 수정
+                    print("코스 선택 버튼 탭됨")
                     // TODO: 경로 만들기 화면으로 네비게이션 또는 관련 로직 구현
                 }
             )
@@ -124,7 +119,3 @@ struct ButtonArea: View {
     }
 }
 
-// Preview for HomeView itself, if needed for isolated development
-#Preview {
-    HomeView()
-}

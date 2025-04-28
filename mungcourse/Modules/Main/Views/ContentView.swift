@@ -16,7 +16,7 @@ struct ContentView: View {
                     Label {
                         Text("홈")
                     } icon: {
-                        Image("home") // Asset Catalog 아이콘 사용
+                        Image("tab_home") // Asset Catalog 아이콘 사용
                     }
                 }
 
@@ -25,7 +25,7 @@ struct ContentView: View {
                     Label {
                         Text("산책 시작")
                     } icon: {
-                        Image("map") // Asset Catalog 아이콘 사용
+                        Image("tab_map") // Asset Catalog 아이콘 사용
                     }
                 }
 
@@ -34,7 +34,7 @@ struct ContentView: View {
                     Label {
                         Text("루틴 설정")
                     } icon: {
-                        Image("route") // Asset Catalog 아이콘 사용
+                        Image("tab_route") // Asset Catalog 아이콘 사용
                     }
                 }
 
@@ -43,7 +43,7 @@ struct ContentView: View {
                     Label {
                         Text("산책 기록")
                     } icon: {   
-                        Image("history") // Asset Catalog 아이콘 사용
+                        Image("tab_history") // Asset Catalog 아이콘 사용
                     }
                 }
 
@@ -52,7 +52,7 @@ struct ContentView: View {
                     Label {
                         Text("프로필")
                     } icon: {
-                        Image("profile") // Asset Catalog 아이콘 사용
+                        Image("tab_profile") // Asset Catalog 아이콘 사용
                     }
                 }
         }
@@ -62,9 +62,3 @@ struct ContentView: View {
 
 // --- HomeView 및 Placeholder 뷰 정의는 HomeView.swift로 이동되었으므로 제거 ---
 
-
-#Preview {
-    ContentView()
-    // SwiftData 관련 코드는 제거되었으므로 Preview에서도 제거합니다.
-    // .modelContainer(for: Item.self, inMemory: true)
-}
