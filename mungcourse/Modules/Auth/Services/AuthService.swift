@@ -104,7 +104,7 @@ class AuthService: AuthServiceProtocol {
                 completion(.failure(error: AuthError.unknown))
                 return
             }
-            self.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
+            TokenManager.shared.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
             completion(.success(token: accessToken))
         }.resume()
     }
@@ -130,25 +130,9 @@ class AuthService: AuthServiceProtocol {
     // 로그아웃 메소드
     func logout() {
         print("로그아웃 처리")
-        clearTokens()
+        TokenManager.shared.clearTokens()
         // 여기서 실제 로그아웃 로직 구현
         // - 토큰 삭제
         // - 서버에 로그아웃 알림 등
-    }
-    
-    // MARK: - Keychain 토큰 저장/조회/삭제
-    func saveTokens(accessToken: String, refreshToken: String) {
-        keychain["accessToken"] = accessToken
-        keychain["refreshToken"] = refreshToken
-    }
-    func getAccessToken() -> String? {
-        return keychain["accessToken"]
-    }
-    func getRefreshToken() -> String? {
-        return keychain["refreshToken"]
-    }
-    func clearTokens() {
-        keychain["accessToken"] = nil
-        keychain["refreshToken"] = nil
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 56BAE79D2DBF93F000243818 /* KeychainAccess */; };
 		56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 56F78F012DAD051800B3CC88 /* NMapsMap */; };
 		56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242A2DBF6BE9008B375A /* GoogleSignIn */; };
 		56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */; };
@@ -71,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */,
 				56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */,
 				56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */,
 				56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */,
@@ -137,6 +139,7 @@
 				56F78F012DAD051800B3CC88 /* NMapsMap */,
 				56FC242A2DBF6BE9008B375A /* GoogleSignIn */,
 				56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */,
+				56BAE79D2DBF93F000243818 /* KeychainAccess */,
 			);
 			productName = mungcourse;
 			productReference = 56F1230C2DA2C33500632733 /* mungcourse.app */;
@@ -224,6 +227,7 @@
 			packageReferences = (
 				56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56F1230D2DA2C33500632733 /* Products */;
@@ -608,6 +612,14 @@
 				minimumVersion = 3.21.0;
 			};
 		};
+		56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -619,6 +631,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		56BAE79D2DBF93F000243818 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
 		56F78F012DAD051800B3CC88 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
