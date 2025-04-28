@@ -9,11 +9,24 @@ struct LoginView: View {
         VStack {
             Spacer()
             
+            // 안내 문구
+            VStack(spacing: 8) {
+                Text("멍코스와 함께\n산책을 시작하세요!")
+                    .font(Font.custom("Pretendard-SemiBold", size: 24))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                Text("안전 코스 추천부터 산책 기록까지")
+                    .font(Font.custom("Pretendard-Medium", size: 16))
+                    .foregroundColor(Color("gray600"))
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.bottom, 32)
+            
             // 로고 이미지
             Image("logo_login")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 200, height: 200)
+                .frame(width: 393)
                 .padding(.bottom, 50)
             
             Spacer()
@@ -28,14 +41,14 @@ struct LoginView: View {
                         Image(systemName: "globe")
                             .foregroundColor(.black)
                         
-                        Text("Google로 로그인")
+                        Text("구글 로그인")
                             .font(.headline)
                             .foregroundColor(.black)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.white)
-                    .cornerRadius(10)
+                    .cornerRadius(28)
                 }
                 .disabled(viewModel.isLoading)
                 
@@ -47,14 +60,14 @@ struct LoginView: View {
                         Image(systemName: "apple.logo")
                             .foregroundColor(.white)
                         
-                        Text("Apple로 로그인")
+                        Text("애플 로그인")
                             .font(.headline)
                             .foregroundColor(.white)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.black)
-                    .cornerRadius(10)
+                    .cornerRadius(28)
                 }
                 .disabled(viewModel.isLoading)
                 
