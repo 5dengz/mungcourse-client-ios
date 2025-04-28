@@ -29,7 +29,6 @@ struct mungcourseApp: App {
                     if !authToken.isEmpty {
                         // 토큰이 유효한 경우 (추후 검증 로직 추가)
                         ContentView()
-                            .modelContainer(sharedModelContainer)
                     } else if !hasCompletedOnboarding {
                         // 1. 온보딩 미완료: 온보딩 화면 표시
                         OnboardingView()
@@ -41,7 +40,6 @@ struct mungcourseApp: App {
                     } else {
                         // 3. 로그인 완료: 메인 컨텐츠 표시
                         ContentView()
-                            .modelContainer(sharedModelContainer)
                     }
                 }
 
