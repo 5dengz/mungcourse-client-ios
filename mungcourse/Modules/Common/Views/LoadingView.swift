@@ -1,15 +1,65 @@
 import SwiftUI
 
 struct LoadingView: View {
+    @State private var animateSmall = false
+    @State private var animateMedium = false
+    @State private var animateLarge = false
+
     var body: some View {
         ZStack {
-            Color("AccentColor")
-                .ignoresSafeArea() // 전체 화면을 배경색으로 채웁니다.
+            Color("main")
+                .ignoresSafeArea()
 
-            Image("logo_white")
+            Image("logo_main")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 210, height: 210) // 로고 크기 조절 (필요에 따라 조정)
+                .frame(width: 119, height: 93)
+                .overlay(alignment: .bottom) {
+                    ZStack {
+                        Image("ellipse_small")
+                            .resizable()
+                            .frame(width: 86, height: 34)
+                            .scaleEffect(animateSmall ? 1 : 0)
+
+                        Image("ellipse_medium")
+                            .resizable()
+                            .frame(width: 131, height: 51)
+                            .scaleEffect(animateMedium ? 1 : 0)
+
+                        Image("ellipse_large")
+                            .resizable()
+                            .frame(width: 176, height: 69)
+                            .scaleEffect(animateLarge ? 1 : 0)
+                    }
+                    .offset(y: 34.5)
+                }
+        }
+        .onAppear {
+            animateSequence()
+        }
+    }
+
+    private func animateSequence() {
+        animateSmall = false
+        animateMedium = false
+        animateLarge = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                animateSmall = true
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                animateMedium = true
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                animateLarge = true
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            animateSequence()
         }
     }
 }

@@ -26,7 +26,7 @@ struct NearbyTrailsView: View { // <- 이름 변경
                     print("주변 산책로 더보기 탭됨")
                 }
                 .font(.callout)
-                .foregroundColor(.gray)
+                .foregroundColor(Color("gray900"))
             }
             .padding(.bottom, 5)
 

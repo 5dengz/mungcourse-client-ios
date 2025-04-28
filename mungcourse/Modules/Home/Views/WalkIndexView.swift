@@ -22,7 +22,7 @@ struct WalkIndexView: View { // <- 이름 변경
             // TODO: 실제 산책 지수 데이터 연동 및 UI 구현 필요
             Text("산책 지수 콘텐츠 영역") // 임시 텍스트 수정
                 .frame(maxWidth: .infinity, minHeight: 80) // 높이 조절
-                .background(Color.gray.opacity(0.2))
+                .background(Color("gray900").opacity(0.2))
                 .cornerRadius(8) // 코너 라운딩 약간 줄임
         }
         //.padding() // 전체 컴포넌트에 패딩 적용

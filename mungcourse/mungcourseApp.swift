@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SwiftData
+import NMapsMap // 네이버 지도 SDK 임포트 (SwiftData 제거)
 
 @main
 struct mungcourseApp: App {
@@ -15,18 +15,10 @@ struct mungcourseApp: App {
     @AppStorage("authToken") private var authToken: String = "" // 추후 토큰 저장용
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    // 앱 초기화 시 네이버 지도 SDK 인증
+    init() {
+        NMFAuthManager.shared().ncpKeyId = "5s28pgywc5" // Info.plist에 있는 클라이언트 ID와 동일하게 설정
+    }
 
     var body: some Scene {
         WindowGroup {

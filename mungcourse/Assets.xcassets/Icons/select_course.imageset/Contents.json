@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "select_course.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
