@@ -30,9 +30,11 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30.apps.googleusercontent.com</string>
+				<string>com.googleusercontent.apps.359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30</string>
 			</array>
 		</dict>
 	</array>
+	<key>GIDClientID</key>
+    <string>359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30.apps.googleusercontent.com</string>
 </dict>
 </plist>

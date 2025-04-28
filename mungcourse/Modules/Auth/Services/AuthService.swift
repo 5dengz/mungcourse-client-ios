@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import GoogleSignIn
 
 // 인증 서비스 결과 타입
 enum AuthResult {
@@ -42,14 +43,65 @@ class AuthService: AuthServiceProtocol {
     // 구글 로그인 메소드
     func loginWithGoogle() -> AnyPublisher<AuthResult, Never> {
         return Future<AuthResult, Never> { promise in
-            print("구글 로그인 API 호출 시작")
-            // 실제 구글 로그인 로직을 여기에 구현해야 함 (현재는 모의 구현)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                let token = "google_auth_token_\(UUID().uuidString)"
-                promise(.success(.success(token: token)))
+            DispatchQueue.main.async {
+                guard let rootViewController = UIApplication.shared.connectedScenes
+                        .compactMap({ $0 as? UIWindowScene })
+                        .first?.windows.first?.rootViewController else {
+                    promise(.success(.failure(error: AuthError.unknown)))
+                    return
+                }
+                GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
+                    if let error = error {
+                        promise(.success(.failure(error: error)))
+                        return
+                    }
+                    guard let idToken = result?.user.idToken?.tokenString else {
+                        promise(.success(.failure(error: AuthError.unknown)))
+                        return
+                    }
+                    print("[GoogleSignIn] id_token: \(idToken)") // 콘솔에 id_token 출력
+                    // 서버로 idToken 전달
+                    self.sendGoogleTokenToServer(idToken: idToken) { serverResult in
+                        promise(.success(serverResult))
+                    }
+                }
             }
         }
         .eraseToAnyPublisher()
+    }
+
+    // 서버로 idToken 전달 (POST /v1/auth/google/login)
+    private func sendGoogleTokenToServer(idToken: String, completion: @escaping (AuthResult) -> Void) {
+        guard let url = URL(string: "https://api.mungcourse.online/v1/auth/google/login") else {
+            completion(.failure(error: AuthError.unknown))
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body = ["idToken": idToken] // 서버 요구에 맞게 key를 idToken으로 변경
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("서버 통신 에러:", error)
+                completion(.failure(error: error))
+                return
+            }
+            if let response = response as? HTTPURLResponse {
+                print("서버 응답 코드:", response.statusCode)
+            }
+            if let data = data, let body = String(data: data, encoding: .utf8) {
+                print("서버 응답 body:", body)
+            }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let dataDict = json["data"] as? [String: Any],
+                  let accessToken = dataDict["access_token"] as? String else {
+                completion(.failure(error: AuthError.unknown))
+                return
+            }
+            completion(.success(token: accessToken))
+        }.resume()
     }
     
     // 애플 로그인 메소드

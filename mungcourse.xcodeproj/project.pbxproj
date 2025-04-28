@@ -36,9 +36,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		56F1232F2DA2C33700632733 /* Exceptions for "mungcourse" folder in "mungcourse" target */ = {
+		56BAE7972DBF722100243818 /* Exceptions for "mungcourse" folder in "mungcourse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"GoogleService-Info.plist",
 				Info.plist,
 			);
 			target = 56F1230B2DA2C33500632733 /* mungcourse */;
@@ -49,7 +50,7 @@
 		56F1230E2DA2C33500632733 /* mungcourse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				56F1232F2DA2C33700632733 /* Exceptions for "mungcourse" folder in "mungcourse" target */,
+				56BAE7972DBF722100243818 /* Exceptions for "mungcourse" folder in "mungcourse" target */,
 			);
 			path = mungcourse;
 			sourceTree = "<group>";
