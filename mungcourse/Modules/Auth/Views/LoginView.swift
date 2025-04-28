@@ -10,7 +10,7 @@ struct LoginView: View {
             Spacer()
             
             // 로고 이미지
-            Image("logo_white")
+            Image("logo_login")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 200, height: 200)
@@ -20,21 +20,21 @@ struct LoginView: View {
             
             // 로그인 버튼들
             VStack(spacing: 16) {
-                // 카카오 로그인 버튼
+                // 구글 로그인 버튼
                 Button(action: {
-                    viewModel.loginWithKakao()
+                    viewModel.loginWithGoogle()
                 }) {
                     HStack {
-                        Image(systemName: "message.fill")
+                        Image(systemName: "globe")
                             .foregroundColor(.black)
                         
-                        Text("카카오 로그인")
+                        Text("Google로 로그인")
                             .font(.headline)
                             .foregroundColor(.black)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.yellow)
+                    .background(Color.white)
                     .cornerRadius(10)
                 }
                 .disabled(viewModel.isLoading)
@@ -77,13 +77,7 @@ struct LoginView: View {
             .padding(.bottom, 50)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [Color.accentColor.opacity(0.8), Color.accentColor]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
+        .background(Color.white)
     }
 }
 

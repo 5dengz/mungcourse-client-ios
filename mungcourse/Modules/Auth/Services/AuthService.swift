@@ -27,7 +27,7 @@ enum AuthError: Error {
 
 // 인증 서비스 프로토콜 - 테스트를 위한 모킹이 쉬워짐
 protocol AuthServiceProtocol {
-    func loginWithKakao() -> AnyPublisher<AuthResult, Never>
+    func loginWithGoogle() -> AnyPublisher<AuthResult, Never>
     func loginWithApple() -> AnyPublisher<AuthResult, Never>
     func logout()
 }
@@ -39,18 +39,13 @@ class AuthService: AuthServiceProtocol {
     
     private init() {}
     
-    // 카카오 로그인 메소드
-    func loginWithKakao() -> AnyPublisher<AuthResult, Never> {
+    // 구글 로그인 메소드
+    func loginWithGoogle() -> AnyPublisher<AuthResult, Never> {
         return Future<AuthResult, Never> { promise in
-            print("카카오 로그인 API 호출 시작")
-            
-            // 여기서 실제 카카오 SDK를 사용한 로그인 로직이 구현될 예정
-            // 현재는 모의 구현으로 항상 성공하는 것으로 가정
-            
-            // API 호출 지연 시뮬레이션
+            print("구글 로그인 API 호출 시작")
+            // 실제 구글 로그인 로직을 여기에 구현해야 함 (현재는 모의 구현)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                // 성공 시 토큰 반환
-                let token = "kakao_auth_token_\(UUID().uuidString)"
+                let token = "google_auth_token_\(UUID().uuidString)"
                 promise(.success(.success(token: token)))
             }
         }

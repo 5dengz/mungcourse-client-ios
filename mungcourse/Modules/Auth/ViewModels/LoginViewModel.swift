@@ -19,13 +19,13 @@ class LoginViewModel: ObservableObject {
         self.authService = authService
     }
     
-    // 카카오 로그인 메소드
-    func loginWithKakao() {
+    // 구글 로그인 메소드
+    func loginWithGoogle() {
         // 로딩 상태 설정
         isLoading = true
         errorMessage = nil
         
-        authService.loginWithKakao()
+        authService.loginWithGoogle()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 guard let self = self else { return }
@@ -35,12 +35,12 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    print("카카오 로그인 성공: \(token)")
+                    print("구글 로그인 성공: \(token)")
                     // 인증 정보 저장
                     self.authToken = token
                     self.isLoggedIn = true
                 case .failure(let error):
-                    print("카카오 로그인 실패: \(error.localizedDescription)")
+                    print("구글 로그인 실패: \(error.localizedDescription)")
                     // 에러 메시지 설정
                     self.errorMessage = error.localizedDescription
                 }
