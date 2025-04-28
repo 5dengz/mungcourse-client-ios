@@ -20,9 +20,9 @@ struct NaverMapView: UIViewRepresentable {
         
         mapView.showLocationButton = showUserLocation
         mapView.mapView.positionMode = trackingMode
-        mapView.showZoomControls = false
-        mapView.showCompass = false
-        mapView.showScaleBar = false
+        mapView.showZoomControls = true
+        mapView.showCompass = true
+        mapView.showScaleBar = true
         // 현위치 버튼 위치 조정(상단 우측, 여백 80, 16)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             let buttons = mapView.subviews.compactMap { $0 as? UIButton }
@@ -48,12 +48,6 @@ struct NaverMapView: UIViewRepresentable {
         mapView.mapView.touchDelegate = context.coordinator
         mapView.mapView.addCameraDelegate(delegate: context.coordinator)
         
-        // 기본 위치 오버레이 숨기기
-        if trackingMode == .disabled {
-            mapView.mapView.locationOverlay.hidden = true
-        } else {
-            mapView.mapView.locationOverlay.hidden = !showUserLocation
-        }
         // 커스텀 발바닥 마커 생성
         let pawImage = UIImage(named: "pinpoint_paw")
         if pawImage == nil {
@@ -124,11 +118,7 @@ struct NaverMapView: UIViewRepresentable {
         }
         // 기본 My-LocationOverlay 숨김 및 마커 위치 업데이트
         mapView.mapView.positionMode = trackingMode
-        if trackingMode == .disabled {
-            mapView.mapView.locationOverlay.hidden = true
-        } else {
-            mapView.mapView.locationOverlay.hidden = !showUserLocation
-        }
+        mapView.mapView.locationOverlay.hidden = true // positionMode 설정 후 반드시 숨김 처리
         // 마커와 이펙트 위치를 userLocation 기준으로 업데이트
         if let userLocation = userLocation {
             context.coordinator.pawMarker?.position = userLocation

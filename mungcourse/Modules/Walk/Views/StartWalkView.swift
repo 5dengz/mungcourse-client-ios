@@ -29,8 +29,8 @@ struct StartWalkView: View {
                         zoomLevel: $viewModel.zoomLevel,
                         pathCoordinates: $viewModel.pathCoordinates,
                         userLocation: $viewModel.userLocation,
-                        showUserLocation: true,
-                        trackingMode: .direction
+                        showUserLocation: true, // 무조건 true로 고정
+                        trackingMode: .normal
                     )
                     .onAppear { print("[디버그] NaverMapView appear in StartWalkView") }
                     .onChange(of: viewModel.centerCoordinate) { newCoord, oldCoord in
