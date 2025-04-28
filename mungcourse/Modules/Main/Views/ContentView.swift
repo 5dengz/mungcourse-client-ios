@@ -20,12 +20,12 @@ struct ContentView: View {
                     }
                 }
 
-            StartWalkView() // 분리된 뷰 사용
+            StartWalkTabView() // StartWalkView 대신 StartWalkTabView 사용
                 .tabItem {
                     Label {
                         Text("산책 시작")
                     } icon: {
-                        Image("map") // Asset Catalog 아이콘 사용
+                        Image("map")
                     }
                 }
 
