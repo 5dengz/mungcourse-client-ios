@@ -11,11 +11,19 @@ struct StartWalkView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
+            // Debug: view appear
+            Color.clear
+                .onAppear { print("[디버그] StartWalkView onAppear") }
+                .onChange(of: viewModel.isWalking) { newValue, oldValue in
+                    print("[디버그] isWalking changed: \(newValue)")
+                }
+                .onChange(of: viewModel.pathCoordinates) { newPath, oldPath in
+                    print("[디버그] StartWalkView pathCoordinates: \(newPath)")
+                }
             // Content area
             VStack(spacing: 0) {
                 // Map View
                 ZStack {
-                    // Map View
                     NaverMapView(
                         centerCoordinate: $viewModel.centerCoordinate,
                         zoomLevel: $viewModel.zoomLevel,
@@ -24,20 +32,33 @@ struct StartWalkView: View {
                         showUserLocation: true,
                         trackingMode: .direction
                     )
+                    .onAppear { print("[디버그] NaverMapView appear in StartWalkView") }
+                    .onChange(of: viewModel.centerCoordinate) { newCoord, oldCoord in
+                        print("[디버그] viewModel.centerCoordinate: \(newCoord)")
+                    }
                     .edgesIgnoringSafeArea(.all)
                 }
             }
-            
             // Bottom controller panel
             WalkControllerView(
                 distance: viewModel.formattedDistance,
                 duration: viewModel.formattedDuration,
                 calories: viewModel.formattedCalories,
                 state: viewModel.isPaused ? .paused : (viewModel.isWalking ? .active : .notStarted),
-                onStart: { viewModel.startWalk() },
-                onPause: { viewModel.pauseWalk() },
-                onResume: { viewModel.resumeWalk() },
+                onStart: {
+                    print("[디버그] WalkControllerView onStart pressed")
+                    viewModel.startWalk()
+                },
+                onPause: {
+                    print("[디버그] WalkControllerView onPause pressed")
+                    viewModel.pauseWalk()
+                },
+                onResume: {
+                    print("[디버그] WalkControllerView onResume pressed")
+                    viewModel.resumeWalk()
+                },
                 onEnd: {
+                    print("[디버그] WalkControllerView onEnd pressed")
                     completedSession = viewModel.endWalk()
                     if let session = completedSession {
                         // TODO: 실제 dogIds를 선택받아야 함. 임시로 [1] 사용
@@ -61,6 +82,21 @@ struct StartWalkView: View {
             }
         } message: {
             Text("총 거리: \(viewModel.formattedDistance)km\n소요 시간: \(viewModel.formattedDuration)\n소모 칼로리: \(viewModel.formattedCalories)kcal")
+        }
+        .alert("위치 권한 필요", isPresented: $viewModel.showPermissionAlert) {
+            Button("설정으로 이동") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("산책을 시작하려면 위치 권한이 필요합니다.\n설정에서 위치 권한을 허용해주세요.")
+        }
+        .alert("위치 서비스 에러", isPresented: $viewModel.showLocationErrorAlert) {
+            Button("확인") {}
+        } message: {
+            Text(viewModel.locationErrorMessage)
         }
     }
 }

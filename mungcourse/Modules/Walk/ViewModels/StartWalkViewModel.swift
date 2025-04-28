@@ -23,6 +23,19 @@ class StartWalkViewModel: ObservableObject {
     private let walkTrackingService: WalkTrackingService
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - 권한 안내 및 에러 알림
+    @Published var showPermissionAlert: Bool = false
+    @Published var showLocationErrorAlert: Bool = false
+    @Published var locationErrorMessage: String = ""
+    
+    private func setupLocationErrorObserver() {
+        NotificationCenter.default.addObserver(forName: .walkLocationError, object: nil, queue: .main) { [weak self] notification in
+            self?.locationErrorMessage = "위치 서비스에 문제가 발생했습니다.\n앱 설정에서 위치 권한을 확인해주세요."
+            self?.showLocationErrorAlert = true
+        }
+    }
+    
+    // MARK: - User Actions
     init(walkTrackingService: WalkTrackingService = WalkTrackingService()) {
         self.walkTrackingService = walkTrackingService
         
@@ -45,6 +58,7 @@ class StartWalkViewModel: ObservableObject {
         // Subscribe to path updates
         walkTrackingService.$walkPath
             .sink { [weak self] path in
+                print("[디버그] pathCoordinates 변경: count=\(path.count), 값=\(path)")
                 self?.pathCoordinates = path
             }
             .store(in: &cancellables)
@@ -77,12 +91,14 @@ class StartWalkViewModel: ObservableObject {
                 self?.isPaused = !isTracking && self?.duration ?? 0 > 0
             }
             .store(in: &cancellables)
+        
+        setupLocationErrorObserver()
     }
     
-    // MARK: - User Actions
-    
     func startWalk() {
-        walkTrackingService.startWalk()
+        walkTrackingService.startWalk(onPermissionDenied: { [weak self] in
+            self?.showPermissionAlert = true
+        })
     }
     
     func pauseWalk() {

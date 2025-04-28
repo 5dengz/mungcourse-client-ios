@@ -15,6 +15,7 @@ struct NaverMapView: UIViewRepresentable {
     var trackingMode: NMFMyPositionMode = .direction
     
     func makeUIView(context: Context) -> NMFNaverMapView {
+        print("[디버그] makeUIView 호출")
         let mapView = NMFNaverMapView()
         
         mapView.showLocationButton = true
@@ -71,24 +72,32 @@ struct NaverMapView: UIViewRepresentable {
         mapView.mapView.moveCamera(cameraUpdate)
         
         // 경로 오버레이 업데이트
-        context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
-        
+        print("[디버그] makeUIView - centerCoordinate: \(centerCoordinate), zoomLevel: \(zoomLevel)")
+        print("[디버그] makeUIView - pathCoordinates: count=\(pathCoordinates.count), 값=\(pathCoordinates)")
+        if pathCoordinates.count >= 2 {
+            DispatchQueue.main.async {
+                context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
+            }
+        } else {
+            print("[디버그] makeUIView - Polyline 생략: 좌표가 2개 미만임")
+        }
         return mapView
     }
 
     func updateUIView(_ mapView: NMFNaverMapView, context: Context) {
+        print("[디버그] updateUIView 호출")
+        print("[디버그] updateUIView - centerCoordinate: \(centerCoordinate), zoomLevel: \(zoomLevel)")
+        print("[디버그] updateUIView - pathCoordinates: count=\(pathCoordinates.count), 값=\(pathCoordinates)")
         if mapView.mapView.cameraPosition.target != centerCoordinate {
             let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate)
             cameraUpdate.animation = .easeIn
             mapView.mapView.moveCamera(cameraUpdate)
         }
-        
         if mapView.mapView.cameraPosition.zoom != zoomLevel {
             let cameraUpdate = NMFCameraUpdate(zoomTo: zoomLevel)
             cameraUpdate.animation = .easeIn
             mapView.mapView.moveCamera(cameraUpdate)
         }
-        
         // 기본 My-LocationOverlay 숨김 및 마커 위치 업데이트
         mapView.mapView.positionMode = .disabled
         mapView.mapView.locationOverlay.hidden = true
@@ -100,9 +109,11 @@ struct NaverMapView: UIViewRepresentable {
                 effectView.center = point
             }
         }
-        
-        // 경로 오버레이 업데이트
-        context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
+        // 경로 오버레이 업데이트 (방어 코드 추가)
+        print("[디버그] pathCoordinates 변경됨: count=\(pathCoordinates.count)")
+        DispatchQueue.main.async {
+            context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
+        }
     }
     
     func makeCoordinator() -> Coordinator {
@@ -110,8 +121,8 @@ struct NaverMapView: UIViewRepresentable {
     }
     
     class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
-        var parent: NaverMapView
-        var pathOverlay: NMFPath?
+        let parent: NaverMapView
+        weak var pathOverlay: NMFPath?
         var pawMarker: NMFMarker?
         var effectView: UIImageView?
         
@@ -121,22 +132,34 @@ struct NaverMapView: UIViewRepresentable {
         
         // Update or add a new path overlay.
         func updatePathOverlay(mapView: NMFMapView, coordinates: [NMGLatLng]) {
-            // Remove existing overlay if present.
+            print("[디버그] updatePathOverlay 호출 - coordinates: count=\(coordinates.count), 값=\(coordinates)")
+            // 좌표 유효성 검사
+            for (i, coord) in coordinates.enumerated() {
+                guard abs(coord.lat) <= 90, abs(coord.lng) <= 180 else {
+                    print("[Error] Invalid coordinate at index \(i): \(coord)")
+                    return
+                }
+            }
+            // 기존 오버레이 완전 제거
             if let existingPath = pathOverlay {
+                print("[디버그] 기존 pathOverlay 제거")
                 existingPath.mapView = nil
                 pathOverlay = nil
             }
-            
-            // Add new path overlay if we have enough coordinates.
-            if coordinates.count >= 2 {
-                let newPath = NMFPath()
-                newPath.path = NMGLineString(points: coordinates)
-                newPath.color = UIColor(red: 0.28, green: 0.81, blue: 0.43, alpha: 1.0)
-                newPath.width = 5
-                newPath.outlineWidth = 1
-                newPath.mapView = mapView
-                pathOverlay = newPath
+            // 2개 미만 좌표면 오버레이 생성하지 않음
+            guard coordinates.count >= 2 else {
+                print("[디버그] Polyline 생략: 좌표가 2개 미만임")
+                return
             }
+            print("[디버그] NMFPath 생성 및 NMGLineString 할당 시도")
+            let newPath = NMFPath()
+            newPath.path = NMGLineString(points: coordinates)
+            newPath.color = UIColor(red: 0.28, green: 0.81, blue: 0.43, alpha: 1.0)
+            newPath.width = 5
+            newPath.outlineWidth = 1
+            newPath.mapView = mapView
+            pathOverlay = newPath
+            print("[디버그] Polyline 정상 생성 및 지도에 추가 완료")
         }
         
         func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {

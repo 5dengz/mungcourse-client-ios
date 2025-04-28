@@ -43,8 +43,15 @@ class WalkTrackingService: NSObject, ObservableObject {
     }
     
     // MARK: - Walk Session Management
-    func startWalk() {
+    func startWalk(onPermissionDenied: (() -> Void)? = nil) {
         guard !isTracking else { return }
+        let status = locationManager.authorizationStatus
+        print("[WalkTrackingService] startWalk() called, 권한 상태: \(status.rawValue)")
+        guard status == .authorizedAlways || status == .authorizedWhenInUse else {
+            print("[WalkTrackingService] 위치 권한이 없습니다. 안내 필요.")
+            onPermissionDenied?()
+            return
+        }
         
         // Clear previous data
         walkPath.removeAll()
@@ -53,13 +60,10 @@ class WalkTrackingService: NSObject, ObservableObject {
         calories = 0.0
         averageSpeed = 0.0
         lastLocation = nil
-        
-        // Start tracking
         isTracking = true
         startTime = Date()
         locationManager.startUpdatingLocation()
-        
-        // Start timer for duration updates
+        print("[WalkTrackingService] 위치 추적 시작!")
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let startTime = self.startTime else { return }
             self.duration = Date().timeIntervalSince(startTime)
@@ -151,7 +155,10 @@ extension WalkTrackingService: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location manager failed with error: \(error)")
+        print("[WalkTrackingService] Location manager failed with error: \(error)")
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .walkLocationError, object: error)
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -166,4 +173,8 @@ extension WalkTrackingService: CLLocationManagerDelegate {
             break
         }
     }
+}
+
+extension Notification.Name {
+    static let walkLocationError = Notification.Name("walkLocationError")
 }
