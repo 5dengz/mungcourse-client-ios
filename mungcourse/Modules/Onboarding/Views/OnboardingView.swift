@@ -49,7 +49,7 @@ struct OnboardingView: View {
             HStack(spacing: 8) {
                 ForEach(0..<pages.count, id: \.self) { index in
                     Circle()
-                        .fill(currentPage == index ? Color.accentColor : Color.gray.opacity(0.3))
+                        .fill(currentPage == index ? Color.main : Color.gray.opacity(0.3))
                         .frame(width: 8, height: 8)
                 }
             }
@@ -58,22 +58,16 @@ struct OnboardingView: View {
             
             
             // 다음 버튼
-            Button(action: {
-                if currentPage < pages.count - 1 {
-                    currentPage += 1
-                } else {
-                    // 마지막 페이지에서는 온보딩 완료
-                    hasCompletedOnboarding = true
+            CommonFilledButton(
+                title: currentPage < pages.count - 1 ? "다음" : "시작하기",
+                action: {
+                    if currentPage < pages.count - 1 {
+                        currentPage += 1
+                    } else {
+                        hasCompletedOnboarding = true
+                    }
                 }
-            }) {
-                Text(currentPage < pages.count - 1 ? "다음" : "시작하기")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .cornerRadius(10)
-            }
+            )
             .padding(.horizontal, 30)
             .padding(.bottom, 30)
         }
