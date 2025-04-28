@@ -39,7 +39,11 @@ struct StartWalkView: View {
                 onResume: { viewModel.resumeWalk() },
                 onEnd: {
                     completedSession = viewModel.endWalk()
-                    if completedSession != nil {
+                    if let session = completedSession {
+                        // TODO: 실제 dogIds를 선택받아야 함. 임시로 [1] 사용
+                        viewModel.uploadWalkSession(session, dogIds: [1]) { success in
+                            // 업로드 성공/실패에 따라 알림 등 처리 가능
+                        }
                         showCompleteAlert = true
                     }
                 }

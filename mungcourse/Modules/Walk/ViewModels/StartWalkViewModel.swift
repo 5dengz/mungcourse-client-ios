@@ -118,4 +118,29 @@ class StartWalkViewModel: ObservableObject {
     var formattedCalories: String {
         String(format: "%.0f", calories)
     }
+    
+    // MARK: - API 연동
+    func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "https://your.api/v1/walks") else {
+            completion(false)
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // TODO: 인증 토큰 필요시 헤더 추가
+        let body = session.toAPIDictionary(dogIds: dogIds)
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let _ = error {
+                completion(false)
+                return
+            }
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                completion(false)
+                return
+            }
+            completion(true)
+        }.resume()
+    }
 }
