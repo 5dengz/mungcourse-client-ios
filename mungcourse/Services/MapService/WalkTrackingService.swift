@@ -128,6 +128,7 @@ extension WalkTrackingService: CLLocationManagerDelegate {
         currentLocation = location
         let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
         walkPath.append(coord)
+        print("[WalkTrackingService] walkPath에 추가된 좌표: \(coord.lat), \(coord.lng)")
         if let lastLocation = lastLocation {
             let distanceInMeters = location.distance(from: lastLocation)
             distance += distanceInMeters / 1000 // Convert to kilometers
