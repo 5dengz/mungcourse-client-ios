@@ -39,7 +39,6 @@
 		56BAE7972DBF722100243818 /* Exceptions for "mungcourse" folder in "mungcourse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"GoogleService-Info.plist",
 				Info.plist,
 			);
 			target = 56F1230B2DA2C33500632733 /* mungcourse */;
@@ -213,11 +212,12 @@
 				};
 			};
 			buildConfigurationList = 56F123072DA2C33500632733 /* Build configuration list for PBXProject "mungcourse" */;
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 56F123032DA2C33500632733;
 			minimizedProjectReferenceProxies = 1;
@@ -313,8 +313,8 @@
 				INFOPLIST_FILE = mungcourse/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "멍코스";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -329,7 +329,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -347,8 +347,8 @@
 				INFOPLIST_FILE = mungcourse/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "멍코스";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -363,12 +363,14 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
 		56F123332DA2C33700632733 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 56F1230E2DA2C33500632733 /* mungcourse */;
+			baseConfigurationReferenceRelativePath = Config/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -432,6 +434,8 @@
 		};
 		56F123342DA2C33700632733 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 56F1230E2DA2C33500632733 /* mungcourse */;
+			baseConfigurationReferenceRelativePath = Config/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

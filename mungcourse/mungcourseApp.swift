@@ -7,6 +7,7 @@
 
 import SwiftUI
 import NMapsMap // 네이버 지도 SDK 임포트 (SwiftData 제거)
+import GoogleSignIn
 
 @main
 struct mungcourseApp: App {
@@ -15,9 +16,19 @@ struct mungcourseApp: App {
     @AppStorage("authToken") private var authToken: String = "" // 추후 토큰 저장용
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
 
-    // 앱 초기화 시 네이버 지도 SDK 인증
+    
     init() {
-        NMFAuthManager.shared().ncpKeyId = "5s28pgywc5" // Info.plist에 있는 클라이언트 ID와 동일하게 설정
+        // Naver Maps Client ID를 Info.plist에서 직접 읽어옵니다.
+        guard let naverId = Bundle.main.object(forInfoDictionaryKey: "NMFClientId") as? String, !naverId.isEmpty else {
+            fatalError("NMFClientId not found in Info.plist")
+        }
+        NMFAuthManager.shared().ncpKeyId = naverId
+
+        // GoogleSignIn Client ID를 Info.plist에서 직접 읽어옵니다.
+        guard let googleId = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String, !googleId.isEmpty else {
+            fatalError("GIDClientID not found in Info.plist")
+        }
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: googleId)
     }
 
     var body: some Scene {

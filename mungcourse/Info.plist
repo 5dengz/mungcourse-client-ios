@@ -2,7 +2,43 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30</string>
+			</array>
+		</dict>
+	</array>
+
+<key>GIDClientID</key>
+<string>$(GOOGLE_CLIENT_ID)</string>
+<key>REVERSED_CLIENT_ID</key>
+<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>naversearchapp</string>
+		<string>naversearchthirdlogin</string>
+		<string>google</string>
+	</array>
+
+	<key>NMFClientId</key>
+	<string>$(NAVER_MAPS_CLIENT_ID)</string>
+	<key>NMFClientSecret</key>
+	<string>$(NAVER_MAPS_CLIENT_SECRET)</string>
+
 	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>location</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
+		<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 		<string>location</string>
@@ -19,16 +55,6 @@
 		<string>naversearchthirdlogin</string>
 		<string>google</string>
 	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30</string>
-			</array>
-		</dict>
-	</array>
+
 </dict>
 </plist>
