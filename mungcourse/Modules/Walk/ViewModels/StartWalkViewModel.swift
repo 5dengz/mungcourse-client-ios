@@ -37,79 +37,75 @@ class StartWalkViewModel: ObservableObject {
     
     // MARK: - User Actions
     init(walkTrackingService: WalkTrackingService = WalkTrackingService()) {
+        print("[StartWalkViewModel] init 호출")
         self.walkTrackingService = walkTrackingService
-        
         // Default to Seoul coordinates if no location is available yet
         self.centerCoordinate = NMGLatLng(lat: 37.5665, lng: 126.9780)
-        
-        // Subscribe to location updates from the tracking service
         walkTrackingService.$currentLocation
             .sink { [weak self] location in
+                print("[StartWalkViewModel] currentLocation 변경: \(String(describing: location))")
                 guard let self = self else { return }
                 if let location = location {
                     let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
+                    print("[StartWalkViewModel] userLocation 갱신: \(coord)")
                     self.userLocation = coord
                 } else {
+                    print("[StartWalkViewModel] userLocation nil")
                     self.userLocation = nil
                 }
             }
             .store(in: &cancellables)
-        
-        // Subscribe to path updates
         walkTrackingService.$walkPath
             .sink { [weak self] path in
-                print("[디버그] pathCoordinates 변경: count=\(path.count), 값=\(path)")
+                print("[StartWalkViewModel] pathCoordinates 변경: count=\(path.count), 값=\(path)")
                 self?.pathCoordinates = path
             }
             .store(in: &cancellables)
-        
-        // Subscribe to distance updates
         walkTrackingService.$distance
             .sink { [weak self] distance in
+                print("[StartWalkViewModel] distance 변경: \(distance)")
                 self?.distance = distance
             }
             .store(in: &cancellables)
-        
-        // Subscribe to duration updates
         walkTrackingService.$duration
             .sink { [weak self] duration in
+                print("[StartWalkViewModel] duration 변경: \(duration)")
                 self?.duration = duration
             }
             .store(in: &cancellables)
-        
-        // Subscribe to calories updates
         walkTrackingService.$calories
             .sink { [weak self] calories in
+                print("[StartWalkViewModel] calories 변경: \(calories)")
                 self?.calories = calories
             }
             .store(in: &cancellables)
-        
-        // Subscribe to tracking state
         walkTrackingService.$isTracking
             .sink { [weak self] isTracking in
+                print("[StartWalkViewModel] isTracking 변경: \(isTracking)")
                 self?.isWalking = isTracking
                 self?.isPaused = !isTracking && self?.duration ?? 0 > 0
             }
             .store(in: &cancellables)
-        
         setupLocationErrorObserver()
     }
     
     func startWalk() {
+        print("[StartWalkViewModel] startWalk() 호출")
         walkTrackingService.startWalk(onPermissionDenied: { [weak self] in
+            print("[StartWalkViewModel] 위치 권한 거부됨")
             self?.showPermissionAlert = true
         })
     }
-    
     func pauseWalk() {
+        print("[StartWalkViewModel] pauseWalk() 호출")
         walkTrackingService.pauseWalk()
     }
-    
     func resumeWalk() {
+        print("[StartWalkViewModel] resumeWalk() 호출")
         walkTrackingService.resumeWalk()
     }
-    
     func endWalk() -> WalkSession? {
+        print("[StartWalkViewModel] endWalk() 호출")
         return walkTrackingService.endWalk()
     }
     

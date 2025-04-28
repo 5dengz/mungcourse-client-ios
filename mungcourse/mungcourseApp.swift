@@ -16,6 +16,7 @@ struct mungcourseApp: App {
     // 앱 초기화 시 네이버 지도 SDK 인증
     init() {
         NMFAuthManager.shared().ncpKeyId = "5s28pgywc5" // Info.plist에 있는 클라이언트 ID와 동일하게 설정
+        GlobalLocationManager.shared.startUpdatingLocation() // 앱 시작 시 위치 업데이트 시작
     }
 
     var body: some Scene {
