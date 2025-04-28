@@ -34,42 +34,26 @@ struct LoginView: View {
             // 로그인 버튼들
             VStack(spacing: 16) {
                 // 구글 로그인 버튼
-                Button(action: {
-                    viewModel.loginWithGoogle()
-                }) {
-                    HStack {
-                        Image(systemName: "globe")
-                            .foregroundColor(.black)
-                        
-                        Text("구글 로그인")
-                            .font(.headline)
-                            .foregroundColor(.black)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(28)
-                }
-                .disabled(viewModel.isLoading)
+                SocialLoginButton(
+                    icon: Image(systemName: "globe").foregroundColor(.black),
+                    text: "구글 로그인",
+                    textColor: .black,
+                    backgroundColor: .white,
+                    cornerRadius: 28,
+                    isLoading: viewModel.isLoading,
+                    action: { viewModel.loginWithGoogle() }
+                )
                 
                 // 애플 로그인 버튼
-                Button(action: {
-                    viewModel.loginWithApple()
-                }) {
-                    HStack {
-                        Image(systemName: "apple.logo")
-                            .foregroundColor(.white)
-                        
-                        Text("애플 로그인")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.black)
-                    .cornerRadius(28)
-                }
-                .disabled(viewModel.isLoading)
+                SocialLoginButton(
+                    icon: Image(systemName: "apple.logo").foregroundColor(.white),
+                    text: "애플 로그인",
+                    textColor: .white,
+                    backgroundColor: .black,
+                    cornerRadius: 28,
+                    isLoading: viewModel.isLoading,
+                    action: { viewModel.loginWithApple() }
+                )
                 
                 // 로딩 인디케이터
                 if viewModel.isLoading {

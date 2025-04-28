@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 56F78F012DAD051800B3CC88 /* NMapsMap */; };
+		56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242A2DBF6BE9008B375A /* GoogleSignIn */; };
+		56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,7 +71,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */,
 				56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */,
+				56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +135,8 @@
 			name = mungcourse;
 			packageProductDependencies = (
 				56F78F012DAD051800B3CC88 /* NMapsMap */,
+				56FC242A2DBF6BE9008B375A /* GoogleSignIn */,
+				56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */,
 			);
 			productName = mungcourse;
 			productReference = 56F1230C2DA2C33500632733 /* mungcourse.app */;
@@ -216,6 +222,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
+				56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56F1230D2DA2C33500632733 /* Products */;
@@ -596,6 +603,14 @@
 				minimumVersion = 3.21.0;
 			};
 		};
+		56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -603,6 +618,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
 			productName = NMapsMap;
+		};
+		56FC242A2DBF6BE9008B375A /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
