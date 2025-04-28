@@ -9,10 +9,6 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
-	<key>NMFClientId</key>
-	<string>5s28pgywc5</string>
-	<key>NMFClientSecret</key>
-	<string>jyfC8sxiG8VYDyQcm1Os2uJNmvTYpHG9P8LUL0zf</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -34,7 +30,5 @@
 			</array>
 		</dict>
 	</array>
-	<key>GIDClientID</key>
-    <string>359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30.apps.googleusercontent.com</string>
 </dict>
 </plist>

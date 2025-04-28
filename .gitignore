@@ -55,3 +55,9 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Sensitive Data / Configuration Files
+# Add files containing API keys, secrets, or environment-specific configurations here
+GoogleService-Info.plist
+# 네이버 맵 및 구글 로그인 관련 키를 git에 커밋하지 않도록 설정
+mungcourse/Config/Secrets.xcconfig
