@@ -16,6 +16,7 @@ class GlobalLocationManager: NSObject, CLLocationManagerDelegate, ObservableObje
 
     func startUpdatingLocation() {
         if CLLocationManager.locationServicesEnabled() {
+            print("[GlobalLocationManager] startUpdatingLocation() called at \(Date())")
             locationManager.requestWhenInUseAuthorization()
             locationManager.startUpdatingLocation()
         }
@@ -27,6 +28,7 @@ class GlobalLocationManager: NSObject, CLLocationManagerDelegate, ObservableObje
 
     // CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("[GlobalLocationManager] didUpdateLocations called at \(Date()) with locations: \(locations)")
         if let location = locations.last {
             lastLocation = location
         }
