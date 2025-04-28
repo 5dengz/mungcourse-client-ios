@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct SocialLoginButton: View {
-    let icon: Image
+struct SocialLoginButton<Icon: View>: View {
+    let icon: () -> Icon
     let text: String
     let textColor: Color
     let backgroundColor: Color
@@ -12,8 +12,7 @@ struct SocialLoginButton: View {
     var body: some View {
         Button(action: action) {
             HStack {
-                icon
-                
+                icon()
                 Text(text)
                     .font(.headline)
                     .foregroundColor(textColor)

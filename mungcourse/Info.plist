@@ -21,6 +21,18 @@
 	<array>
 		<string>naversearchapp</string>
 		<string>naversearchthirdlogin</string>
+		<string>google</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>359627064967-pjkmgsg7qkd7kj0og5gsv2r919hmjt30.apps.googleusercontent.com</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

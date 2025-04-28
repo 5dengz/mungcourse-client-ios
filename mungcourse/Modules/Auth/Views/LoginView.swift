@@ -35,7 +35,7 @@ struct LoginView: View {
             VStack(spacing: 16) {
                 // 구글 로그인 버튼
                 SocialLoginButton(
-                    icon: Image(systemName: "globe").foregroundColor(.black),
+                    icon: { Image(systemName: "globe").foregroundColor(.black) },
                     text: "구글 로그인",
                     textColor: .black,
                     backgroundColor: .white,
@@ -46,7 +46,7 @@ struct LoginView: View {
                 
                 // 애플 로그인 버튼
                 SocialLoginButton(
-                    icon: Image(systemName: "apple.logo").foregroundColor(.white),
+                    icon: { Image(systemName: "apple.logo").foregroundColor(.white) },
                     text: "애플 로그인",
                     textColor: .white,
                     backgroundColor: .black,
