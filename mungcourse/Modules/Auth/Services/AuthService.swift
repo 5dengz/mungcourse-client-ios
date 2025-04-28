@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import GoogleSignIn
+import KeychainAccess
 
 // 인증 서비스 결과 타입
 enum AuthResult {
@@ -37,6 +38,7 @@ protocol AuthServiceProtocol {
 class AuthService: AuthServiceProtocol {
     // Singleton 패턴 (앱 전체에서 하나의 인스턴스만 사용)
     static let shared = AuthService()
+    private let keychain = Keychain(service: "com.mungcourse.app")
     
     private init() {}
     
@@ -97,10 +99,12 @@ class AuthService: AuthServiceProtocol {
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let dataDict = json["data"] as? [String: Any],
                   let tokens = dataDict["tokens"] as? [String: Any],
-                  let accessToken = tokens["accessToken"] as? String else {
+                  let accessToken = tokens["accessToken"] as? String,
+                  let refreshToken = tokens["refreshToken"] as? String else {
                 completion(.failure(error: AuthError.unknown))
                 return
             }
+            self.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
             completion(.success(token: accessToken))
         }.resume()
     }
@@ -126,8 +130,25 @@ class AuthService: AuthServiceProtocol {
     // 로그아웃 메소드
     func logout() {
         print("로그아웃 처리")
+        clearTokens()
         // 여기서 실제 로그아웃 로직 구현
         // - 토큰 삭제
         // - 서버에 로그아웃 알림 등
+    }
+    
+    // MARK: - Keychain 토큰 저장/조회/삭제
+    func saveTokens(accessToken: String, refreshToken: String) {
+        keychain["accessToken"] = accessToken
+        keychain["refreshToken"] = refreshToken
+    }
+    func getAccessToken() -> String? {
+        return keychain["accessToken"]
+    }
+    func getRefreshToken() -> String? {
+        return keychain["refreshToken"]
+    }
+    func clearTokens() {
+        keychain["accessToken"] = nil
+        keychain["refreshToken"] = nil
     }
 }
