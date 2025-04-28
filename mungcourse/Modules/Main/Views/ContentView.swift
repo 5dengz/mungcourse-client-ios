@@ -30,7 +30,13 @@ struct ContentView: View {
         }
     }
     @State private var selectedTab: Tab = .home
-    private let tabBarHeight: CGFloat = 54
+    private let imageHeight: CGFloat = 24
+    private let imageToBorder: CGFloat = 10
+    private let imageToText: CGFloat = 3
+    private let textToSafeArea: CGFloat = 1
+    private var tabBarHeight: CGFloat {
+        imageToBorder + imageHeight + imageToText + tabFontSize + textToSafeArea
+    }
     private let tabFontSize: CGFloat = 12
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -55,16 +61,19 @@ struct ContentView: View {
                         Button(action: {
                             selectedTab = tab
                         }) {
-                            VStack(spacing: 4) {
+                            VStack(spacing: 0) {
+                                Spacer().frame(height: imageToBorder)
                                 Image(tab.icon)
                                     .renderingMode(.template)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(height: 24)
+                                    .frame(height: imageHeight)
                                     .foregroundColor(selectedTab == tab ? Color("main") : Color("gray400"))
+                                Spacer().frame(height: imageToText)
                                 Text(tab.title)
                                     .font(.custom("Pretendard", size: tabFontSize))
                                     .foregroundColor(selectedTab == tab ? Color("main") : Color("gray400"))
+                                Spacer().frame(height: textToSafeArea)
                             }
                             .frame(maxWidth: .infinity)
                         }
