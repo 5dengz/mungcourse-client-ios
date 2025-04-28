@@ -8,57 +8,73 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        TabView {
-            // 각 탭에 새로 생성한 뷰를 연결합니다.
-            HomeView()
-                .tabItem {
-                    Label {
-                        Text("홈")
-                    } icon: {
-                        Image("tab_home") // Asset Catalog 아이콘 사용
-                    }
-                }
-
-            StartWalkView() // 분리된 뷰 사용
-                .tabItem {
-                    Label {
-                        Text("산책 시작")
-                    } icon: {
-                        Image("tab_map") // Asset Catalog 아이콘 사용
-                    }
-                }
-
-            RoutineSettingsView() // 분리된 뷰 사용
-                .tabItem {
-                    Label {
-                        Text("루틴 설정")
-                    } icon: {
-                        Image("tab_route") // Asset Catalog 아이콘 사용
-                    }
-                }
-
-            WalkHistoryView() // 분리된 뷰 사용
-                .tabItem {
-                    Label {
-                        Text("산책 기록")
-                    } icon: {   
-                        Image("tab_history") // Asset Catalog 아이콘 사용
-                    }
-                }
-
-            ProfileTabView() // 분리된 뷰 사용
-                .tabItem {
-                    Label {
-                        Text("프로필")
-                    } icon: {
-                        Image("tab_profile") // Asset Catalog 아이콘 사용
-                    }
-                }
+    enum Tab: Int, CaseIterable {
+        case home, startWalk, routine, history, profile
+        var title: String {
+            switch self {
+            case .home: return "홈"
+            case .startWalk: return "산책 시작"
+            case .routine: return "루틴 설정"
+            case .history: return "산책 기록"
+            case .profile: return "프로필"
+            }
         }
-        // .accentColor(themeColor) // 제거됨 - Asset Catalog의 AccentColor 사용
+        var icon: String {
+            switch self {
+            case .home: return "tab_home"
+            case .startWalk: return "tab_map"
+            case .routine: return "tab_route"
+            case .history: return "tab_history"
+            case .profile: return "tab_profile"
+            }
+        }
+    }
+    @State private var selectedTab: Tab = .home
+    private let tabBarHeight: CGFloat = 54
+    private let tabFontSize: CGFloat = 12
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Group {
+                switch selectedTab {
+                case .home:
+                    HomeView()
+                case .startWalk:
+                    StartWalkView()
+                case .routine:
+                    RoutineSettingsView()
+                case .history:
+                    WalkHistoryView()
+                case .profile:
+                    ProfileTabView()
+                }
+            }
+            VStack(spacing: 0) {
+                Spacer()
+                HStack {
+                    ForEach(Tab.allCases, id: \ .self) { tab in
+                        Button(action: {
+                            selectedTab = tab
+                        }) {
+                            VStack(spacing: 4) {
+                                Image(tab.icon)
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 24)
+                                    .foregroundColor(selectedTab == tab ? Color("main") : Color("gray400"))
+                                Text(tab.title)
+                                    .font(.custom("Pretendard", size: tabFontSize))
+                                    .foregroundColor(selectedTab == tab ? Color("main") : Color("gray400"))
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+                .frame(height: tabBarHeight)
+                .background(Color.white.ignoresSafeArea(edges: .bottom))
+                .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
+            }
+        }
     }
 }
-
-// --- HomeView 및 Placeholder 뷰 정의는 HomeView.swift로 이동되었으므로 제거 ---
 
