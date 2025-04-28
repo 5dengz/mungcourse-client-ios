@@ -96,7 +96,8 @@ class AuthService: AuthServiceProtocol {
             guard let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let dataDict = json["data"] as? [String: Any],
-                  let accessToken = dataDict["access_token"] as? String else {
+                  let tokens = dataDict["tokens"] as? [String: Any],
+                  let accessToken = tokens["accessToken"] as? String else {
                 completion(.failure(error: AuthError.unknown))
                 return
             }
