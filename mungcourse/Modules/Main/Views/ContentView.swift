@@ -30,6 +30,7 @@ struct ContentView: View {
         }
     }
     @State private var selectedTab: Tab = .home
+    @State private var prevTab: Tab? = nil
     @State private var isStartWalkOverlayPresented: Bool = false
     @State private var showSelectWaypoint: Bool = false
     @State private var showRecommendCourse: Bool = false
@@ -49,7 +50,9 @@ struct ContentView: View {
                     HomeView(selectedTab: $selectedTab)
                 case .startWalk:
                     HomeView(selectedTab: $selectedTab)
-                        .onAppear { isStartWalkOverlayPresented = true }
+                        .onAppear {
+                            isStartWalkOverlayPresented = true
+                        }
                 case .routine:
                     RoutineSettingsView()
                 case .history:
@@ -61,8 +64,11 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 Spacer()
                 HStack {
-                    ForEach(Tab.allCases, id: \ .self) { tab in
+                    ForEach(Tab.allCases, id: \.self) { tab in
                         Button(action: {
+                            if tab == .startWalk {
+                                prevTab = selectedTab
+                            }
                             selectedTab = tab
                         }) {
                             VStack(spacing: 0) {
@@ -108,6 +114,12 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $showRecommendCourse) {
             NavigationStack { RecommendCourseView() }
+        }
+        .onChange(of: isStartWalkOverlayPresented) { newValue in
+            if newValue == false, let prev = prevTab {
+                selectedTab = prev
+                prevTab = nil
+            }
         }
     }
 }

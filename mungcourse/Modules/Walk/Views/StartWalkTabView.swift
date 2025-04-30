@@ -8,6 +8,10 @@ struct StartWalkTabView: View {
         ZStack(alignment: .bottom) {
             Color.black.opacity(0.5)
                 .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    isOverlayPresented = false
+                }
             VStack(spacing: 16) {
                 CommonFilledButton(
                     title: "경유지 선택",
