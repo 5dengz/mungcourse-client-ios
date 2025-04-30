@@ -12,7 +12,8 @@ struct LoginView: View {
             // 안내 문구
             VStack(spacing: 8) {
                 Text("멍코스와 함께\n산책을 시작하세요!")
-                    .font(Font.custom("Pretendard-SemiBold", size: 24))
+                    .font(Font.custom("Pretendard", size: 24))
+                    .fontWeight(.semibold)
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                 Text("안전 코스 추천부터 산책 기록까지")
@@ -33,9 +34,20 @@ struct LoginView: View {
             
             // 로그인 버튼들
             VStack(spacing: 16) {
+                // 카카오 로그인 버튼
+                SocialLoginButton(
+                    icon: { Image( "sns_kakaotalk").foregroundColor(.black) },
+                    text: "카카오 로그인",
+                    textColor: .black,
+                    backgroundColor: .pointYellow,
+                    cornerRadius: 28,
+                    isLoading: viewModel.isLoading,
+                    action: { viewModel.loginWithApple() }
+                )
+                
                 // 구글 로그인 버튼
                 SocialLoginButton(
-                    icon: { Image(systemName: "globe").foregroundColor(.black) },
+                    icon: { Image( "sns_google").foregroundColor(.black) },
                     text: "구글 로그인",
                     textColor: .black,
                     backgroundColor: .white,
@@ -46,7 +58,7 @@ struct LoginView: View {
                 
                 // 애플 로그인 버튼
                 SocialLoginButton(
-                    icon: { Image(systemName: "apple.logo").foregroundColor(.white) },
+                    icon: { Image( "sns_apple").foregroundColor(.white) },
                     text: "애플 로그인",
                     textColor: .white,
                     backgroundColor: .black,
@@ -74,7 +86,7 @@ struct LoginView: View {
             .padding(.bottom, 50)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(Color.gray100)
     }
 }
 
