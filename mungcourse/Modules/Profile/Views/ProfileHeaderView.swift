@@ -16,7 +16,7 @@ struct ProfileHeaderView: View {
                 Button(action: { onSwitchProfile?() }) {
                     Image(systemName: "arrow.triangle.2.circlepath") // cycle 비슷한 아이콘
                         .font(.title2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.black)
                 }
                 Button(action: { onSettings?() }) {
                     Image(systemName: "gearshape")
@@ -28,7 +28,7 @@ struct ProfileHeaderView: View {
             HStack {
                 Spacer()
                 Text("프로필")
-                    .font(.headline)
+                    .font(Font.custom("Pretendard", size: 20).weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
                 Spacer()

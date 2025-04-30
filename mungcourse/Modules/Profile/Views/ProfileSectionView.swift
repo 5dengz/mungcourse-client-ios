@@ -19,13 +19,15 @@ struct ProfileSectionView: View {
                     .fill(Color.gray.opacity(0.2))
                     .frame(width: 127, height: 127)
             }
+            Spacer().frame(height: 16)
             Text(nickname ?? "강아지 이름")
                 .font(.title2)
-                .fontWeight(.semibold)
+                .fontWeight(Font.Weight.semibold)
             Button(action: { onEdit?() }) {
                 Text("프로필 편집")
                     .font(.caption)
-                    .foregroundColor(.blue)
+                    .fontWeight(Font.Weight.semibold)
+                    .foregroundColor(Color("gray400"))
             }
         }
         .frame(maxWidth: .infinity)
