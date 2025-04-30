@@ -1,7 +1,6 @@
 import SwiftUI
 
 // Renamed from ReusableButtonStyleButton
-// Removed duplicate import SwiftUI
 struct MainButton: View {
     let title: String
     let imageName: String // Changed from iconName to imageName
@@ -35,7 +34,7 @@ struct MainButton: View {
                 // 좌측 상단 텍스트
                 Text(title)
                     .font(.headline) // 적절한 폰트 설정
-                    .foregroundColor(Color("white")) // 파라미터로 받은 전경색 사용
+                    .foregroundColor(foregroundColor) // 파라미터로 받은 전경색 사용
                     .padding([.top, .leading], 12) // 내부 패딩
                     .fontWeight(.semibold) // 세미볼드로 변경
 

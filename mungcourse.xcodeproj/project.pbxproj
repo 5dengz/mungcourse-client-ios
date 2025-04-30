@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 56BAE79D2DBF93F000243818 /* KeychainAccess */; };
 		56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 56F78F012DAD051800B3CC88 /* NMapsMap */; };
+		56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242A2DBF6BE9008B375A /* GoogleSignIn */; };
+		56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +37,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		56F1232F2DA2C33700632733 /* Exceptions for "mungcourse" folder in "mungcourse" target */ = {
+		56BAE7972DBF722100243818 /* Exceptions for "mungcourse" folder in "mungcourse" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -47,7 +50,7 @@
 		56F1230E2DA2C33500632733 /* mungcourse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				56F1232F2DA2C33700632733 /* Exceptions for "mungcourse" folder in "mungcourse" target */,
+				56BAE7972DBF722100243818 /* Exceptions for "mungcourse" folder in "mungcourse" target */,
 			);
 			path = mungcourse;
 			sourceTree = "<group>";
@@ -69,7 +72,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */,
+				56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */,
 				56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */,
+				56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +137,9 @@
 			name = mungcourse;
 			packageProductDependencies = (
 				56F78F012DAD051800B3CC88 /* NMapsMap */,
+				56FC242A2DBF6BE9008B375A /* GoogleSignIn */,
+				56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */,
+				56BAE79D2DBF93F000243818 /* KeychainAccess */,
 			);
 			productName = mungcourse;
 			productReference = 56F1230C2DA2C33500632733 /* mungcourse.app */;
@@ -206,16 +215,19 @@
 				};
 			};
 			buildConfigurationList = 56F123072DA2C33500632733 /* Build configuration list for PBXProject "mungcourse" */;
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 56F123032DA2C33500632733;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
+				56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56F1230D2DA2C33500632733 /* Products */;
@@ -305,8 +317,8 @@
 				INFOPLIST_FILE = mungcourse/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "멍코스";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -321,7 +333,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -339,8 +351,8 @@
 				INFOPLIST_FILE = mungcourse/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "멍코스";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "멍코스가 산책로를 기록하고 배변봉투함 위치를 안내하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -355,12 +367,14 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
 		56F123332DA2C33700632733 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 56F1230E2DA2C33500632733 /* mungcourse */;
+			baseConfigurationReferenceRelativePath = Config/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -424,6 +438,8 @@
 		};
 		56F123342DA2C33700632733 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 56F1230E2DA2C33500632733 /* mungcourse */;
+			baseConfigurationReferenceRelativePath = Config/Secrets.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -596,13 +612,44 @@
 				minimumVersion = 3.21.0;
 			};
 		};
+		56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		56BAE79D2DBF93F000243818 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
 		56F78F012DAD051800B3CC88 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
 			productName = NMapsMap;
+		};
+		56FC242A2DBF6BE9008B375A /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
