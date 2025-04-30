@@ -45,7 +45,7 @@ struct ContentView: View {
                 case .home:
                     HomeView(selectedTab: $selectedTab)
                 case .startWalk:
-                    StartWalkView()
+                    StartWalkTabView()
                 case .routine:
                     RoutineSettingsView()
                 case .history:
