@@ -77,46 +77,133 @@ class ProfileViewModel: ObservableObject {
 
 struct ProfileTabView: View {
     @StateObject private var viewModel = ProfileViewModel()
+    @State private var selectedTab: InfoTab = .basic
+    
+    enum InfoTab: String, CaseIterable {
+        case basic = "기본 정보"
+        case walk = "산책 기록"
+    }
     
     var body: some View {
-        VStack(spacing: 16) {
-            if viewModel.isLoading {
-                ProgressView()
-            } else if let user = viewModel.userInfo {
-                Text("닉네임: \(user.nickname ?? "-")")
-                    .font(.title)
-                Text("이메일: \(user.email)")
-                if let urlStr = user.profileImageUrl, let url = URL(string: urlStr) {
-                    AsyncImage(url: url) { image in
-                        image.resizable().scaledToFit()
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-                }
-            } else if let error = viewModel.errorMessage {
-                Text(error).foregroundColor(.red)
-            } else {
-                Text("유저 정보를 불러오세요.")
-            }
-            // 통신 결과(응답 원본) 표시
-            if let response = viewModel.rawResponse {
-                ScrollView {
-                    Text(response)
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                        .padding(8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                }
-                .frame(maxHeight: 200)
-            }
+        VStack(spacing: 0) {
+            // 헤더
+            headerView
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 16)
+            // 프로필 영역
+            profileSection
+                .padding(.bottom, 24)
+            // 버튼 영역
+            tabSelector
+                .padding(.bottom, 24)
+            // 정보 영역
+            infoSection
+            Spacer()
         }
         .onAppear {
             viewModel.fetchUserInfo()
         }
-        .navigationTitle("프로필")
+    }
+    
+    // MARK: - Header
+    private var headerView: some View {
+        HStack {
+            Button(action: { /* 뒤로가기 액션 */ }) {
+                Image(systemName: "chevron.left")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+            }
+            Text("프로필")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+            Button(action: { /* 프로필 전환 액션 */ }) {
+                Text("프로필 전환")
+                    .font(.subheadline)
+                    .foregroundColor(.blue)
+            }
+            Button(action: { /* 설정 액션 */ }) {
+                Image(systemName: "gearshape")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+            }
+        }
+        .frame(height: 51)
+    }
+    
+    // MARK: - Profile Section
+    private var profileSection: some View {
+        VStack(spacing: 8) {
+            if let user = viewModel.userInfo, let urlStr = user.profileImageUrl, let url = URL(string: urlStr) {
+                AsyncImage(url: url) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    Circle().fill(Color.gray.opacity(0.2))
+                }
+                .frame(width: 127, height: 127)
+                .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 127, height: 127)
+            }
+            Text(viewModel.userInfo?.nickname ?? "강아지 이름")
+                .font(.title2)
+                .fontWeight(.semibold)
+            Button(action: { /* 프로필 편집 액션 */ }) {
+                Text("프로필 편집")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - Tab Selector
+    private var tabSelector: some View {
+        HStack(spacing: 12) {
+            ForEach(InfoTab.allCases, id: \ .self) { tab in
+                Button(action: { selectedTab = tab }) {
+                    Text(tab.rawValue)
+                        .font(.subheadline)
+                        .fontWeight(selectedTab == tab ? .bold : .regular)
+                        .foregroundColor(selectedTab == tab ? .white : .primary)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 20)
+                        .background(
+                            Group {
+                                if selectedTab == tab {
+                                    Capsule().fill(Color.accentColor)
+                                } else {
+                                    Capsule().fill(Color.clear)
+                                }
+                            }
+                        )
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - Info Section
+    private var infoSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if selectedTab == .basic {
+                Section(header: Text("기본 정보").font(.headline)) {
+                    // 기본 정보 내용 (추후 구현)
+                    Text("기본 정보 영역")
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Section(header: Text("산책 기록").font(.headline)) {
+                    // 산책 기록 내용 (추후 구현)
+                    Text("산책 기록 영역")
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal)
     }
 }
 
