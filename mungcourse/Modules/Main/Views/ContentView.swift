@@ -31,6 +31,8 @@ struct ContentView: View {
     }
     @State private var selectedTab: Tab = .home
     @State private var isStartWalkOverlayPresented: Bool = false
+    @State private var showSelectWaypoint: Bool = false
+    @State private var showRecommendCourse: Bool = false
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
     private let imageToText: CGFloat = 3
@@ -86,10 +88,26 @@ struct ContentView: View {
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
             }
             if isStartWalkOverlayPresented {
-                StartWalkTabView(isOverlayPresented: $isStartWalkOverlayPresented)
+                StartWalkTabView(
+                    isOverlayPresented: $isStartWalkOverlayPresented,
+                    onSelectWaypoint: {
+                        showSelectWaypoint = true
+                        isStartWalkOverlayPresented = false
+                    },
+                    onRecommendCourse: {
+                        showRecommendCourse = true
+                        isStartWalkOverlayPresented = false
+                    }
+                )
                     .transition(.opacity)
                     .zIndex(1)
             }
+        }
+        .fullScreenCover(isPresented: $showSelectWaypoint) {
+            NavigationStack { SelectWaypointView() }
+        }
+        .fullScreenCover(isPresented: $showRecommendCourse) {
+            NavigationStack { RecommendCourseView() }
         }
     }
 }

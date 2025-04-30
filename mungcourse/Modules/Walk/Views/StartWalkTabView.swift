@@ -2,8 +2,8 @@ import SwiftUI
 
 struct StartWalkTabView: View {
     @Binding var isOverlayPresented: Bool
-    @State private var showSelectWaypoint = false
-    @State private var showRecommendCourse = false
+    let onSelectWaypoint: () -> Void
+    let onRecommendCourse: () -> Void
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.black.opacity(0.5)
@@ -12,7 +12,7 @@ struct StartWalkTabView: View {
                 CommonFilledButton(
                     title: "경유지 선택",
                     action: {
-                        showSelectWaypoint = true
+                        onSelectWaypoint()
                         isOverlayPresented = false
                     },
                     backgroundColor: .white,
@@ -23,7 +23,7 @@ struct StartWalkTabView: View {
                 CommonFilledButton(
                     title: "바로 추천",
                     action: {
-                        showRecommendCourse = true
+                        onRecommendCourse()
                         isOverlayPresented = false
                     },
                     backgroundColor: Color("main"),
@@ -34,21 +34,16 @@ struct StartWalkTabView: View {
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 32 + 56) // 탭바 높이(56) + 여유
-            // 네비게이션 연결
-            .background(
-                NavigationLink(destination: SelectWaypointView(), isActive: $showSelectWaypoint) { EmptyView() }
-                    .hidden()
-            )
-            .background(
-                NavigationLink(destination: RecommendCourseView(), isActive: $showRecommendCourse) { EmptyView() }
-                    .hidden()
-            )
         }
     }
 }
 
 #Preview {
     NavigationStack {
-        StartWalkTabView(isOverlayPresented: .constant(true))
+        StartWalkTabView(
+            isOverlayPresented: .constant(true),
+            onSelectWaypoint: { },
+            onRecommendCourse: { }
+        )
     }
 }
