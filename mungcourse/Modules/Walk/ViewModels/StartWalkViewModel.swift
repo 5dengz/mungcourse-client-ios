@@ -133,26 +133,60 @@ class StartWalkViewModel: ObservableObject {
     
     // MARK: - API 연동
     func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://your.api/v1/walks") else {
+        guard let url = URL(string: "https://api.mungcourse.online/v1/walks") else {
             completion(false)
             return
         }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // TODO: 인증 토큰 필요시 헤더 추가
+        
         let body = session.toAPIDictionary(dogIds: dogIds)
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let _ = error {
-                completion(false)
-                return
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("산책 데이터 JSON 변환 실패: \(error)")
+            completion(false)
+            return
+        }
+        
+        // NetworkManager를 사용하여 API 요청 (자동 토큰 갱신 기능 포함)
+        NetworkManager.shared.performAPIRequest(request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("산책 데이터 업로드 실패: \(error)")
+                    completion(false)
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("산책 데이터 업로드 실패: 응답 없음")
+                    completion(false)
+                    return
+                }
+                
+                if httpResponse.statusCode == 200, let data = data {
+                    do {
+                        // 성공 응답 파싱
+                        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                           let success = json["success"] as? Bool,
+                           success {
+                            print("산책 데이터 업로드 성공: \(json)")
+                            completion(true)
+                        } else {
+                            print("산책 데이터 업로드 실패: 응답 형식 불일치")
+                            completion(false)
+                        }
+                    } catch {
+                        print("산책 데이터 업로드 응답 파싱 실패: \(error)")
+                        completion(false)
+                    }
+                } else {
+                    print("산책 데이터 업로드 실패: 상태 코드 \(httpResponse.statusCode)")
+                    completion(false)
+                }
             }
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                completion(false)
-                return
-            }
-            completion(true)
-        }.resume()
+        }
     }
 }

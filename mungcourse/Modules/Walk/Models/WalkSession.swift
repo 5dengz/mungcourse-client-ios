@@ -63,13 +63,14 @@ class WalkSession {
 extension WalkSession {
     func toAPIDictionary(dogIds: [Int]) -> [String: Any] {
         [
-            "distance_km": distance,
-            "duration_sec": Int(duration),
+            "distanceKm": distance,
+            "durationSec": Int(duration),
             "calories": Int(calories),
-            "started_at": ISO8601DateFormatter().string(from: startTime),
-            "ended_at": ISO8601DateFormatter().string(from: endTime),
-            "dog_ids": dogIds,
-            "gps_data": Array(zip(pathLatitudes, pathLongitudes)).map { ["lat": $0.0, "lng": $0.1] }
+            "startedAt": ISO8601DateFormatter().string(from: startTime),
+            "endedAt": ISO8601DateFormatter().string(from: endTime),
+            "routeRating": 0, // 기본값 0으로 설정
+            "dogIds": dogIds,
+            "gpsData": Array(zip(pathLatitudes, pathLongitudes)).map { ["lat": $0.0, "lng": $0.1] }
         ]
     }
 }
