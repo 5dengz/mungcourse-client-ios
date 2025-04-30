@@ -30,6 +30,7 @@ class WalkTrackingService: NSObject, ObservableObject {
     
     // MARK: - Location Manager Setup
     private func setupLocationManager() {
+        print("[WalkTrackingService] setupLocationManager() 호출")
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 5 // meters
@@ -37,69 +38,63 @@ class WalkTrackingService: NSObject, ObservableObject {
         locationManager.pausesLocationUpdatesAutomatically = false
         requestLocationPermission()
     }
-    
     private func requestLocationPermission() {
+        print("[WalkTrackingService] requestLocationPermission() 호출")
         locationManager.requestAlwaysAuthorization()
     }
     
     // MARK: - Walk Session Management
-    func startWalk() {
-        guard !isTracking else { return }
-        
-        // Clear previous data
+    func startWalk(onPermissionDenied: (() -> Void)? = nil) {
+        let status = locationManager.authorizationStatus
+        print("[WalkTrackingService] startWalk() called, 권한 상태: \(status.rawValue)")
+        guard status == .authorizedAlways || status == .authorizedWhenInUse else {
+            print("[WalkTrackingService] 위치 권한이 없습니다. 안내 필요.")
+            onPermissionDenied?()
+            return
+        }
+        print("[WalkTrackingService] startWalk() - 데이터 초기화 및 위치 추적 시작")
         walkPath.removeAll()
         distance = 0.0
         duration = 0.0
         calories = 0.0
         averageSpeed = 0.0
         lastLocation = nil
-        
-        // Start tracking
         isTracking = true
         startTime = Date()
         locationManager.startUpdatingLocation()
-        
-        // Start timer for duration updates
+        print("[WalkTrackingService] 위치 추적 시작!")
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let startTime = self.startTime else { return }
             self.duration = Date().timeIntervalSince(startTime)
             self.updateAverageSpeed()
         }
     }
-    
     func pauseWalk() {
+        print("[WalkTrackingService] pauseWalk() 호출")
         guard isTracking else { return }
-        
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
         timer = nil
         isTracking = false
     }
-    
     func resumeWalk() {
+        print("[WalkTrackingService] resumeWalk() 호출")
         guard !isTracking, startTime != nil else { return }
-        
         locationManager.startUpdatingLocation()
-        
-        // Resume timer
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let startTime = self.startTime else { return }
             self.duration = Date().timeIntervalSince(startTime)
             self.updateAverageSpeed()
         }
-        
         isTracking = true
     }
-    
     func endWalk() -> WalkSession? {
+        print("[WalkTrackingService] endWalk() 호출")
         guard startTime != nil else { return nil }
-        
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
         timer = nil
         isTracking = false
-        
-        // Create a session record
         let session = WalkSession(
             id: UUID(),
             startTime: startTime!,
@@ -110,51 +105,46 @@ class WalkTrackingService: NSObject, ObservableObject {
             path: walkPath,
             averageSpeed: averageSpeed
         )
-        
-        // Reset tracking state
         startTime = nil
-        
         return session
     }
-    
-    // MARK: - Helper Methods
     private func updateAverageSpeed() {
         if duration > 0 {
             averageSpeed = (distance / duration) * 3600 // Convert to km/h
+            print("[WalkTrackingService] averageSpeed 갱신: \(averageSpeed)")
         }
     }
-    
     private func updateCalories() {
         calories = distance * caloriesPerKmMultiplier
+        print("[WalkTrackingService] calories 갱신: \(calories)")
     }
 }
 
 // MARK: - CLLocationManagerDelegate
 extension WalkTrackingService: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("[WalkTrackingService] didUpdateLocations 호출: \(locations.map { $0.coordinate }) isTracking=\(isTracking)")
         guard let location = locations.last, isTracking else { return }
-        
         currentLocation = location
-        
-        // Add to path
         let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
         walkPath.append(coord)
-        
-        // Update distance if we have a previous location
+        print("[WalkTrackingService] walkPath에 추가된 좌표: \(coord.lat), \(coord.lng)")
         if let lastLocation = lastLocation {
             let distanceInMeters = location.distance(from: lastLocation)
             distance += distanceInMeters / 1000 // Convert to kilometers
+            print("[WalkTrackingService] distance 누적: \(distance)")
             updateCalories() // Update calories based on new distance
         }
-        
         lastLocation = location
     }
-    
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location manager failed with error: \(error)")
+        print("[WalkTrackingService] Location manager failed with error: \(error)")
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .walkLocationError, object: error)
+        }
     }
-    
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        print("[WalkTrackingService] didChangeAuthorization: \(status.rawValue)")
         switch status {
         case .authorizedAlways, .authorizedWhenInUse:
             locationManager.startUpdatingLocation()
@@ -166,4 +156,8 @@ extension WalkTrackingService: CLLocationManagerDelegate {
             break
         }
     }
+}
+
+extension Notification.Name {
+    static let walkLocationError = Notification.Name("walkLocationError")
 }

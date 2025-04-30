@@ -59,3 +59,17 @@ class WalkSession {
         }
     }
 }
+
+extension WalkSession {
+    func toAPIDictionary(dogIds: [Int]) -> [String: Any] {
+        [
+            "distance_km": distance,
+            "duration_sec": Int(duration),
+            "calories": Int(calories),
+            "started_at": ISO8601DateFormatter().string(from: startTime),
+            "ended_at": ISO8601DateFormatter().string(from: endTime),
+            "dog_ids": dogIds,
+            "gps_data": Array(zip(pathLatitudes, pathLongitudes)).map { ["lat": $0.0, "lng": $0.1] }
+        ]
+    }
+}

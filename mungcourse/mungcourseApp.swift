@@ -18,6 +18,7 @@ struct mungcourseApp: App {
 
     
     init() {
+        GlobalLocationManager.shared.startUpdatingLocation() // 앱 시작 시 위치 업데이트 시작
         // Naver Maps Client ID를 Info.plist에서 직접 읽어옵니다.
         guard let naverId = Bundle.main.object(forInfoDictionaryKey: "NMFClientId") as? String, !naverId.isEmpty else {
             fatalError("NMFClientId not found in Info.plist")
