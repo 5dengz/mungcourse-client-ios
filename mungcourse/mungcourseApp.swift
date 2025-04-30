@@ -71,6 +71,7 @@ struct mungcourseApp: App {
                         }
                 }
             }
+            .preferredColorScheme(.light)
         }
     }
 }
