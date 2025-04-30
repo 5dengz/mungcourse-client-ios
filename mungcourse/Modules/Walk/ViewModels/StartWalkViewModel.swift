@@ -134,6 +134,7 @@ class StartWalkViewModel: ObservableObject {
     // MARK: - API 연동
     func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
         guard let url = URL(string: "https://api.mungcourse.online/v1/walks") else {
+            print("❌ 산책 데이터 업로드 실패: 잘못된 URL")
             completion(false)
             return
         }
@@ -143,10 +144,19 @@ class StartWalkViewModel: ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let body = session.toAPIDictionary(dogIds: dogIds)
+        // 요청 본문 Dictionary 출력
+        print("📤 산책 데이터 업로드 요청 Dictionary: \(body)")
+        
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+            let jsonData = try JSONSerialization.data(withJSONObject: body)
+            request.httpBody = jsonData
+            
+            // 요청 본문 JSON 문자열로 출력
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("📤 산책 데이터 요청 본문(JSON): \(jsonString)")
+            }
         } catch {
-            print("산책 데이터 JSON 변환 실패: \(error)")
+            print("❌ 산책 데이터 JSON 변환 실패: \(error)")
             completion(false)
             return
         }
@@ -155,35 +165,57 @@ class StartWalkViewModel: ObservableObject {
         NetworkManager.shared.performAPIRequest(request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
-                    print("산책 데이터 업로드 실패: \(error)")
+                    print("❌ 산책 데이터 업로드 실패: \(error)")
+                    print("❌ 에러 상세: \(error.localizedDescription)")
                     completion(false)
                     return
                 }
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    print("산책 데이터 업로드 실패: 응답 없음")
+                    print("❌ 산책 데이터 업로드 실패: 응답 없음")
                     completion(false)
                     return
                 }
                 
-                if httpResponse.statusCode == 200, let data = data {
-                    do {
-                        // 성공 응답 파싱
-                        if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                           let success = json["success"] as? Bool,
-                           success {
-                            print("산책 데이터 업로드 성공: \(json)")
-                            completion(true)
-                        } else {
-                            print("산책 데이터 업로드 실패: 응답 형식 불일치")
+                // 상태 코드와 함께 응답 헤더 출력
+                print("🔄 응답 상태 코드: \(httpResponse.statusCode)")
+                print("🔄 응답 헤더: \(httpResponse.allHeaderFields)")
+                
+                // 응답 데이터 출력
+                if let data = data {
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("📥 산책 데이터 응답 본문: \(responseString)")
+                    }
+                    
+                    if httpResponse.statusCode == 200 {
+                        do {
+                            // 성공 응답 파싱
+                            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                                print("✅ 산책 데이터 업로드 성공: \(json)")
+                                
+                                if let success = json["success"] as? Bool, success {
+                                    completion(true)
+                                } else {
+                                    print("⚠️ 산책 데이터 업로드 응답 - success 필드가 false 또는 없음")
+                                    completion(false)
+                                }
+                            } else {
+                                print("❌ 산책 데이터 업로드 실패: 응답 형식 불일치")
+                                completion(false)
+                            }
+                        } catch {
+                            print("❌ 산책 데이터 업로드 응답 파싱 실패: \(error)")
                             completion(false)
                         }
-                    } catch {
-                        print("산책 데이터 업로드 응답 파싱 실패: \(error)")
+                    } else {
+                        print("❌ 산책 데이터 업로드 실패: 상태 코드 \(httpResponse.statusCode)")
+                        if let errorString = String(data: data, encoding: .utf8) {
+                            print("❌ 에러 응답: \(errorString)")
+                        }
                         completion(false)
                     }
                 } else {
-                    print("산책 데이터 업로드 실패: 상태 코드 \(httpResponse.statusCode)")
+                    print("❌ 산책 데이터 업로드 실패: 응답 데이터 없음")
                     completion(false)
                 }
             }
