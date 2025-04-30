@@ -30,6 +30,7 @@ struct ContentView: View {
         }
     }
     @State private var selectedTab: Tab = .home
+    @State private var isStartWalkOverlayPresented: Bool = false
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
     private let imageToText: CGFloat = 3
@@ -45,7 +46,8 @@ struct ContentView: View {
                 case .home:
                     HomeView(selectedTab: $selectedTab)
                 case .startWalk:
-                    StartWalkTabView()
+                    HomeView(selectedTab: $selectedTab)
+                        .onAppear { isStartWalkOverlayPresented = true }
                 case .routine:
                     RoutineSettingsView()
                 case .history:
@@ -82,6 +84,11 @@ struct ContentView: View {
                 .frame(height: tabBarHeight)
                 .background(Color.white.ignoresSafeArea(edges: .bottom))
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
+            }
+            if isStartWalkOverlayPresented {
+                StartWalkTabView(isOverlayPresented: $isStartWalkOverlayPresented)
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
     }
