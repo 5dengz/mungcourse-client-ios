@@ -1,0 +1,5 @@
+- always answer in Korean
+- use Sequential Thinking MCP and Knowledge Graph Memory MCP 
+- use XcodeBuild MCP when writing swift code
+- search internet for the latest and most accurate information
+- always refer to official documentation
