@@ -62,12 +62,15 @@ class WalkSession {
 
 extension WalkSession {
     func toAPIDictionary(dogIds: [Int]) -> [String: Any] {
-        [
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        
+        return [
             "distanceKm": distance,
             "durationSec": Int(duration),
             "calories": Int(calories),
-            "startedAt": ISO8601DateFormatter().string(from: startTime),
-            "endedAt": ISO8601DateFormatter().string(from: endTime),
+            "startedAt": dateFormatter.string(from: startTime),
+            "endedAt": dateFormatter.string(from: endTime),
             "routeRating": 0, // 기본값 0으로 설정
             "dogIds": dogIds,
             "gpsData": Array(zip(pathLatitudes, pathLongitudes)).map { ["lat": $0.0, "lng": $0.1] }

@@ -11,6 +11,10 @@ final class NetworkManager {
         if let accessToken = TokenManager.shared.getAccessToken() {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
+        // refreshToken이 있으면 Authorization-Refresh 헤더에 추가
+        if let refreshToken = TokenManager.shared.getRefreshToken() {
+            request.setValue("Bearer \(refreshToken)", forHTTPHeaderField: "Authorization-Refresh")
+        }
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
                 // accessToken 만료, refresh 시도
