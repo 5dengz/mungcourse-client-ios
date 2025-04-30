@@ -40,7 +40,6 @@ struct LoginView: View {
                     text: "카카오 로그인",
                     textColor: .black,
                     backgroundColor: .pointYellow,
-                    cornerRadius: 28,
                     isLoading: viewModel.isLoading,
                     action: { viewModel.loginWithApple() }
                 )
@@ -51,7 +50,6 @@ struct LoginView: View {
                     text: "구글 로그인",
                     textColor: .black,
                     backgroundColor: .white,
-                    cornerRadius: 28,
                     isLoading: viewModel.isLoading,
                     action: { viewModel.loginWithGoogle() }
                 )
@@ -62,7 +60,6 @@ struct LoginView: View {
                     text: "애플 로그인",
                     textColor: .white,
                     backgroundColor: .black,
-                    cornerRadius: 28,
                     isLoading: viewModel.isLoading,
                     action: { viewModel.loginWithApple() }
                 )
