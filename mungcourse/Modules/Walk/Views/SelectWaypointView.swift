@@ -1,12 +1,16 @@
 import SwiftUI
 
 struct SelectWaypointView: View {
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         VStack(spacing: 0) {
             CommonHeaderView(leftIcon: "arrow_back", leftAction: {
-                // TODO: 뒤로 가기 기능 구현
+                dismiss()
             }, title: "경유지 선택")
             CommonSearchView()
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 10)
             // 컨텐츠 영역 placeholder
             ScrollView {
@@ -20,7 +24,7 @@ struct SelectWaypointView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .ignoresSafeArea(edges: .top)
+        .navigationBarHidden(true)
     }
 }
 
