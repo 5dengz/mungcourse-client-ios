@@ -30,6 +30,7 @@ struct ContentView: View {
         }
     }
     @State private var selectedTab: Tab = .home
+    @State private var overlayBackgroundTab: Tab? = nil
     @State private var isStartWalkOverlayPresented: Bool = false
     @State private var showSelectWaypoint: Bool = false
     @State private var showRecommendCourse: Bool = false
@@ -44,10 +45,9 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
-                switch selectedTab {
+                let backgroundTab = overlayBackgroundTab ?? selectedTab
+                switch backgroundTab {
                 case .home:
-                    HomeView(selectedTab: $selectedTab)
-                case .startWalk:
                     HomeView(selectedTab: $selectedTab)
                 case .routine:
                     RoutineSettingsView()
@@ -55,6 +55,8 @@ struct ContentView: View {
                     WalkHistoryView()
                 case .profile:
                     ProfileTabView()
+                case .startWalk:
+                    HomeView(selectedTab: $selectedTab)
                 }
             }
             VStack(spacing: 0) {
@@ -63,9 +65,11 @@ struct ContentView: View {
                     ForEach(Tab.allCases, id: \.self) { tab in
                         Button(action: {
                             if tab == .startWalk {
+                                overlayBackgroundTab = selectedTab
                                 isStartWalkOverlayPresented = true
                             } else {
                                 selectedTab = tab
+                                overlayBackgroundTab = nil
                             }
                         }) {
                             VStack(spacing: 0) {
@@ -120,6 +124,11 @@ struct ContentView: View {
                     showRecommendCourse = false
                     isStartWalkOverlayPresented = true
                 })
+            }
+        }
+        .onChange(of: isStartWalkOverlayPresented) { newValue in
+            if !newValue {
+                overlayBackgroundTab = nil
             }
         }
     }
