@@ -110,10 +110,20 @@ struct ContentView: View {
             }
         }
         .fullScreenCover(isPresented: $showSelectWaypoint) {
-            NavigationStack { SelectWaypointView() }
+            NavigationStack {
+                SelectWaypointView(onBack: {
+                    showSelectWaypoint = false
+                    isStartWalkOverlayPresented = true
+                })
+            }
         }
         .fullScreenCover(isPresented: $showRecommendCourse) {
-            NavigationStack { RecommendCourseView() }
+            NavigationStack {
+                RecommendCourseView(onBack: {
+                    showRecommendCourse = false
+                    isStartWalkOverlayPresented = true
+                })
+            }
         }
         .onChange(of: isStartWalkOverlayPresented) { newValue in
             if newValue == false, let prev = prevTab {

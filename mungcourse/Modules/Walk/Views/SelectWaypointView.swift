@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct SelectWaypointView: View {
-    @Environment(\.dismiss) private var dismiss
+    let onBack: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             CommonHeaderView(leftIcon: "arrow_back", leftAction: {
-                dismiss()
+                onBack()
             }, title: "경유지 선택")
             CommonSearchView()
             // 컨텐츠 영역 placeholder
@@ -26,5 +26,5 @@ struct SelectWaypointView: View {
 }
 
 #Preview {
-    SelectWaypointView()
+    SelectWaypointView(onBack: { })
 } 
