@@ -69,7 +69,7 @@ struct RegisterDogView: View {
                 }
             }
             .navigationBarHidden(true) // Hide the default navigation bar
-            .onChange(of: viewModel.isLoggedIn) { isLoggedIn in
+            .onChange(of: viewModel.isLoggedIn) { _, isLoggedIn in
                 if isLoggedIn {
                     // 로그인 완료 시 화면 닫기
                     dismiss()
