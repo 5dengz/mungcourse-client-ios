@@ -49,12 +49,12 @@
 	<key>BASE_HOST</key>
 	<string>$(BASE_HOST)</string>
 	<key>API_BASE_URL</key>
-	<string>http://$(BASE_HOST)</string>
+	<string>https://$(BASE_HOST)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>52.78.181.100</key>
+			<key>api.mungcourse.online</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>
