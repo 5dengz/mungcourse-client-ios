@@ -9,9 +9,6 @@ struct SelectWaypointView: View {
                 dismiss()
             }, title: "경유지 선택")
             CommonSearchView()
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
             // 컨텐츠 영역 placeholder
             ScrollView {
                 VStack {
