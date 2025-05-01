@@ -65,34 +65,32 @@ struct WalkControlButton: View {
     }
 }
 
-#Preview {
-    Group {
-        WalkControlButton(
-            state: .notStarted,
-            onStart: {},
-            onPause: {},
-            onResume: {},
-            onEnd: {}
-        )
-        .previewDisplayName("Not Started")
-        
-        WalkControlButton(
-            state: .active,
-            onStart: {},
-            onPause: {},
-            onResume: {},
-            onEnd: {}
-        )
-        .previewDisplayName("Active")
-        
-        WalkControlButton(
-            state: .paused,
-            onStart: {},
-            onPause: {},
-            onResume: {},
-            onEnd: {}
-        )
-        .previewDisplayName("Paused")
-    }
-    .previewLayout(.sizeThatFits)
+#Preview("Not Started") {
+    WalkControlButton(
+        state: .notStarted,
+        onStart: {},
+        onPause: {},
+        onResume: {},
+        onEnd: {}
+    )
+}
+
+#Preview("Active") {
+    WalkControlButton(
+        state: .active,
+        onStart: {},
+        onPause: {},
+        onResume: {},
+        onEnd: {}
+    )
+}
+
+#Preview("Paused", traits: .sizeThatFits) {
+    WalkControlButton(
+        state: .paused,
+        onStart: {},
+        onPause: {},
+        onResume: {},
+        onEnd: {}
+    )
 }

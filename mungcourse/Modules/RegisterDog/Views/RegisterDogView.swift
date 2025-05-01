@@ -5,6 +5,7 @@ import SwiftUI
 struct RegisterDogView: View {
     // TODO: Replace LoginViewModel with a dedicated DogViewModel
     @ObservedObject var viewModel: LoginViewModel
+    // TODO: Add @Environment(\.dismiss) var dismiss for back button action
     
     // MARK: - State Variables (Managed by the main view)
     @State private var profileImage: Image? = nil
@@ -25,39 +26,51 @@ struct RegisterDogView: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationStack {
-            // Use the extracted content view
-            RegisterDogContentsView(
-                profileImage: $profileImage,
-                name: $name,
-                gender: $gender,
-                breed: $breed,
-                dateOfBirth: $dateOfBirth,
-                weight: $weight,
-                isNeutered: $isNeutered,
-                hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
-                errorMessage: viewModel.errorMessage // Pass the error message
-                // TODO: Pass any necessary actions (like add another dog)
-            )
-            .navigationTitle("반려견 정보 입력")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("완료") {
-                        registerAction()
-                    }
-                    .font(.custom("Pretendard-Bold", size: 18))
-                    .foregroundColor(isFormValid ? Color("main") : Color("gray500"))
-                    .disabled(!isFormValid || viewModel.isLoading)
+        // NavigationStack might still be needed for the navigation context, 
+        // but header is now custom.
+        NavigationStack { 
+            VStack(spacing: 0) { // Use spacing 0 if header shouldn't have gap below
+                CommonHeaderView(
+                    leftIcon: "arrow_back", // Use the back arrow icon asset
+                    leftAction: { 
+                        // TODO: Implement dismiss action
+                        // dismiss()
+                        print("Back button tapped")
+                    },
+                    title: "반려견 정보 입력"
+                ) { // Right content: The completion button
+                    CommonFilledButton(
+                        title: "완료",
+                        action: registerAction,
+                        isEnabled: isFormValid && !viewModel.isLoading
+                    )
+                    .frame(width: 60) // Adjust width as needed for header button
                 }
-                // TODO: Add back button if needed
+                
+                // The main content area
+                RegisterDogContentsView(
+                    profileImage: $profileImage,
+                    name: $name,
+                    gender: $gender,
+                    breed: $breed,
+                    dateOfBirth: $dateOfBirth,
+                    weight: $weight,
+                    isNeutered: $isNeutered,
+                    hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
+                    errorMessage: viewModel.errorMessage
+                )
+                .padding(.horizontal, 20)
+                // Remove navigation modifiers from here
+                
+                Spacer() // Pushes content up if needed, depending on ScrollView behavior
             }
-            .overlay {
+            .overlay { // Apply overlay to the VStack
                 if viewModel.isLoading {
                     Color.black.opacity(0.1).ignoresSafeArea()
                     ProgressView()
                 }
             }
+            .navigationBarHidden(true) // Hide the default navigation bar
         }
     }
     
@@ -100,5 +113,6 @@ struct RegisterDogView: View {
 
 // MARK: - Preview
 #Preview {
+    // Ensure LoginViewModel provides necessary states for preview
     RegisterDogView(viewModel: LoginViewModel())
 } 
