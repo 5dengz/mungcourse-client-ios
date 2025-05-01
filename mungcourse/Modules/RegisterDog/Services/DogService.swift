@@ -8,13 +8,15 @@ protocol DogServiceProtocol {
 
 final class DogService: DogServiceProtocol {
     static let shared = DogService()
-    private let baseURL = "https://api.mungcourse.online"
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
 
     private init() {}
 
     // GET /v1/dogs
     func fetchDogs() -> AnyPublisher<[Dog], Error> {
-        guard let url = URL(string: "\(baseURL)/v1/dogs") else {
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/dogs") else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
         var request = URLRequest(url: url)
@@ -43,7 +45,7 @@ final class DogService: DogServiceProtocol {
 
     // POST /v1/dogs
     func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error> {
-        guard let url = URL(string: "\(baseURL)/v1/dogs") else {
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/dogs") else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
         var request = URLRequest(url: url)

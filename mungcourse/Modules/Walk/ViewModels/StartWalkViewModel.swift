@@ -132,8 +132,12 @@ class StartWalkViewModel: ObservableObject {
     }
     
     // MARK: - API 연동
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
+    
     func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://api.mungcourse.online/v1/walks") else {
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/walks") else {
             print("❌ 산책 데이터 업로드 실패: 잘못된 URL")
             completion(false)
             return

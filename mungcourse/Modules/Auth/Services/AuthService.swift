@@ -42,6 +42,10 @@ class AuthService: AuthServiceProtocol {
     
     private init() {}
     
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
+    
     // 구글 로그인 메소드
     func loginWithGoogle() -> AnyPublisher<AuthResult, Never> {
         return Future<AuthResult, Never> { promise in
@@ -74,7 +78,7 @@ class AuthService: AuthServiceProtocol {
 
     // 서버로 idToken 전달 (POST /v1/auth/google/login)
     private func sendGoogleTokenToServer(idToken: String, completion: @escaping (AuthResult) -> Void) {
-        guard let url = URL(string: "https://api.mungcourse.online/v1/auth/google/login") else {
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/google/login") else {
             completion(.failure(error: AuthError.unknown))
             return
         }

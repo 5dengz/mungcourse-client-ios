@@ -30,6 +30,10 @@ struct mungcourseApp: App {
             fatalError("GIDClientID not found in Info.plist")
         }
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: googleId)
+
+        // 디버깅: Info.plist에서 API_BASE_URL 값 확인
+        let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String
+        print("[DEBUG] API_BASE_URL 런타임 값:", apiBaseURL ?? "nil")
     }
 
     var body: some Scene {

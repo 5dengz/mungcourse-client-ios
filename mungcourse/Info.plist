@@ -46,5 +46,22 @@
 	<string>산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
+	<key>BASE_HOST</key>
+	<string>$(BASE_HOST)</string>
+	<key>API_BASE_URL</key>
+	<string>http://$(BASE_HOST)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>52.78.181.100</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

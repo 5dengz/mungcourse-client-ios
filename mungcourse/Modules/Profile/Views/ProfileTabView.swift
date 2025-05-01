@@ -26,6 +26,10 @@ class ProfileViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var rawResponse: String? // 추가: 원본 응답 저장
     
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
+    
     func fetchUserInfo() {
         isLoading = true
         errorMessage = nil
@@ -36,7 +40,7 @@ class ProfileViewModel: ObservableObject {
             print("[ProfileViewModel] 토큰 없음")
             return
         }
-        guard let url = URL(string: "https://api.mungcourse.online/v1/auth/me") else {
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/me") else {
             errorMessage = "URL 생성 실패"
             isLoading = false
             print("[ProfileViewModel] URL 생성 실패")
