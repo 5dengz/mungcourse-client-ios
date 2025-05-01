@@ -3,10 +3,10 @@ import Foundation
 struct Dog: Codable, Identifiable {
     let id: Int
     let name: String
-    let age: Int
-    let breed: String
+    let dogImgUrl: String
+    let isMain: Bool
 
     enum CodingKeys: String, CodingKey {
-        case id, name, age, breed
+        case id, name, dogImgUrl, isMain
     }
 } 

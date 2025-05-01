@@ -34,14 +34,46 @@ class LoginViewModel: ObservableObject {
     
     // 로그인 상태 확인 메소드
     func checkLoginStatus() {
-        // 이미 로그인되어 있고 authToken이 있으면 바로 메인으로 이동
-        if isLoggedIn && !authToken.isEmpty {
-            print("이미 로그인 된 상태입니다: 토큰 - \(authToken)")
-        } else {
-            // 로그인이 필요한 상태
+        // Keychain에서 accessToken 조회
+        guard let token = TokenManager.shared.getAccessToken(), !token.isEmpty else {
+            // 로그인 정보 없으면 로그아웃 상태
             isLoggedIn = false
             authToken = ""
+            print("로그인 정보 없음: 재로그인 필요")
+            return
         }
+        // 토큰 만료 여부 검사
+        if isTokenValid(token) {
+            // 유효한 토큰이면 로그인 상태 유지
+            authToken = token
+            isLoggedIn = true
+            print("로그인 유지: 유효한 토큰 - \(token)")
+        } else {
+            // 만료된 토큰은 로그아웃 처리
+            logout()
+            print("토큰 만료: 재로그인 필요")
+        }
+    }
+    
+    // 토큰 만료(exp) 클레임을 확인하는 헬퍼 메소드
+    private func isTokenValid(_ token: String) -> Bool {
+        let segments = token.split(separator: ".")
+        guard segments.count == 3 else { return false }
+        // Base64 페이로드 디코딩 준비
+        var base64 = String(segments[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let remainder = base64.count % 4
+        if remainder > 0 {
+            base64 = base64.padding(toLength: base64.count + 4 - remainder, withPad: "=", startingAt: 0)
+        }
+        // 디코딩 후 JSON 파싱
+        guard let data = Data(base64Encoded: base64),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let exp = json["exp"] as? TimeInterval else {
+            return false
+        }
+        return Date(timeIntervalSince1970: exp) > Date()
     }
     
     // 카카오 로그인 메소드

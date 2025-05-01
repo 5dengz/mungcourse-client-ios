@@ -32,10 +32,27 @@ final class DogService: DogServiceProtocol {
                     promise(.failure(URLError(.badServerResponse)))
                     return
                 }
+
+                // HTTP 404 처리: 반려견 없음으로 간주하고 빈 배열 반환
+                if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 404 {
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("[DogService.fetchDogs] HTTP 404, 반려견 없음: \(jsonString)")
+                    }
+                    promise(.success([]))
+                    return
+                }
+
+                // 서버 응답 JSON 전체 로그 찍기
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("[DogService.fetchDogs] 서버 응답 JSON: \(jsonString)")
+                }
+
                 do {
                     let responseWrapper = try JSONDecoder().decode(DogListResponse.self, from: data)
                     promise(.success(responseWrapper.data))
                 } catch {
+                    // 디코딩 오류 상세 로그
+                    print("[DogService.fetchDogs] 디코딩 오류: \(error)")
                     promise(.failure(error))
                 }
             }
