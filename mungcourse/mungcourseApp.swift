@@ -57,7 +57,7 @@ struct mungcourseApp: App {
 
                 // 로딩 화면을 조건부로 위에 표시
                 if showLoadingScreen {
-                    LoadingView()
+                    SplashView() // LoadingView()를 SplashView()로 변경
                         .transition(.opacity) // 부드러운 전환 효과
                         .zIndex(1) // 항상 위에 오도록 설정
                         .onAppear {

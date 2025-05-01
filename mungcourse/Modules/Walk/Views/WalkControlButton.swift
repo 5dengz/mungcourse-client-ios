@@ -85,7 +85,7 @@ struct WalkControlButton: View {
     )
 }
 
-#Preview("Paused", traits: .sizeThatFits) {
+#Preview("Paused", traits: .sizeThatFitsLayout) {
     WalkControlButton(
         state: .paused,
         onStart: {},

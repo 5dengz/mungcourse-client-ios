@@ -13,24 +13,20 @@
 			</array>
 		</dict>
 	</array>
-
-<key>GIDClientID</key>
-<string>$(GOOGLE_CLIENT_ID)</string>
-<key>REVERSED_CLIENT_ID</key>
-<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
-
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_CLIENT_ID)</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>naversearchapp</string>
 		<string>naversearchthirdlogin</string>
 		<string>google</string>
 	</array>
-
 	<key>NMFClientId</key>
 	<string>$(NAVER_MAPS_CLIENT_ID)</string>
 	<key>NMFClientSecret</key>
 	<string>$(NAVER_MAPS_CLIENT_SECRET)</string>
-
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
@@ -38,26 +34,17 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
-		<key>UIBackgroundModes</key>
+	<key>UIAppFonts</key>
 	<array>
-		<string>remote-notification</string>
-		<string>location</string>
+		<string>Pretendard-SemiBold.otf</string>
+		<string>Pretendard-Bold.otf</string>
+		<string>Pretendard-Regular.otf</string>
 	</array>
-	<key>UILaunchScreen</key>
-	<dict/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>산책 경로를 추적하고 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>산책 경로를 추적하고 배경에서도 지도에 표시하기 위해 위치 정보가 필요합니다.</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>naversearchapp</string>
-		<string>naversearchthirdlogin</string>
-		<string>google</string>
-	</array>
-
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
-
 </dict>
 </plist>
