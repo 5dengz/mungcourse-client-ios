@@ -4,6 +4,7 @@ import Combine
 struct LoginView: View {
     // ViewModel 사용
     @StateObject private var viewModel = LoginViewModel()
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         VStack {
@@ -40,7 +41,7 @@ struct LoginView: View {
                     textColor: .black,
                     backgroundColor: .pointYellow,
                     isLoading: viewModel.isLoading,
-                    action: { viewModel.loginWithApple() }
+                    action: { viewModel.loginWithKakao() }
                 )
                 
                 // 구글 로그인 버튼
@@ -70,6 +71,25 @@ struct LoginView: View {
         .background(Color.gray100)
         .fullScreenCover(isPresented: $viewModel.needsDogRegistration) {
             RegisterDogView(viewModel: viewModel)
+        }
+        .onChange(of: viewModel.isLoggedIn) { newValue in
+            if newValue {
+                // 로그인 성공 시 메인 화면으로 이동하는 로직
+                print("로그인 성공: 메인 화면으로 이동")
+            }
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                // 앱이 활성화될 때 로그인 상태 확인
+                viewModel.checkLoginStatus()
+            }
+        }
+        .alert(item: $viewModel.errorMessage) { errorMsg in
+            Alert(
+                title: Text("로그인 오류"),
+                message: Text(errorMsg),
+                dismissButton: .default(Text("확인"))
+            )
         }
     }
 }

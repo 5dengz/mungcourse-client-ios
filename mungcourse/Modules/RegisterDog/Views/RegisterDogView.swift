@@ -5,7 +5,7 @@ import SwiftUI
 struct RegisterDogView: View {
     // TODO: Replace LoginViewModel with a dedicated DogViewModel
     @ObservedObject var viewModel: LoginViewModel
-    // TODO: Add @Environment(\.dismiss) var dismiss for back button action
+    @Environment(\.dismiss) private var dismiss
     
     // MARK: - State Variables (Managed by the main view)
     @State private var profileImage: Image? = nil
@@ -33,9 +33,7 @@ struct RegisterDogView: View {
                 CommonHeaderView(
                     leftIcon: "arrow_back", // Use the back arrow icon asset
                     leftAction: { 
-                        // TODO: Implement dismiss action
-                        // dismiss()
-                        print("Back button tapped")
+                        dismiss()
                     },
                     title: "반려견 정보 입력"
                 ) { // Right content: The completion button
@@ -57,7 +55,7 @@ struct RegisterDogView: View {
                     weight: $weight,
                     isNeutered: $isNeutered,
                     hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
-                    errorMessage: viewModel.errorMessage
+                    errorMessage: viewModel.errorMessage?.message
                 )
                 .padding(.horizontal, 20)
                 // Remove navigation modifiers from here
@@ -71,6 +69,12 @@ struct RegisterDogView: View {
                 }
             }
             .navigationBarHidden(true) // Hide the default navigation bar
+            .onChange(of: viewModel.isLoggedIn) { isLoggedIn in
+                if isLoggedIn {
+                    // 로그인 완료 시 화면 닫기
+                    dismiss()
+                }
+            }
         }
     }
     
@@ -82,32 +86,21 @@ struct RegisterDogView: View {
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
         guard let weightDouble = Double(weight) else {
-            viewModel.errorMessage = "유효한 몸무게를 입력해주세요."
+            viewModel.errorMessage = IdentifiableError(message: "유효한 몸무게를 입력해주세요.")
             return
         }
         guard let selectedGender = gender else {
-            viewModel.errorMessage = "성별을 선택해주세요."
+            viewModel.errorMessage = IdentifiableError(message: "성별을 선택해주세요.")
             return
         }
         
-        // TODO: Update ViewModel function call signature
+        // TODO: Calculate age from date of birth
+        let calendar = Calendar.current
+        let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: Date())
+        let age = ageComponents.year ?? 0
         
-        // --- Placeholder Call (Remove when ViewModel is updated) ---
-        print("Registering Dog:")
-        print("- Name: \(name)")
-        print("- Gender: \(selectedGender.rawValue)")
-        print("- Breed: \(breed)")
-        print("- DOB: \(dateOfBirth)")
-        print("- Weight: \(weightDouble)")
-        print("- Neutered: \(isNeutered != nil ? String(describing: isNeutered!) : "N/A")")
-        print("- Surgery: \(hasPatellarLuxationSurgery != nil ? String(describing: hasPatellarLuxationSurgery!) : "N/A")")
-        
-        viewModel.isLoading = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            viewModel.isLoading = false
-            viewModel.errorMessage = Bool.random() ? nil : "서버 오류로 등록에 실패했습니다."
-        }
-        // --- End Placeholder ---
+        // 반려견 등록 호출
+        viewModel.registerDog(name: name, age: age, breed: breed)
     }
 }
 
