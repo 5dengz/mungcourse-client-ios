@@ -126,7 +126,7 @@ struct ContentView: View {
                 })
             }
         }
-        .onChange(of: isStartWalkOverlayPresented) { newValue in
+        .onChange(of: isStartWalkOverlayPresented) { _, newValue in
             if !newValue {
                 overlayBackgroundTab = nil
             }

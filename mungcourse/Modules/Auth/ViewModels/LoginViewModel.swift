@@ -13,10 +13,17 @@ class LoginViewModel: ObservableObject {
     
     // 앱 스토리지 (UserDefaults 래퍼) - 뷰에서 주입받음
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    // AppStorage for token; will set after dog registration or if dogs exist
     @AppStorage("authToken") private var authToken: String = ""
+    // Temporarily hold auth token until dog registration
+    private var pendingAuthToken: String? = nil
+    @Published var needsDogRegistration: Bool = false
     
-    init(authService: AuthServiceProtocol = AuthService.shared) {
+    private let dogService: DogServiceProtocol
+    
+    init(authService: AuthServiceProtocol = AuthService.shared, dogService: DogServiceProtocol = DogService.shared) {
         self.authService = authService
+        self.dogService = dogService
     }
     
     // 구글 로그인 메소드
@@ -35,9 +42,9 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    // 인증 정보 저장
-                    self.authToken = token
-                    self.isLoggedIn = true
+                    // 토큰을 임시 저장하고 등록된 반려견 조회
+                    self.pendingAuthToken = token
+                    self.checkDogs()
                 case .failure(let error):
                     // 에러 메시지 설정
                     self.errorMessage = error.localizedDescription
@@ -62,13 +69,60 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    // 인증 정보 저장
-                    self.authToken = token
-                    self.isLoggedIn = true
+                    // 토큰을 임시 저장하고 등록된 반려견 조회
+                    self.pendingAuthToken = token
+                    self.checkDogs()
                 case .failure(let error):
                     // 에러 메시지 설정
                     self.errorMessage = error.localizedDescription
                 }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func checkDogs() {
+        isLoading = true
+        dogService.fetchDogs()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                self.isLoading = false
+                if case .failure(let error) = completion {
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] dogs in
+                guard let self = self else { return }
+                if dogs.isEmpty {
+                    self.needsDogRegistration = true
+                } else if let token = self.pendingAuthToken {
+                    // 반려견이 이미 등록되어 있으면 로그인 완료 및 토큰 저장
+                    self.authToken = token
+                    self.isLoggedIn = true
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    // 반려견 등록 메소드
+    func registerDog(name: String, age: Int, breed: String) {
+        isLoading = true
+        errorMessage = nil
+        dogService.registerDog(name: name, age: age, breed: breed)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                self.isLoading = false
+                if case .failure(let error) = completion {
+                    self.errorMessage = error.localizedDescription
+                }
+            } receiveValue: { [weak self] dog in
+                guard let self = self else { return }
+                // 등록 성공 시 토큰 저장 및 로그인 완료
+                if let token = self.pendingAuthToken {
+                    self.authToken = token
+                }
+                self.needsDogRegistration = false
+                self.isLoggedIn = true
             }
             .store(in: &cancellables)
     }
