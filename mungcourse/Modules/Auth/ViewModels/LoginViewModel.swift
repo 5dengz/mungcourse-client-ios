@@ -35,12 +35,10 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    print("구글 로그인 성공: \(token)")
                     // 인증 정보 저장
                     self.authToken = token
                     self.isLoggedIn = true
                 case .failure(let error):
-                    print("구글 로그인 실패: \(error.localizedDescription)")
                     // 에러 메시지 설정
                     self.errorMessage = error.localizedDescription
                 }
@@ -64,12 +62,10 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    print("애플 로그인 성공: \(token)")
                     // 인증 정보 저장
                     self.authToken = token
                     self.isLoggedIn = true
                 case .failure(let error):
-                    print("애플 로그인 실패: \(error.localizedDescription)")
                     // 에러 메시지 설정
                     self.errorMessage = error.localizedDescription
                 }

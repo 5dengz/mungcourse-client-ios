@@ -2,6 +2,8 @@
 #
 # gitignore 파일 작성
 #
+.cursor/
+
 ## Build generated
 build/
 DerivedData/

@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: false
----
-- when note timestamp id (YYYYMMDDHHmmss.md) format is attached, use obsidian MCP to search for that note, and record current chat contents  to the note
