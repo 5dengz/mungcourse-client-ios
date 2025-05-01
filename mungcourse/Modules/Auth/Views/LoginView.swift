@@ -12,12 +12,11 @@ struct LoginView: View {
             // 안내 문구
             VStack(spacing: 8) {
                 Text("멍코스와 함께\n산책을 시작하세요!")
-                    .font(Font.custom("Pretendard", size: 24))
-                    .fontWeight(.semibold)
+                    .font(Font.custom("Pretendard-SemiBold", size: 24))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                 Text("안전 코스 추천부터 산책 기록까지")
-                    .font(Font.custom("Pretendard-Medium", size: 16))
+                    .font(Font.custom("Pretendard-Regular", size: 16))
                     .foregroundColor(Color("gray600"))
                     .multilineTextAlignment(.center)
             }

@@ -16,6 +16,7 @@ struct SplashView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 119, height: 93)
+                    .shadow(color: Color.black.opacity(0.18), radius: 16, x: 0, y: 8)
                     .overlay(alignment: .bottom) {
                         ZStack {
                             Image("ellipse_small")
