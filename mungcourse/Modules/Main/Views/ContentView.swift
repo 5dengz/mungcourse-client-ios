@@ -29,36 +29,53 @@ struct ContentView: View {
             }
         }
     }
+
     @State private var selectedTab: Tab = .home
     @State private var overlayBackgroundTab: Tab? = nil
-    @State private var isStartWalkOverlayPresented: Bool = false
-    @State private var showSelectWaypoint: Bool = false
-    @State private var showRecommendCourse: Bool = false
+    @State private var isStartWalkOverlayPresented = false
+    @State private var showSelectWaypoint = false
+    @State private var showRecommendCourse = false
+    @State private var showingDogSelection = false
+    @State private var dogName: String = ""
+    @State private var availableDogs: [String] = []
+
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
     private let imageToText: CGFloat = 3
     private let textToSafeArea: CGFloat = 1
+    private let tabFontSize: CGFloat = 12
     private var tabBarHeight: CGFloat {
         imageToBorder + imageHeight + imageToText + tabFontSize + textToSafeArea
     }
-    private let tabFontSize: CGFloat = 12
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
                 let backgroundTab = overlayBackgroundTab ?? selectedTab
                 switch backgroundTab {
                 case .home:
-                    HomeView(selectedTab: $selectedTab)
+                    HomeView(
+                        selectedTab: $selectedTab,
+                        showingDogSelection: $showingDogSelection,
+                        dogName: $dogName,
+                        availableDogs: availableDogs
+                    )
+                case .startWalk:
+                    HomeView(
+                        selectedTab: $selectedTab,
+                        showingDogSelection: $showingDogSelection,
+                        dogName: $dogName,
+                        availableDogs: availableDogs
+                    )
                 case .routine:
                     RoutineSettingsView()
                 case .history:
                     WalkHistoryView()
                 case .profile:
                     ProfileTabView()
-                case .startWalk:
-                    HomeView(selectedTab: $selectedTab)
                 }
             }
+
             VStack(spacing: 0) {
                 Spacer()
                 HStack {
@@ -79,11 +96,15 @@ struct ContentView: View {
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
                                     .frame(height: imageHeight)
-                                    .foregroundColor(selectedTab == tab ? Color("main") : Color("gray400"))
+                                    .foregroundColor(
+                                        selectedTab == tab ? Color("main") : Color("gray400")
+                                    )
                                 Spacer().frame(height: imageToText)
                                 Text(tab.title)
                                     .font(.custom("Pretendard", size: tabFontSize))
-                                    .foregroundColor(selectedTab == tab ? Color("main") : Color("gray400"))
+                                    .foregroundColor(
+                                        selectedTab == tab ? Color("main") : Color("gray400")
+                                    )
                                 Spacer().frame(height: textToSafeArea)
                             }
                             .frame(maxWidth: .infinity)
@@ -94,6 +115,7 @@ struct ContentView: View {
                 .background(Color.white.ignoresSafeArea(edges: .bottom))
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
             }
+
             if isStartWalkOverlayPresented {
                 StartWalkTabView(
                     isOverlayPresented: $isStartWalkOverlayPresented,
@@ -106,8 +128,25 @@ struct ContentView: View {
                         isStartWalkOverlayPresented = false
                     }
                 )
-                    .transition(.opacity)
-                    .zIndex(1)
+                .transition(.opacity)
+                .zIndex(1)
+            }
+
+            if showingDogSelection {
+                ZStack(alignment: .bottom) {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture { showingDogSelection = false }
+                        .transition(.opacity)
+                    DogSelectionSheet(
+                        isPresented: $showingDogSelection,
+                        selectedDog: $dogName,
+                        dogs: availableDogs
+                    )
+                    .transition(.move(edge: .bottom))
+                }
+                .animation(.easeInOut, value: showingDogSelection)
+                .zIndex(1)
             }
         }
         .fullScreenCover(isPresented: $showSelectWaypoint) {
@@ -126,11 +165,5 @@ struct ContentView: View {
                 })
             }
         }
-        .onChange(of: isStartWalkOverlayPresented) { _, newValue in
-            if !newValue {
-                overlayBackgroundTab = nil
-            }
-        }
     }
 }
-
