@@ -7,6 +7,8 @@ struct RegisterDogView: View {
     // LoginViewModel 대신 RegisterDogViewModel 사용
     @StateObject private var viewModel = RegisterDogViewModel()
     @Environment(\.dismiss) private var dismiss
+    // 뒤로가기 버튼 노출 여부
+    var showBackButton: Bool = true
     
     // MARK: - State Variables (Managed by the main view)
     @State private var profileImage: Image? = nil
@@ -33,10 +35,8 @@ struct RegisterDogView: View {
         NavigationStack { 
             VStack(spacing: 0) { // Use spacing 0 if header shouldn't have gap below
                 CommonHeaderView(
-                    leftIcon: "arrow_back", // Use the back arrow icon asset
-                    leftAction: { 
-                        dismiss()
-                    },
+                    leftIcon: showBackButton ? "arrow_back" : nil, // 조건부 노출
+                    leftAction: showBackButton ? { dismiss() } : nil, // 조건부 노출
                     title: "반려견 정보 입력"
                 )
                 

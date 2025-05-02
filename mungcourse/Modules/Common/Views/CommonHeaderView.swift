@@ -2,13 +2,13 @@ import SwiftUI
 
 // 새로 만든 공통 헤더 컴포넌트
 struct CommonHeaderView<RightContent: View>: View {
-    let leftIcon: String
-    let leftAction: (() -> Void)?
+    var leftIcon: String?
+    var leftAction: (() -> Void)?
     let title: String
     let rightContent: () -> RightContent
 
     // 기본 생성자: 오른쪽 컨텐츠가 없는 경우 EmptyView 사용
-    init(leftIcon: String,
+    init(leftIcon: String?,
          leftAction: (() -> Void)? = nil,
          title: String,
          @ViewBuilder rightContent: @escaping () -> RightContent) {
@@ -21,7 +21,7 @@ struct CommonHeaderView<RightContent: View>: View {
 
 // 오른쪽 컨텐츠가 필요 없을 때 사용가능하도록 EmptyView 전용 이니셜라이저 제공
 extension CommonHeaderView where RightContent == EmptyView {
-    init(leftIcon: String,
+    init(leftIcon: String?,
          leftAction: (() -> Void)? = nil,
          title: String) {
         self.init(leftIcon: leftIcon,
@@ -37,7 +37,7 @@ extension CommonHeaderView {
         ZStack(alignment: .center) {
             HStack {
                 Button(action: { leftAction?() }) {
-                    Image(leftIcon)
+                    Image(leftIcon ?? "")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)

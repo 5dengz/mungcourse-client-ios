@@ -1,4 +1,6 @@
 import SwiftUI
+import Foundation
+import Combine
 
 struct SplashView: View {
     @State private var animateSmall = false
@@ -6,6 +8,9 @@ struct SplashView: View {
     @State private var animateLarge = false
     @State private var shouldShowLogin = false
     @State private var shouldShowMain = false
+    @State private var shouldShowRegisterDog = false
+    @State private var splashStartTime: Date? = nil
+    @State private var isNavigated = false
 
     var body: some View {
         ZStack {
@@ -46,6 +51,7 @@ struct SplashView: View {
                 .offset(y: -93/2 - 70) // 이미지 높이/2 + 여백(70)
         }
         .onAppear {
+            splashStartTime = Date()
             animateSequence()
             checkTokenAndNavigate()
         }
@@ -54,6 +60,9 @@ struct SplashView: View {
         }
         .fullScreenCover(isPresented: $shouldShowMain) {
             ContentView()
+        }
+        .fullScreenCover(isPresented: $shouldShowRegisterDog) {
+            RegisterDogView(showBackButton: false)
         }
     }
 
@@ -92,16 +101,103 @@ struct SplashView: View {
         }
     }
 
-    private func checkTokenAndNavigate() {
-        // 토큰 유효성 검사 (간단 버전, 실제 앱에서는 네트워크 검증도 추가 가능)
-        if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
-            if isTokenValid(token) {
-                shouldShowMain = true
-            } else {
-                shouldShowLogin = true
+    private func showAfterMinimumSplash(_ action: @escaping () -> Void) {
+        let minDuration: TimeInterval = 2.0
+        let elapsed = Date().timeIntervalSince(splashStartTime ?? Date())
+        if elapsed >= minDuration {
+            if !isNavigated {
+                isNavigated = true
+                action()
             }
         } else {
-            shouldShowLogin = true
+            let delay = minDuration - elapsed
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                if !isNavigated {
+                    isNavigated = true
+                    action()
+                }
+            }
+        }
+    }
+
+    private func resetCovers() {
+        shouldShowLogin = false
+        shouldShowMain = false
+        shouldShowRegisterDog = false
+    }
+
+    private func checkTokenAndNavigate() {
+        if let token = TokenManager.shared.getAccessToken(), !token.isEmpty, isTokenValid(token) {
+            // 로그인 되어 있으면 강아지 검사
+            fetchDogsAndNavigate()
+        } else {
+            showAfterMinimumSplash {
+                resetCovers()
+                shouldShowLogin = true
+            }
+        }
+    }
+
+    private func fetchDogsAndNavigate() {
+        guard let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
+              let url = URL(string: "\(apiBaseURL)/v1/dogs") else {
+            showAfterMinimumSplash {
+                resetCovers()
+                shouldShowRegisterDog = true
+            }
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        if let accessToken = TokenManager.shared.getAccessToken() {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        }
+        NetworkManager.shared.performAPIRequest(request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("[SplashView] 강아지 목록 조회 에러: \(error.localizedDescription)")
+                    showAfterMinimumSplash {
+                        resetCovers()
+                        shouldShowRegisterDog = true
+                    }
+                    return
+                }
+                guard let data = data, let httpResponse = response as? HTTPURLResponse else {
+                    showAfterMinimumSplash {
+                        resetCovers()
+                        shouldShowRegisterDog = true
+                    }
+                    return
+                }
+                print("[SplashView] 강아지 목록 응답 원본: \(String(data: data, encoding: .utf8) ?? "데이터 디코딩 실패")")
+                if httpResponse.statusCode == 200 {
+                    do {
+                        let response = try JSONDecoder().decode(DogListResponse.self, from: data)
+                        if response.data.isEmpty {
+                            showAfterMinimumSplash {
+                                resetCovers()
+                                shouldShowRegisterDog = true
+                            }
+                        } else {
+                            showAfterMinimumSplash {
+                                resetCovers()
+                                shouldShowMain = true
+                            }
+                        }
+                    } catch {
+                        print("[SplashView] 강아지 목록 디코딩 에러: \(error.localizedDescription)")
+                        showAfterMinimumSplash {
+                            resetCovers()
+                            shouldShowRegisterDog = true
+                        }
+                    }
+                } else {
+                    showAfterMinimumSplash {
+                        resetCovers()
+                        shouldShowRegisterDog = true
+                    }
+                }
+            }
         }
     }
 
@@ -121,6 +217,11 @@ struct SplashView: View {
             return false
         }
         return Date(timeIntervalSince1970: exp) > Date()
+    }
+
+    // DogListResponse만 남기고 Dog 구조체는 삭제
+    struct DogListResponse: Decodable {
+        let data: [Dog]
     }
 }
 
