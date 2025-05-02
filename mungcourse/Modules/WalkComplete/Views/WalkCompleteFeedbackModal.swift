@@ -2,7 +2,7 @@ import SwiftUI
 
 struct WalkCompleteFeedbackModal: View {
     @Binding var isPresented: Bool
-    @State private var selected: Int = 0
+    @Binding var selectedRating: Int
     var onComplete: (() -> Void)? = nil
     
     var body: some View {
@@ -17,10 +17,10 @@ struct WalkCompleteFeedbackModal: View {
             }
             HStack(spacing: 18) {
                 ForEach(1...5, id: \.self) { idx in
-                    Image(selected >= idx ? "star_filled" : "star_empty")
+                    Image(selectedRating >= idx ? "star_filled" : "star_empty")
                         .resizable()
                         .frame(width: 32, height: 32)
-                        .onTapGesture { selected = idx }
+                        .onTapGesture { selectedRating = idx }
                 }
             }
             CommonFilledButton(title: "완료", action: {
@@ -41,5 +41,8 @@ struct WalkCompleteFeedbackModal: View {
 }
 
 #Preview {
-    WalkCompleteFeedbackModal(isPresented: .constant(true))
+    WalkCompleteFeedbackModal(
+        isPresented: .constant(true),
+        selectedRating: .constant(3)
+    )
 }
