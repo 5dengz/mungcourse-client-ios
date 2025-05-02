@@ -115,9 +115,9 @@ class RegisterDogViewModel: ObservableObject {
                 }
                 
                 // 2. 반려견 정보 등록
-                let isoFormatter = ISO8601DateFormatter()
-                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                let postedAtString = isoFormatter.string(from: Date())
+                let postedAtFormatter = DateFormatter()
+                postedAtFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                let postedAtString = postedAtFormatter.string(from: Date())
                 
                 let dogData = DogRegistrationData(
                     name: name,
