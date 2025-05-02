@@ -19,7 +19,7 @@ struct ProfileImageView: View {
                             .scaledToFill()
                             .clipShape(Circle())
                     } else {
-                        Image(systemName: "photo.fill") // Placeholder icon
+                        Image("profile_empty") // Placeholder icon
                             .resizable()
                             .scaledToFit()
                             .frame(width: 60)
@@ -35,7 +35,7 @@ struct ProfileImageView: View {
                     Circle()
                         .fill(Color("gray600")) // Use asset color
                         .frame(width: 34, height: 34)
-                    Image(systemName: "camera.fill")
+                    Image("icon_camera")
                         .foregroundColor(.white)
                         .font(.system(size: 16))
                 }

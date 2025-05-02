@@ -14,6 +14,9 @@ struct RegisterDogContentsView: View {
     
     // Passed value
     let errorMessage: String?
+    let isFormValid: Bool
+    let isLoading: Bool
+    var registerAction: () -> Void
     
     // TODO: Define actions passed from the parent if needed
     // var addAnotherDogAction: () -> Void
@@ -49,9 +52,15 @@ struct RegisterDogContentsView: View {
                 .font(.custom("Pretendard-Regular", size: 14))
                 .foregroundColor(Color("gray700"))
                 .padding(.top, 10)
+                
+                CommonFilledButton(
+                    title: "완료",
+                    action: registerAction,
+                    isEnabled: isFormValid && !isLoading
+                )
+                .padding(.top, 12)
 
                 Spacer() // Keep spacer if needed within the scroll content
-
             }
             .padding(.horizontal) 
             .padding(.bottom)
@@ -81,6 +90,9 @@ struct RegisterDogContentsView: View {
 //         weight: $weight,
 //         isNeutered: $isNeutered,
 //         hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
-//         errorMessage: errorMessage
+//         errorMessage: errorMessage,
+//         isFormValid: true,
+//         isLoading: false,
+//         registerAction: {}
 //     )
 // } 

@@ -36,14 +36,7 @@ struct RegisterDogView: View {
                         dismiss()
                     },
                     title: "반려견 정보 입력"
-                ) { // Right content: The completion button
-                    CommonFilledButton(
-                        title: "완료",
-                        action: registerAction,
-                        isEnabled: isFormValid && !viewModel.isLoading
-                    )
-                    .frame(width: 60) // Adjust width as needed for header button
-                }
+                )
                 
                 // The main content area
                 RegisterDogContentsView(
@@ -55,7 +48,10 @@ struct RegisterDogView: View {
                     weight: $weight,
                     isNeutered: $isNeutered,
                     hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
-                    errorMessage: viewModel.errorMessage?.message
+                    errorMessage: viewModel.errorMessage?.message,
+                    isFormValid: isFormValid,
+                    isLoading: viewModel.isLoading,
+                    registerAction: registerAction
                 )
                 .padding(.horizontal, 20)
                 // Remove navigation modifiers from here

@@ -48,7 +48,7 @@ extension CommonHeaderView {
             .padding(.horizontal, 20)
 
             Text(title)
-                .font(.headline)
+                .font(Font.custom("Pretendard-SemiBold", size: 20))
                 .frame(maxWidth: .infinity)
                 .multilineTextAlignment(.center)
                 .allowsHitTesting(false)
