@@ -104,12 +104,25 @@ struct ProfileTabView: View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
                 // 헤더
-                ProfileHeaderView(
-                    onBack: { /* 뒤로가기 액션 */ },
-                    onSwitchProfile: { showingDogSelection = true },
-                    onSettings: { /* 설정 액션 */ }
-                )
-                .padding(.top, 8)
+                CommonHeaderView(
+                    leftIcon: "chevron.left",
+                    leftAction: { /* 뒤로가기 액션 */ },
+                    title: "프로필"
+                ) {
+                    HStack(spacing: 16) {
+                        Button(action: { showingDogSelection = true }) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.title2)
+                                .foregroundColor(.black)
+                        }
+                        Button(action: { /* 설정 액션 */ }) {
+                            Image(systemName: "gearshape")
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+                .padding(.top, 16)
                 .padding(.bottom, 16)
                 // 프로필 영역
                 ProfileSectionView(
