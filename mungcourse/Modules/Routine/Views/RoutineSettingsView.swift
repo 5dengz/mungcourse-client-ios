@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // 루틴 모델
 struct Routine: Identifiable {
@@ -28,6 +29,19 @@ enum DayOfWeek: String, CaseIterable, Identifiable {
     case sunday = "일"
     
     var id: String { self.rawValue }
+    
+    // API용 요일 문자열
+    var apiValue: String {
+        switch self {
+        case .monday: return "MON"
+        case .tuesday: return "TUE"
+        case .wednesday: return "WED"
+        case .thursday: return "THU"
+        case .friday: return "FRI"
+        case .saturday: return "SAT"
+        case .sunday: return "SUN"
+        }
+    }
 }
 
 // 루틴 뷰모델
@@ -35,38 +49,79 @@ class RoutineViewModel: ObservableObject {
     @Published var routines: [Routine] = []
     @Published var selectedDay: DayOfWeek = .monday
     @Published var showAddRoutine: Bool = false
-    @Published var newRoutineTitle: String = ""
-    @Published var newRoutineTime: String = "알림 없음"
+    
+    private var cancellables = Set<AnyCancellable>()
     
     init() {
-        loadSampleData()
+        fetchRoutines(for: selectedDay)
+        $selectedDay
+            .sink { [weak self] day in
+                self?.fetchRoutines(for: day)
+            }
+            .store(in: &cancellables)
     }
     
-    // 샘플 데이터 로드 (실제로는 데이터베이스나 UserDefaults에서 로드할 수 있음)
-    private func loadSampleData() {
-        routines = [
-            Routine(title: "아침 산책", time: "오전 8시 30분", isDone: true, days: [.monday, .tuesday, .wednesday, .thursday, .friday]),
-            Routine(title: "점심 사료주기", time: "알림 없음", isDone: false, days: [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]),
-            Routine(title: "저녁 산책", time: "오후 8시", isDone: false, days: [.monday, .tuesday, .wednesday, .thursday, .friday])
-        ]
+    /// 특정 요일의 루틴을 API로 가져옵니다.
+    private func fetchRoutines(for day: DayOfWeek) {
+        let dateStr = dateString(for: day)
+        RoutineService.shared.fetchRoutines(date: dateStr)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error fetching routines: \(error.localizedDescription)")
+                }
+            }, receiveValue: { [weak self] dataList in
+                self?.routines = dataList.map {
+                    Routine(title: $0.name, time: $0.alarmTime, isDone: $0.isCompleted, days: [day])
+                }
+            })
+            .store(in: &cancellables)
     }
     
-    // 선택된 요일에 해당하는 루틴들만 필터링
+    /// DayOfWeek를 기반으로 yyyy-MM-dd 형식의 날짜 문자열을 생성합니다.
+    private func dateString(for day: DayOfWeek) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.firstWeekday = 2
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else {
+            return ""
+        }
+        let dates = (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
+        if let index = DayOfWeek.allCases.firstIndex(of: day), index < dates.count {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.locale = Locale(identifier: "ko_KR")
+            return formatter.string(from: dates[index])
+        }
+        return ""
+    }
+    
+    // 선택된 요일에 해당하는 루틴들만 필터링 (fetch에서 이미 필터링됨)
     func filteredRoutines() -> [Routine] {
-        return routines.filter { $0.days.contains(selectedDay) }
+        routines.filter { $0.days.contains(selectedDay) }
     }
     
-    // 루틴 완료 상태 토글
+    // 루틴 완료 상태 토글 (로컬 반영)
     func toggleRoutineCompletion(routine: Routine) {
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {
             routines[index].isDone.toggle()
         }
     }
     
-    // 새 루틴 추가
+    // 새 루틴 등록 (API 호출)
     func addRoutine(title: String, time: String, days: Set<DayOfWeek>) {
-        let newRoutine = Routine(title: title, time: time, days: days)
-        routines.append(newRoutine)
+        let repeatDays = days.map { $0.apiValue }
+        let request = CreateRoutineRequest(name: title, alarmTime: time, repeatDays: repeatDays)
+        RoutineService.shared.createRoutine(requestBody: request)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error creating routine: \(error.localizedDescription)")
+                }
+            }, receiveValue: { [weak self] _ in
+                // 등록 후 현재 선택된 요일의 루틴 목록 리프레시
+                self?.fetchRoutines(for: self?.selectedDay ?? .monday)
+            })
+            .store(in: &cancellables)
     }
     
     // 오늘 날짜 포맷
