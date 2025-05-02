@@ -1,5 +1,6 @@
 import SwiftUI
 // TODO: PhotosUI import for image picker functionality
+import PhotosUI // Already added, but good practice to ensure
 // TODO: Create a dedicated DogViewModel instead of using LoginViewModel
 
 struct RegisterDogView: View {
@@ -9,6 +10,7 @@ struct RegisterDogView: View {
     
     // MARK: - State Variables (Managed by the main view)
     @State private var profileImage: Image? = nil
+    @State private var selectedImageData: Data? = nil // State for selected image data
     @State private var name: String = ""
     @State private var gender: Gender? = nil
     @State private var breed: String = ""
@@ -41,6 +43,7 @@ struct RegisterDogView: View {
                 // The main content area
                 RegisterDogContentsView(
                     profileImage: $profileImage,
+                    selectedImageData: $selectedImageData,
                     name: $name,
                     gender: $gender,
                     breed: $breed,
@@ -90,13 +93,27 @@ struct RegisterDogView: View {
             return
         }
         
-        // TODO: Calculate age from date of birth
-        let calendar = Calendar.current
-        let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: Date())
-        let age = ageComponents.year ?? 0
-        
-        // 반려견 등록 호출
-        viewModel.registerDog(name: name, age: age, breed: breed)
+        // Format birthDate to "yyyy-MM-dd"
+        let birthDateFormatter = DateFormatter()
+        birthDateFormatter.dateFormat = "yyyy-MM-dd"
+        let birthDateString = birthDateFormatter.string(from: dateOfBirth)
+
+        // Convert optional Bools to non-optional (assuming false if nil for API)
+        let neuteredStatus = isNeutered ?? false
+        let arthritisStatus = hasPatellarLuxationSurgery ?? false
+
+        // TODO: Replace with actual ViewModel call
+        // Call the new ViewModel function
+        viewModel.registerDogWithImage(
+            name: name, 
+            gender: selectedGender.rawValue, 
+            breed: breed, 
+            birthDate: birthDateString, 
+            weight: weightDouble, 
+            neutered: neuteredStatus, 
+            hasArthritis: arthritisStatus, 
+            imageData: selectedImageData
+        )
     }
 }
 

@@ -1,11 +1,13 @@
 import SwiftUI
+import PhotosUI // Import PhotosUI
 
 // MARK: - Reusable Subviews (Helper Components)
 
 struct ProfileImageView: View {
     @Binding var image: Image?
-    // TODO: Add logic to present image picker
-    
+    @Binding var selectedImageData: Data? // Add binding for image data
+    @State private var selectedItem: PhotosPickerItem? = nil // State for the picker item
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Circle()
@@ -17,6 +19,7 @@ struct ProfileImageView: View {
                         img
                             .resizable()
                             .scaledToFill()
+                            .frame(width: 127, height: 127) // Ensure frame is applied
                             .clipShape(Circle())
                     } else {
                         Image("profile_empty") // Placeholder icon
@@ -26,10 +29,13 @@ struct ProfileImageView: View {
                     }
                 }
 
-            Button {
-                // TODO: Add action to show image picker
-                print("Select image tapped")
-            } label: {
+            // Integrate PhotosPicker with the existing button's appearance
+            PhotosPicker(
+                selection: $selectedItem,
+                matching: .images, // Only allow images
+                photoLibrary: .shared() // Use the shared photo library
+            ) {
+                // Use the existing button label content
                 ZStack {
                     Circle()
                         .fill(Color("gray600")) // Use asset color
@@ -37,6 +43,18 @@ struct ProfileImageView: View {
                     Image("icon_camera")
                         .foregroundColor(.white)
                         .font(.system(size: 16))
+                }
+            }
+            // Add task modifier to handle selection change
+            .onChange(of: selectedItem) { _, newItem in
+                Task {
+                    // Retrieve image data
+                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                        selectedImageData = data // Update the bound data
+                        if let uiImage = UIImage(data: data) {
+                            image = Image(uiImage: uiImage) // Update the preview image
+                        }
+                    }
                 }
             }
         }
@@ -48,9 +66,10 @@ struct ProfileImageView: View {
     // Define @State variable correctly within the Preview scope
     struct PreviewWrapper: View {
         @State var previewImage: Image? = nil // Or provide a default image like Image(systemName: "pawprint.fill")
-        
+        @State var imageData: Data? = nil // Add state for data in preview
+
         var body: some View {
-            ProfileImageView(image: $previewImage)
+            ProfileImageView(image: $previewImage, selectedImageData: $imageData) // Pass the data binding
                 .padding()
         }
     }

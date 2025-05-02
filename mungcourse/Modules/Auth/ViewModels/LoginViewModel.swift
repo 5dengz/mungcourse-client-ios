@@ -2,6 +2,19 @@ import Foundation
 import Combine
 import SwiftUI
 
+// Dog Registration Data Structure (matches API request body)
+struct DogRegistrationData: Encodable {
+    let name: String
+    let gender: String
+    let breed: String
+    let birthDate: String // "yyyy-MM-dd"
+    let weight: Double
+    let postedAt: String // ISO8601 format
+    let hasArthritis: Bool // Mapped from hasPatellarLuxationSurgery
+    let neutered: Bool
+    var dogImgUrl: String? // Optional image URL
+}
+
 // 에러 메시지를 Identifiable로 만들기 위한 구조체
 struct IdentifiableError: Identifiable {
     let id = UUID()
@@ -208,6 +221,78 @@ class LoginViewModel: ObservableObject {
                 print("반려견 등록 완료: 메인 화면으로 이동")
             }
             .store(in: &cancellables)
+    }
+    
+    // 새로운 반려견 등록 메소드 (이미지 포함)
+    func registerDogWithImage(name: String, gender: String, breed: String, birthDate: String, weight: Double, neutered: Bool, hasArthritis: Bool, imageData: Data?) {
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                var finalImageUrl: String? = nil
+                
+                // 1. Upload Image if provided
+                if let data = imageData {
+                    // Generate a unique filename (e.g., using UUID)
+                    let fileName = UUID().uuidString
+                    // Determine file extension (e.g., ".jpg") - requires more robust handling
+                    let fileExtension = ".jpg"
+                    
+                    print("Requesting S3 pre-signed URL for \(fileName)(\(fileExtension)")
+                    // Call service to get pre-signed URL
+                    let s3Info = try await dogService.getS3PresignedUrl(fileName: fileName, fileExtension: fileExtension)
+                    print("Received pre-signed URL: \(s3Info.preSignedUrl)")
+                    
+                    print("Uploading image to S3...")
+                    // Call service to upload image data
+                    try await dogService.uploadImageToS3(presignedUrl: s3Info.preSignedUrl, imageData: data)
+                    print("Image uploaded successfully. Final URL: \(s3Info.imageUrl)")
+                    finalImageUrl = s3Info.imageUrl
+                }
+                
+                // 2. Register Dog Information
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds] // Match "2025-05-02T02:47:50.015Z"
+                let postedAtString = isoFormatter.string(from: Date())
+                
+                let dogData = DogRegistrationData(
+                    name: name,
+                    gender: gender,
+                    breed: breed,
+                    birthDate: birthDate, // Already formatted in View
+                    weight: weight,
+                    postedAt: postedAtString,
+                    hasArthritis: hasArthritis,
+                    neutered: neutered,
+                    dogImgUrl: finalImageUrl
+                )
+                
+                print("Registering dog information...")
+                let registeredDog = try await dogService.registerDogWithDetails(dogData: dogData)
+                print("Dog registered successfully: \(registeredDog)")
+                
+                // 3. Finalize Login
+                await MainActor.run {
+                    if let token = self.pendingAuthToken {
+                        self.authToken = token
+                        print("Auth token saved.")
+                    }
+                    self.needsDogRegistration = false
+                    self.isLoggedIn = true
+                    self.isLoading = false
+                    print("Registration complete. Logged in.")
+                }
+                
+            } catch {
+                // Handle errors from any step
+                print("Error during dog registration: \(error)")
+                await MainActor.run {
+                    self.errorMessage = IdentifiableError(message: "반려견 등록 중 오류가 발생했습니다: \(error.localizedDescription)")
+                    self.isLoading = false
+                }
+            }
+        }
     }
     
     // 로그아웃 메소드

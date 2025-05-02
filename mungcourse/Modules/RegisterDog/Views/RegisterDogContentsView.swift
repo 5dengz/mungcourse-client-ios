@@ -4,6 +4,7 @@ import SwiftUI
 struct RegisterDogContentsView: View {
     // Bindings to the state variables in the parent view
     @Binding var profileImage: Image?
+    @Binding var selectedImageData: Data?
     @Binding var name: String
     @Binding var gender: RegisterDogView.Gender?
     @Binding var breed: String
@@ -24,7 +25,7 @@ struct RegisterDogContentsView: View {
     var body: some View {
         ScrollView { 
             VStack(spacing: 24) {
-                ProfileImageView(image: $profileImage)
+                ProfileImageView(image: $profileImage, selectedImageData: $selectedImageData)
 
                 VStack(spacing: 35) { 
                     RequiredTextField(title: "이름", placeholder: "입력하기", text: $name)
