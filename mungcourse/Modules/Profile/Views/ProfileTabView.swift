@@ -95,32 +95,51 @@ class ProfileViewModel: ObservableObject {
 }
 
 struct ProfileTabView: View {
+    @EnvironmentObject var dogVM: DogViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
+    @State private var showingDogSelection: Bool = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            // 헤더
-            ProfileHeaderView(
-                onBack: { /* 뒤로가기 액션 */ },
-                onSwitchProfile: { /* 프로필 전환 액션 */ },
-                onSettings: { /* 설정 액션 */ }
-            )
-            .padding(.top, 8)
-            .padding(.bottom, 16)
-            // 프로필 영역
-            ProfileSectionView(
-                nickname: viewModel.userInfo?.nickname,
-                profileImageUrl: viewModel.userInfo?.profileImageUrl,
-                onEdit: { /* 프로필 편집 액션 */ }
-            )
-            .padding(.bottom, 24)
-            // 탭 선택자
-            ProfileTabSelectorView(selectedTab: $selectedTab)
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                // 헤더
+                ProfileHeaderView(
+                    onBack: { /* 뒤로가기 액션 */ },
+                    onSwitchProfile: { showingDogSelection = true },
+                    onSettings: { /* 설정 액션 */ }
+                )
+                .padding(.top, 8)
+                .padding(.bottom, 16)
+                // 프로필 영역
+                ProfileSectionView(
+                    nickname: dogVM.mainDog?.name,
+                    profileImageUrl: dogVM.mainDog?.dogImgUrl,
+                    onEdit: { /* 프로필 편집 액션 */ }
+                )
                 .padding(.bottom, 24)
-            // 정보 영역
-            ProfileInfoSectionView(selectedTab: selectedTab)
-            Spacer()
+                // 탭 선택자
+                ProfileTabSelectorView(selectedTab: $selectedTab)
+                    .padding(.bottom, 24)
+                // 정보 영역
+                ProfileInfoSectionView(selectedTab: selectedTab)
+                Spacer()
+            }
+            // DogSelectionSheet 오버레이
+            if showingDogSelection {
+                ZStack(alignment: .bottom) {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture { showingDogSelection = false }
+                    DogSelectionSheet(
+                        isPresented: $showingDogSelection,
+                        selectedDog: $dogVM.selectedDogName,
+                        dogs: dogVM.dogNames
+                    )
+                }
+                .animation(.easeInOut, value: showingDogSelection)
+                .zIndex(1)
+            }
         }
         .onAppear {
             viewModel.fetchUserInfo()
