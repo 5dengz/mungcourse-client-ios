@@ -18,46 +18,6 @@ struct Routine: Identifiable {
     }
 }
 
-// 요일 열거형
-enum DayOfWeek: String, CaseIterable, Identifiable {
-    case monday = "월"
-    case tuesday = "화"
-    case wednesday = "수"
-    case thursday = "목"
-    case friday = "금"
-    case saturday = "토"
-    case sunday = "일"
-    
-    var id: String { self.rawValue }
-    
-    // 오늘에 해당하는 DayOfWeek
-    static var today: DayOfWeek {
-        let weekday = Calendar.current.component(.weekday, from: Date())
-        switch weekday {
-        case 2: return .monday
-        case 3: return .tuesday
-        case 4: return .wednesday
-        case 5: return .thursday
-        case 6: return .friday
-        case 7: return .saturday
-        default: return .sunday
-        }
-    }
-    
-    // API용 요일 문자열
-    var apiValue: String {
-        switch self {
-        case .monday: return "MON"
-        case .tuesday: return "TUE"
-        case .wednesday: return "WED"
-        case .thursday: return "THU"
-        case .friday: return "FRI"
-        case .saturday: return "SAT"
-        case .sunday: return "SUN"
-        }
-    }
-}
-
 // 루틴 뷰모델
 class RoutineViewModel: ObservableObject {
     @Published var routines: [Routine] = []
@@ -207,7 +167,7 @@ struct RoutineSettingsView: View {
             }
         }
         .sheet(isPresented: $viewModel.showAddRoutine) {
-            AddRoutineView(viewModel: viewModel)
+            AddRoutineView()
         }
     }
 }

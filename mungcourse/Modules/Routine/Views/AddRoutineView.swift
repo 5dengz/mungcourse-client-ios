@@ -1,57 +1,108 @@
 import SwiftUI
 
-// 루틴 추가 시트
 struct AddRoutineView: View {
-    @ObservedObject var viewModel: RoutineViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var title: String = ""
-    @State private var time: String = "알림 없음"
     @State private var selectedDays: Set<DayOfWeek> = []
+    @State private var isAM: Bool = true
+    @State private var hour: Int = 8
+    @State private var minute: Int = 0
+    @State private var isAlarmOn: Bool = false
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("루틴 정보")) {
-                    TextField("루틴 이름", text: $title)
-                    
-                    // 실제 구현에서는 DatePicker 등을 사용할 수 있음
-                    TextField("알림 시간", text: $time)
+        VStack(spacing: 0) {
+            CommonHeaderView(
+                leftIcon: "arrow_back",
+                leftAction: { presentationMode.wrappedValue.dismiss() },
+                title: "루틴 추가"
+            )
+            .padding(.bottom, 12)
+            .padding(.top, 8)
+            
+            VStack(spacing: 28) {
+                RequiredTextField(title: "루틴명", placeholder: "입력하기", text: $title)
+                    .padding(.horizontal, 20)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("반복 설정")
+                        .font(.custom("Pretendard-SemiBold", size: 16))
+                        .foregroundColor(Color("gray900"))
+                        .padding(.leading, 20)
+                    HStack(spacing: 16) {
+                        ForEach(DayOfWeek.allCases, id: \.self) { day in
+                            Circle()
+                                .fill(selectedDays.contains(day) ? Color("main") : Color("gray200"))
+                                .frame(width: 36, height: 36)
+                                .overlay(
+                                    Text(day.shortKor)
+                                        .font(.custom("Pretendard-Bold", size: 14))
+                                        .foregroundColor(selectedDays.contains(day) ? .white : Color("gray700"))
+                                )
+                                .onTapGesture {
+                                    if selectedDays.contains(day) {
+                                        selectedDays.remove(day)
+                                    } else {
+                                        selectedDays.insert(day)
+                                    }
+                                }
+                        }
+                    }
+                    .padding(.horizontal, 20)
                 }
                 
-                Section(header: Text("반복 요일")) {
-                    ForEach(DayOfWeek.allCases) { day in
-                        HStack {
-                            Text(day.rawValue + "요일")
-                            Spacer()
-                            if selectedDays.contains(day) {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.blue)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("루틴 시간")
+                        .font(.custom("Pretendard-SemiBold", size: 16))
+                        .foregroundColor(Color("gray900"))
+                        .padding(.leading, 20)
+                    HStack(spacing: 0) {
+                        Picker("오전/오후", selection: $isAM) {
+                            Text("오전").tag(true)
+                            Text("오후").tag(false)
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(width: 100)
+                        
+                        Picker("시", selection: $hour) {
+                            ForEach(1...12, id: \.self) { h in
+                                Text("\(h)시").tag(h)
                             }
                         }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            if selectedDays.contains(day) {
-                                selectedDays.remove(day)
-                            } else {
-                                selectedDays.insert(day)
+                        .frame(width: 80)
+                        .tint(Color("main"))
+                        
+                        Picker("분", selection: $minute) {
+                            ForEach(0..<60, id: \.self) { m in
+                                Text(String(format: "%02d분", m)).tag(m)
                             }
                         }
+                        .frame(width: 80)
+                        .tint(Color("main"))
                     }
+                    .padding(.horizontal, 20)
                 }
+                
+                HStack {
+                    Text("알림 설정")
+                        .font(.custom("Pretendard-SemiBold", size: 16))
+                        .foregroundColor(Color("gray900"))
+                    Spacer()
+                    Toggle("", isOn: $isAlarmOn)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 20)
             }
-            .navigationTitle("새 루틴 추가")
-            .navigationBarItems(
-                leading: Button("취소") {
-                    presentationMode.wrappedValue.dismiss()
-                },
-                trailing: Button("저장") {
-                    if !title.isEmpty && !selectedDays.isEmpty {
-                        viewModel.addRoutine(title: title, time: time, days: selectedDays)
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-                .disabled(title.isEmpty || selectedDays.isEmpty)
-            )
+            .padding(.vertical, 24)
+            .padding(.horizontal, 20)
+            
+            Spacer()
+            
+            CommonFilledButton(title: "홈으로 이동", action: {
+                // 홈 이동 액션 구현 필요
+                presentationMode.wrappedValue.dismiss()
+            })
+            .padding(.horizontal, 20)
+            .padding(.bottom, 24)
         }
     }
-} 
+}
