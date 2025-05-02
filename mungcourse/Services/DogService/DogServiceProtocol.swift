@@ -30,6 +30,28 @@ struct DogDataResponse: Codable {
     let data: Dog
 }
 
+// Service 전용 API 응답 래퍼
+struct ServiceAPIResponse<T: Decodable>: Decodable {
+    let statusCode: Int
+    let message: String
+    let data: T
+    let timestamp: String
+    let success: Bool
+}
+
+// 반려견 등록 전용 응답 모델 (서버가 id 없이 반환하는 필드에 맞춤)
+struct DogRegistrationResponseData: Decodable {
+    let name: String
+    let gender: String
+    let breed: String
+    let birthDate: String
+    let weight: Double
+    let postedAt: String
+    let hasArthritis: Bool
+    let neutered: Bool
+    let dogImgUrl: String?
+    let isMain: Bool
+}
 
 protocol DogServiceProtocol {
     // --- 기존 함수 시그니처 (Publisher 방식 예시) ---
@@ -38,7 +60,7 @@ protocol DogServiceProtocol {
     func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error> // 이 함수는 registerDogWithDetails로 대체될 수 있음
 
     // --- 새로 추가할 비동기 함수 시그니처 ---
-    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse
-    func uploadImageToS3(presignedUrl: String, imageData: Data) async throws
-    func registerDogWithDetails(dogData: DogRegistrationData) async throws -> Dog
+    func getS3PresignedUrl(fileName: String, fileExtension: String, contentType: String) async throws -> S3PresignedUrlFullResponse
+    func uploadImageToS3(presignedUrl: String, imageData: Data, contentType: String) async throws
+    func registerDogWithDetails(dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
 }

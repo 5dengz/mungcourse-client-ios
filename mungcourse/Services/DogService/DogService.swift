@@ -131,7 +131,7 @@ class DogService: DogServiceProtocol {
     
     // MARK: - Async/Await 기반 구현
 
-    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse {
+    func getS3PresignedUrl(fileName: String, fileExtension: String, contentType: String) async throws -> S3PresignedUrlFullResponse {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -145,9 +145,9 @@ class DogService: DogServiceProtocol {
 
         // fileExtension에서 앞에 점(.)이 있으면 제거
         let cleanExtension = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
-        let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension]
+        let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension, "contentType": contentType]
         do {
-            request.httpBody = try JSONEncoder().encode(requestBody)
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
             print("➡️ Requesting S3 URL: \(endpoint) with token: \(authToken.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
         } catch {
             print("❌ Error encoding S3 URL request body: \(error)")
@@ -178,17 +178,16 @@ class DogService: DogServiceProtocol {
         }
     }
 
-    func uploadImageToS3(presignedUrl: String, imageData: Data) async throws {
+    func uploadImageToS3(presignedUrl: String, imageData: Data, contentType: String) async throws {
         guard let url = URL(string: presignedUrl) else {
              print("❌ Error: Invalid pre-signed URL string: \(presignedUrl)")
             throw NetworkError.invalidURL
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT"
-        // Determine Content-Type dynamically or assume JPEG/PNG
-        // For more robustness, inspect imageData's first few bytes
-        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type") // Or "image/png"
+        request.httpMethod = "POST"  // S3 프리사인드 POST 방식 사용
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
 
         print("⬆️ Uploading image (\(imageData.count) bytes) to S3: \(url.absoluteString.prefix(60))...")
 
@@ -200,17 +199,14 @@ class DogService: DogServiceProtocol {
         }
 
         // S3 PUT success is typically 200 OK
-        guard httpResponse.statusCode == 200 else {
+        guard (200...299).contains(httpResponse.statusCode) else {
              print("❌ Error: S3 Upload failed with status: \(httpResponse.statusCode)")
-             // Attempt to read error body from S3 (often XML)
-             // let (errorData, _) = try await URLSession.shared.data(from: url) // This might not be correct, S3 response might be empty on error
-             // print("   S3 Error Body (if any): \(String(data: errorData, encoding: .utf8) ?? "")")
             throw NetworkError.s3UploadFailed(statusCode: httpResponse.statusCode)
         }
         print("✅ Image uploaded successfully to S3.")
     }
 
-    func registerDogWithDetails(dogData: DogRegistrationData) async throws -> Dog {
+    func registerDogWithDetails(dogData: DogRegistrationData) async throws -> DogRegistrationResponseData {
         let endpoint = baseURL.appendingPathComponent("/v1/dogs")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -247,15 +243,16 @@ class DogService: DogServiceProtocol {
             throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
 
+        // 1) JSON 래퍼를 먼저 파싱
         do {
             let decoder = JSONDecoder()
-            // Handle potential snake_case keys from server
-            // decoder.keyDecodingStrategy = .convertFromSnakeCase
-            let registeredDog = try decoder.decode(Dog.self, from: data)
-            print("✅ Dog registered successfully: \(registeredDog.name) (ID: \(registeredDog.id))")
-            return registeredDog
+            // decoder.keyDecodingStrategy = .convertFromSnakeCase // 필요시 사용
+            let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
+            let registeredData = apiResponse.data
+            print("✅ Dog registered successfully: \(registeredData.name)")
+            return registeredData
         } catch {
-             print("❌ Error decoding dog registration response: \(error). Data: \(String(data: data, encoding: .utf8) ?? "Invalid data")")
+            print("❌ Error decoding dog registration response: \(error). Data: \(String(data: data, encoding: .utf8) ?? "Invalid data")")
             throw NetworkError.decodingError(error)
         }
     }
