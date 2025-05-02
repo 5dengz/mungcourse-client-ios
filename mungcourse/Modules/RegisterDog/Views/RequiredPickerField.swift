@@ -1,11 +1,12 @@
 import SwiftUI
+import Foundation
 
 struct RequiredPickerField: View {
     let title: String
     let placeholder: String
-    @Binding var selection: String // Replace with appropriate type if using a real Picker
+    @Binding var selection: String
+    @State private var isShowingPicker = false
     
-    // TODO: Implement actual Picker functionality (e.g., navigate to a selection list)
     var body: some View {
         InputFieldContainer(title: title) {
             HStack {
@@ -13,14 +14,42 @@ struct RequiredPickerField: View {
                     .font(.custom("Pretendard-Regular", size: 14))
                     .foregroundColor(selection.isEmpty ? Color("gray500") : Color("black"))
                 Spacer()
-                Image("icon_search") // Changed from system icon to custom icon
+                Image("icon_search")
                     .foregroundColor(Color("gray500"))
             }
             .inputBoxStyle()
-            .contentShape(Rectangle()) // Make HStack tappable
+            .contentShape(Rectangle())
             .onTapGesture {
-                // TODO: Show picker view/options
-                print("\(title) picker tapped")
+                isShowingPicker = true
+            }
+            .sheet(isPresented: $isShowingPicker) {
+                NavigationView {
+                    List(DogBreeds.all, id: \.self) { breed in
+                        Button(action: {
+                            selection = breed
+                            isShowingPicker = false
+                        }) {
+                            HStack {
+                                Text(breed)
+                                    .foregroundColor(.black)
+                                if selection == breed {
+                                    Spacer()
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(Color("main"))
+                                }
+                            }
+                        }
+                    }
+                    .navigationTitle(title)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("닫기") {
+                                isShowingPicker = false
+                            }
+                        }
+                    }
+                }
             }
         }
     }
