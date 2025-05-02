@@ -18,6 +18,7 @@ struct AddRoutineView: View {
             )
             .padding(.bottom, 12)
             .padding(.top, 8)
+            .padding(.horizontal, 20)
             
             VStack(spacing: 28) {
                 RequiredTextField(title: "루틴명", placeholder: "입력하기", text: $title)
@@ -62,7 +63,9 @@ struct AddRoutineView: View {
                         }
                         .pickerStyle(.segmented)
                         .frame(width: 100)
-                        
+
+                        Spacer()
+
                         Picker("시", selection: $hour) {
                             ForEach(1...12, id: \.self) { h in
                                 Text("\(h)시").tag(h)
@@ -70,7 +73,9 @@ struct AddRoutineView: View {
                         }
                         .frame(width: 80)
                         .tint(Color("main"))
-                        
+
+                        Spacer()
+
                         Picker("분", selection: $minute) {
                             ForEach(0..<60, id: \.self) { m in
                                 Text(String(format: "%02d분", m)).tag(m)
@@ -79,6 +84,7 @@ struct AddRoutineView: View {
                         .frame(width: 80)
                         .tint(Color("main"))
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
                 }
                 
@@ -96,13 +102,6 @@ struct AddRoutineView: View {
             .padding(.horizontal, 20)
             
             Spacer()
-            
-            CommonFilledButton(title: "홈으로 이동", action: {
-                // 홈 이동 액션 구현 필요
-                presentationMode.wrappedValue.dismiss()
-            })
-            .padding(.horizontal, 20)
-            .padding(.bottom, 24)
         }
     }
 }

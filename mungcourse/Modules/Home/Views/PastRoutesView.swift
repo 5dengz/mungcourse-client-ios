@@ -14,7 +14,7 @@ struct PastRoutesView: View { // <- 이름 변경
                 }
                 .font(.custom("Pretendard-Regular", size: 14)) // 더보기 버튼 폰트 크기 조절
                 .fontWeight(.light)
-                .foregroundColor(.gray)
+                .foregroundColor(.gray800)
             }
             .padding(.bottom, 5)
 
