@@ -32,7 +32,7 @@ struct NearbyTrailsView: View {
                         ForEach(viewModel.dogPlaces) { place in
                             TrailItemView(
                                 trailName: place.name,
-                                distance: String(format: "%.1fkm", place.distance / 1000),
+                                distance: String(format: "%.1fkm", place    .distance / 1000),
                                 imageName: place.dogPlaceImgUrl ?? "",
                                 roundTripTime: place.openingHours ?? "",
                                 category: place.category

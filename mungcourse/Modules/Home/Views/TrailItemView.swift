@@ -6,7 +6,7 @@ struct TrailItemView: View {
     let trailName: String
     let distance: String
     let imageName: String // 이미지 이름 또는 URL
-    let roundTripTime: String // 왕복 시간 추가 (예: "약 30분") -> 사용되지 않으므로 제거 고려
+    let roundTripTime: String // 왕복 시간 (NearbyTrailsView에서 openingHours 사용 중)
     let category: String // 카테고리 파라미터 추가
 
     var body: some View {
@@ -30,6 +30,12 @@ struct TrailItemView: View {
                                 .foregroundColor(.white)
                                 .font(.largeTitle)
                         )
+                }
+
+                // 왕복 시간 뷰 복원
+                if !roundTripTime.isEmpty { // 시간이 비어있지 않을 때만 표시
+                    RoundTripTimeView(timeString: roundTripTime)
+                        .padding(8)
                 }
             }
 
@@ -70,7 +76,7 @@ struct TrailItemView: View {
 }
 
 #Preview {
-    // category 파라미터 추가 및 roundTripTime 제거 (또는 더미값 유지)
-    TrailItemView(trailName: "샘플 산책로 이름", distance: "1.5km", imageName: "", roundTripTime: "", category: "공원")
+    // roundTripTime 파라미터 복원
+    TrailItemView(trailName: "샘플 산책로 이름", distance: "1.5km", imageName: "", roundTripTime: "약 45분", category: "공원")
         .padding()
 }
