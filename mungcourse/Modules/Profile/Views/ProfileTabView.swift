@@ -20,6 +20,14 @@ struct APIResponse<T: Codable>: Codable {
     let success: Bool
 }
 
+struct ErrorResponse: Codable {
+    let statusCode: Int
+    let message: String
+    let error: String?
+    let success: Bool
+    let timestamp: String
+}
+
 class ProfileViewModel: ObservableObject {
     @Published var userInfo: UserInfo?
     @Published var isLoading = false
@@ -48,9 +56,7 @@ class ProfileViewModel: ObservableObject {
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue(refreshToken, forHTTPHeaderField: "Authorization-Refresh")
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        NetworkManager.shared.performAPIRequest(request) { data, response, error in
             DispatchQueue.main.async {
                 self.isLoading = false
                 if let error = error {
@@ -58,24 +64,33 @@ class ProfileViewModel: ObservableObject {
                     print("[ProfileViewModel] 네트워크 에러: \(error.localizedDescription)")
                     return
                 }
-                guard let data = data else {
+                guard let data = data, let httpResponse = response as? HTTPURLResponse else {
                     self.errorMessage = "데이터 없음"
                     print("[ProfileViewModel] 데이터 없음")
                     return
                 }
                 print("[ProfileViewModel] 응답 데이터: \(String(data: data, encoding: .utf8) ?? "데이터 디코딩 실패")")
                 do {
-                    let decoder = JSONDecoder()
-                    let response = try decoder.decode(APIResponse<UserInfo>.self, from: data)
-                    self.userInfo = response.data
-                    print("[ProfileViewModel] 유저 정보 파싱 성공: \(response.data)")
-                    self.rawResponse = String(data: data, encoding: .utf8)
+                    if (200...299).contains(httpResponse.statusCode) {
+                        let response = try JSONDecoder().decode(APIResponse<UserInfo>.self, from: data)
+                        self.userInfo = response.data
+                        print("[ProfileViewModel] 유저 정보 파싱 성공: \(response.data)")
+                        self.rawResponse = String(data: data, encoding: .utf8)
+                    } else {
+                        let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
+                        self.errorMessage = errorResponse.message
+                        print("[ProfileViewModel] 에러 응답 파싱: \(errorResponse)")
+                        self.rawResponse = String(data: data, encoding: .utf8)
+                    }
+                } catch let decodingError as DecodingError {
+                    print("[ProfileViewModel] 디코딩 에러: \(decodingError)")
+                    self.errorMessage = "데이터 파싱 실패: \(decodingError.localizedDescription)"
                 } catch {
                     self.errorMessage = error.localizedDescription
-                    print("[ProfileViewModel] 디코딩 에러: \(error.localizedDescription)")
+                    print("[ProfileViewModel] 알 수 없는 에러: \(error.localizedDescription)")
                 }
             }
-        }.resume()
+        }
     }
 }
 
