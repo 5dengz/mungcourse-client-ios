@@ -11,7 +11,7 @@ struct InputFieldContainer<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 13) {
             Text(title)
                 .font(.custom("Pretendard-SemiBold", size: 16))
                 .foregroundColor(Color("gray800")) // Use asset color

@@ -26,7 +26,7 @@ struct RegisterDogContentsView: View {
             VStack(spacing: 24) {
                 ProfileImageView(image: $profileImage)
 
-                VStack(spacing: 16) { 
+                VStack(spacing: 24) { 
                     RequiredTextField(title: "이름", placeholder: "입력하기", text: $name)
                     // Use fully qualified enum type name here
                     RequiredSegmentedPicker(title: "성별", selection: $gender, options: RegisterDogView.Gender.allCases)
@@ -51,48 +51,18 @@ struct RegisterDogContentsView: View {
                 }
                 .font(.custom("Pretendard-Regular", size: 14))
                 .foregroundColor(Color("gray700"))
-                .padding(.top, 10)
+                .padding(.top, 29)
                 
                 CommonFilledButton(
                     title: "완료",
                     action: registerAction,
                     isEnabled: isFormValid && !isLoading
                 )
-                .padding(.top, 12)
+                .padding(.top, 0)
 
                 Spacer() // Keep spacer if needed within the scroll content
             }
-            .padding(.horizontal) 
             .padding(.bottom)
         }
     }
 }
-
-// TODO: Add Preview for RegisterDogContentsView if possible (needs mock bindings)
-// #Preview {
-//     // Need to provide mock bindings for preview
-//     @State var profileImage: Image? = nil
-//     @State var name: String = ""
-//     @State var gender: RegisterDogView.Gender? = .female
-//     @State var breed: String = "푸들"
-//     @State var dateOfBirth: Date = Date()
-//     @State var weight: String = "5.5"
-//     @State var isNeutered: Bool? = true
-//     @State var hasPatellarLuxationSurgery: Bool? = false
-//     let errorMessage: String? = "미리보기 에러 메시지"
-//     
-//     return RegisterDogContentsView(
-//         profileImage: $profileImage,
-//         name: $name,
-//         gender: $gender,
-//         breed: $breed,
-//         dateOfBirth: $dateOfBirth,
-//         weight: $weight,
-//         isNeutered: $isNeutered,
-//         hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
-//         errorMessage: errorMessage,
-//         isFormValid: true,
-//         isLoading: false,
-//         registerAction: {}
-//     )
-// } 

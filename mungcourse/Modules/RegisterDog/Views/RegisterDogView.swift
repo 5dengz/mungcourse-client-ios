@@ -102,6 +102,5 @@ struct RegisterDogView: View {
 
 // MARK: - Preview
 #Preview {
-    // Ensure LoginViewModel provides necessary states for preview
     RegisterDogView(viewModel: LoginViewModel())
 } 
