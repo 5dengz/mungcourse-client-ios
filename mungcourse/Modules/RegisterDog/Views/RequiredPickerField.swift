@@ -13,7 +13,7 @@ struct RequiredPickerField: View {
                     .font(.custom("Pretendard-Regular", size: 14))
                     .foregroundColor(selection.isEmpty ? Color("gray500") : Color("black"))
                 Spacer()
-                Image(systemName: "chevron.down") // Or chevron.right if navigating
+                Image("icon_search") // Changed from system icon to custom icon
                     .foregroundColor(Color("gray500"))
             }
             .inputBoxStyle()

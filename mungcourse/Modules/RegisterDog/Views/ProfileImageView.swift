@@ -22,8 +22,7 @@ struct ProfileImageView: View {
                         Image("profile_empty") // Placeholder icon
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 60)
-                            .foregroundColor(Color("gray400"))
+                            .frame(width: 127, height: 127)
                     }
                 }
 
@@ -40,7 +39,6 @@ struct ProfileImageView: View {
                         .font(.system(size: 16))
                 }
             }
-            .offset(x: 5, y: 5) // Adjust offset slightly
         }
         .padding(.vertical) // Add some vertical padding
     }

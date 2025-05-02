@@ -26,7 +26,7 @@ struct RegisterDogContentsView: View {
             VStack(spacing: 24) {
                 ProfileImageView(image: $profileImage)
 
-                VStack(spacing: 24) { 
+                VStack(spacing: 35) { 
                     RequiredTextField(title: "이름", placeholder: "입력하기", text: $name)
                     // Use fully qualified enum type name here
                     RequiredSegmentedPicker(title: "성별", selection: $gender, options: RegisterDogView.Gender.allCases)

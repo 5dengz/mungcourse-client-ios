@@ -3,24 +3,57 @@ import SwiftUI
 struct RequiredDatePicker: View {
     let title: String
     @Binding var selection: Date
-
+    @State private var isShowingDatePicker = false
+    
+    // Date formatter for text display
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy. MM. dd."
+        return formatter
+    }()
+    
     var body: some View {
-         InputFieldContainer(title: title) {
-             HStack {
-                // Use DatePicker directly inline or as a button presenting a modal
-                 DatePicker(
-                    "", // No label needed here as we have the InputFieldContainer title
-                    selection: $selection,
-                    displayedComponents: [.date]
-                 )
-                 .labelsHidden() // Hide the default label
-                 .font(.custom("Pretendard-Regular", size: 14))
-                 .accentColor(Color("main")) // Picker accent color
-
-                 Spacer() // Pushes date picker to the left
-             }
-             .inputBoxStyle() // Apply consistent styling
-         }
+        InputFieldContainer(title: title) {
+            HStack {
+                Text(dateFormatter.string(from: selection))
+                    .font(.custom("Pretendard-Regular", size: 14))
+                    .foregroundColor(Color("black"))
+                
+                Spacer() // Pushes content to the left and right edges
+                
+                Image("icon_calendar")
+                    .foregroundColor(Color("gray500"))
+            }
+            .inputBoxStyle() // Apply consistent styling
+            .contentShape(Rectangle()) // Make the whole HStack tappable
+            .onTapGesture {
+                isShowingDatePicker = true
+            }
+            .sheet(isPresented: $isShowingDatePicker) {
+                VStack(spacing: 20) {
+                    DatePicker(
+                        "날짜 선택",
+                        selection: $selection,
+                        displayedComponents: [.date]
+                    )
+                    .datePickerStyle(GraphicalDatePickerStyle())
+                    .labelsHidden()
+                    .padding()
+                    
+                    Button("확인") {
+                        isShowingDatePicker = false
+                    }
+                    .font(.headline)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color("main"))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                }
+                .presentationDetents([.height(400)])
+            }
+        }
     }
 }
 
