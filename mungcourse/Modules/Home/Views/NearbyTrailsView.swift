@@ -18,14 +18,13 @@ struct NearbyTrailsView: View { // <- 이름 변경
             // 상단 영역: 제목과 더보기 버튼
             HStack {
                 Text("주변 산책로") // 제목
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                    .font(.custom("Pretendard-SemiBold", size: 18))
                 Spacer()
                 Button("더보기") {
                     // TODO: 더보기 액션 구현
                     print("주변 산책로 더보기 탭됨")
                 }
-                .font(.callout)
+                .font(.custom("Pretendard-Regular", size: 14))
                 .foregroundColor(Color("gray900"))
             }
             .padding(.bottom, 5)

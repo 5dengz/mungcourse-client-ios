@@ -86,9 +86,6 @@ struct RoutineSettingsView: View {
             Color.white.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // 상단 상태바
-                StatusBarView()
-                    .padding(.top, 8)
                 
                 // 요일/날짜 선택 영역
                 RoutineDaySelector(selectedDay: $viewModel.selectedDay, todayDate: viewModel.formattedDate())

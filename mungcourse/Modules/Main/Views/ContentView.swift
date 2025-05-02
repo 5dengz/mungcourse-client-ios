@@ -71,7 +71,7 @@ struct ContentView: View {
                 case .history:
                     WalkHistoryView()
                 case .profile:
-                    ProfileTabView()
+                    ProfileTabView(showingDogSelection: $showingDogSelection)
                 }
             }
 

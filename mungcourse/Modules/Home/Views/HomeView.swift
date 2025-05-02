@@ -17,11 +17,12 @@ struct HomeView: View {
                 )
                 ButtonArea()
                 NearbyTrailsView()
-                WalkIndexView()
+                // WalkIndexView()
                 PastRoutesView()
+                    .padding(.bottom, 35)
                 Spacer()
             }
-            .padding()
+            .padding(.horizontal, 20)
         }
         .navigationTitle("홈")
     }

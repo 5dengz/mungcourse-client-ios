@@ -98,7 +98,7 @@ struct ProfileTabView: View {
     @EnvironmentObject var dogVM: DogViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
-    @State private var showingDogSelection: Bool = false
+    @Binding var showingDogSelection: Bool
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -125,21 +125,6 @@ struct ProfileTabView: View {
                 ProfileInfoSectionView(selectedTab: selectedTab)
                 Spacer()
             }
-            // DogSelectionSheet 오버레이
-            if showingDogSelection {
-                ZStack(alignment: .bottom) {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture { showingDogSelection = false }
-                    DogSelectionSheet(
-                        isPresented: $showingDogSelection,
-                        selectedDog: $dogVM.selectedDogName,
-                        dogs: dogVM.dogNames
-                    )
-                }
-                .animation(.easeInOut, value: showingDogSelection)
-                .zIndex(1)
-            }
         }
         .onAppear {
             viewModel.fetchUserInfo()
@@ -148,5 +133,5 @@ struct ProfileTabView: View {
 }
 
 #Preview {
-    ProfileTabView()
+    ProfileTabView(showingDogSelection: .constant(false))
 }

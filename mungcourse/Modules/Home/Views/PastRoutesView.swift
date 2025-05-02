@@ -6,14 +6,13 @@ struct PastRoutesView: View { // <- 이름 변경
             // 상단 영역: 제목과 더보기 버튼
             HStack {
                 Text("지난 경로") 
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                    .font(.custom("Pretendard-SemiBold", size: 18))
                 Spacer()
                 Button("더보기") {
                     // TODO: 더보기 액션 구현
                     print("과거 산책 기록 더보기 탭됨")
                 }
-                .font(.custom("Pretendard", size: 14)) // 더보기 버튼 폰트 크기 조절
+                .font(.custom("Pretendard-Regular", size: 14)) // 더보기 버튼 폰트 크기 조절
                 .fontWeight(.light)
                 .foregroundColor(.gray)
             }
