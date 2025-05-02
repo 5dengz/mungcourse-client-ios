@@ -129,7 +129,7 @@ struct RoutineSettingsView: View {
                     })
                     Spacer()
                 }
-                .padding(.bottom, 80)
+                .padding(.bottom, 90)
             }
         }
         .sheet(isPresented: $viewModel.showAddRoutine) {
