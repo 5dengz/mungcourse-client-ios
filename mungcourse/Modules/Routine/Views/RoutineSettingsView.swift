@@ -30,6 +30,20 @@ enum DayOfWeek: String, CaseIterable, Identifiable {
     
     var id: String { self.rawValue }
     
+    // 오늘에 해당하는 DayOfWeek
+    static var today: DayOfWeek {
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        switch weekday {
+        case 2: return .monday
+        case 3: return .tuesday
+        case 4: return .wednesday
+        case 5: return .thursday
+        case 6: return .friday
+        case 7: return .saturday
+        default: return .sunday
+        }
+    }
+    
     // API용 요일 문자열
     var apiValue: String {
         switch self {
@@ -47,7 +61,7 @@ enum DayOfWeek: String, CaseIterable, Identifiable {
 // 루틴 뷰모델
 class RoutineViewModel: ObservableObject {
     @Published var routines: [Routine] = []
-    @Published var selectedDay: DayOfWeek = .monday
+    @Published var selectedDay: DayOfWeek = .today
     @Published var showAddRoutine: Bool = false
     
     private var cancellables = Set<AnyCancellable>()

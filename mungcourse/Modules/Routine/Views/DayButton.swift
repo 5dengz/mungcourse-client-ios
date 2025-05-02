@@ -12,15 +12,15 @@ struct DayButton: View {
         Button(action: action) {
             ZStack {
                 RoundedRectangle(cornerRadius: 29.5)
-                    .fill(isSelected || isToday ? Color("main") : Color(red: 0.94, green: 0.94, blue: 0.94))
+                    .fill(isSelected ? Color("main") : Color(red: 0.94, green: 0.94, blue: 0.94))
                     .frame(width: 41, height: 58)
                 VStack(spacing: 2) {
                     Text(day.rawValue)
-                        .font(.custom("Pretendard", size: 12).weight(isSelected || isToday ? .semibold : .regular))
-                        .foregroundColor(isSelected || isToday ? .white : Color(red: 0.62, green: 0.62, blue: 0.62))
+                        .font(.custom("Pretendard", size: 12).weight(isSelected ? .semibold : .regular))
+                        .foregroundColor(isSelected ? .white : Color(red: 0.62, green: 0.62, blue: 0.62))
                     Text("\(dateNumber)")
-                        .font(.custom("Pretendard", size: 14).weight(isSelected || isToday ? .semibold : .regular))
-                        .foregroundColor(isSelected || isToday ? .white : Color(red: 0.62, green: 0.62, blue: 0.62))
+                        .font(.custom("Pretendard", size: 14).weight(isSelected ? .semibold : .regular))
+                        .foregroundColor(isSelected ? .white : Color(red: 0.62, green: 0.62, blue: 0.62))
                 }
             }
         }
