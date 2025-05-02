@@ -30,29 +30,9 @@ struct RequiredDatePicker: View {
                 isShowingDatePicker = true
             }
             .sheet(isPresented: $isShowingDatePicker) {
-                VStack(spacing: 20) {
-                    Spacer().frame(height: 24) // 상단 여백 추가
-
-                    DatePicker(
-                        "날짜 선택",
-                        selection: $selection,
-                        displayedComponents: [.date]
-                    )
-                    .datePickerStyle(.graphical)
-                    .labelsHidden()
-                    .padding()
-                    .tint(Color("main"))
-
-                    CommonFilledButton(title: "확인", action: {
-                        isShowingDatePicker = false
-                    })
-                    .padding(.horizontal)
-                    .padding(.bottom, 16) // 하단 여백 추가
-                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 8) } // 홈 인디케이터 보호
-
-                    Spacer() // 버튼을 아래로 밀어줌
-                }
-                .presentationDetents([.height(500)])
+                CommonDatePickerSheet(selection: $selection, onConfirm: {
+                    isShowingDatePicker = false
+                })
             }
         }
     }
@@ -68,4 +48,4 @@ struct RequiredDatePicker: View {
         }
     }
     return PreviewWrapper()
-} 
+}
