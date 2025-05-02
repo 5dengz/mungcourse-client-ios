@@ -57,6 +57,7 @@ protocol DogServiceProtocol {
     // --- 기존 함수 시그니처 (Publisher 방식 예시) ---
     // 필요에 따라 async/await 방식으로 변경하거나 유지할 수 있습니다.
     func fetchDogs() -> AnyPublisher<[Dog], Error>
+    func fetchMainDog() -> AnyPublisher<Dog, Error>
     func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error> // 이 함수는 registerDogWithDetails로 대체될 수 있음
 
     // --- 새로 추가할 비동기 함수 시그니처 ---

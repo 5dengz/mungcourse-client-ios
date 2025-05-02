@@ -258,4 +258,36 @@ class DogService: DogServiceProtocol {
             throw NetworkError.decodingError(error)
         }
     }
+
+    // GET /v1/dogs/main 메인 반려견 조회
+    func fetchMainDog() -> AnyPublisher<Dog, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/main")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        if !authToken.isEmpty {
+            request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        }
+
+        return Future<Dog, Error> { promise in
+            URLSession.shared.dataTaskPublisher(for: request)
+                .map { $0.data }
+                .tryMap { data -> Dog in
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("[DogService.fetchMainDog] 응답: \(jsonString)")
+                    }
+                    let responseWrapper = try JSONDecoder().decode(DogDataResponse.self, from: data)
+                    return responseWrapper.data
+                }
+                .sink(receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        print("[DogService.fetchMainDog] 오류: \(error.localizedDescription)")
+                        promise(.failure(error))
+                    }
+                }, receiveValue: { dog in
+                    promise(.success(dog))
+                })
+                .store(in: &self.cancellables)
+        }
+        .eraseToAnyPublisher()
+    }
 }

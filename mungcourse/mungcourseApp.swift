@@ -15,6 +15,7 @@ struct mungcourseApp: App {
     @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
     @AppStorage("authToken") private var authToken: String = "" // 추후 토큰 저장용
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
+    @StateObject private var dogVM = DogViewModel()
 
     
     init() {
@@ -39,6 +40,7 @@ struct mungcourseApp: App {
     var body: some Scene {
         WindowGroup {
             SplashView()
+                .environmentObject(dogVM)
                 .preferredColorScheme(.light)
         }
     }

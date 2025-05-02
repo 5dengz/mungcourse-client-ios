@@ -36,8 +36,7 @@ struct ContentView: View {
     @State private var showSelectWaypoint = false
     @State private var showRecommendCourse = false
     @State private var showingDogSelection = false
-    @State private var dogName: String = ""
-    @State private var availableDogs: [String] = []
+    @EnvironmentObject var dogVM: DogViewModel
 
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
@@ -57,15 +56,15 @@ struct ContentView: View {
                     HomeView(
                         selectedTab: $selectedTab,
                         showingDogSelection: $showingDogSelection,
-                        dogName: $dogName,
-                        availableDogs: availableDogs
+                        dogName: $dogVM.selectedDogName,
+                        availableDogs: dogVM.dogNames
                     )
                 case .startWalk:
                     HomeView(
                         selectedTab: $selectedTab,
                         showingDogSelection: $showingDogSelection,
-                        dogName: $dogName,
-                        availableDogs: availableDogs
+                        dogName: $dogVM.selectedDogName,
+                        availableDogs: dogVM.dogNames
                     )
                 case .routine:
                     RoutineSettingsView()
@@ -140,8 +139,8 @@ struct ContentView: View {
                         .transition(.opacity)
                     DogSelectionSheet(
                         isPresented: $showingDogSelection,
-                        selectedDog: $dogName,
-                        dogs: availableDogs
+                        selectedDog: $dogVM.selectedDogName,
+                        dogs: dogVM.dogNames
                     )
                     .transition(.move(edge: .bottom))
                 }
