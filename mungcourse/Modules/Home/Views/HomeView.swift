@@ -5,26 +5,44 @@ struct HomeView: View {
     @Binding var showingDogSelection: Bool
     @Binding var dogName: String
     let availableDogs: [String]
+    
+    @State private var isWalkOverlayPresented = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 35) {
-                ProfileArea(
-                    selectedTab: $selectedTab,
-                    showingDogSelection: $showingDogSelection,
-                    dogName: $dogName,
-                    availableDogs: availableDogs
-                )
-                ButtonArea()
-                NearbyTrailsView()
-                // WalkIndexView()
-                PastRoutesView()
-                    .padding(.bottom, 35)
-                Spacer()
+        ZStack {
+            ScrollView {
+                VStack(spacing: 35) {
+                    ProfileArea(
+                        selectedTab: $selectedTab,
+                        showingDogSelection: $showingDogSelection,
+                        dogName: $dogName,
+                        availableDogs: availableDogs
+                    )
+                    ButtonArea(isWalkOverlayPresented: $isWalkOverlayPresented)
+                    NearbyTrailsView()
+                    // WalkIndexView()
+                    PastRoutesView()
+                        .padding(.bottom, 35)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
+            .navigationTitle("홈")
+            
+            if isWalkOverlayPresented {
+                StartWalkTabView(
+                    isOverlayPresented: $isWalkOverlayPresented,
+                    onSelectWaypoint: {
+                        // TODO: 경유지 선택 액션 구현
+                    },
+                    onRecommendCourse: {
+                        // TODO: 바로 추천 액션 구현
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(1)
+            }
         }
-        .navigationTitle("홈")
     }
 }
 
@@ -85,6 +103,7 @@ struct ProfileArea: View {
 }
 
 struct ButtonArea: View {
+    @Binding var isWalkOverlayPresented: Bool
     var body: some View {
         HStack(spacing: 9) {
             MainButton(
@@ -93,7 +112,7 @@ struct ButtonArea: View {
                 backgroundColor: Color("AccentColor"),
                 foregroundColor: Color("white"),
                 action: {
-                    print("산책 시작 버튼 탭됨")
+                    isWalkOverlayPresented = true
                 }
             )
             MainButton(
