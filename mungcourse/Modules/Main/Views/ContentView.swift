@@ -57,14 +57,16 @@ struct ContentView: View {
                         selectedTab: $selectedTab,
                         showingDogSelection: $showingDogSelection,
                         dogName: $dogVM.selectedDogName,
-                        availableDogs: dogVM.dogNames
+                        availableDogs: dogVM.dogNames,
+                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented
                     )
                 case .startWalk:
                     HomeView(
                         selectedTab: $selectedTab,
                         showingDogSelection: $showingDogSelection,
                         dogName: $dogVM.selectedDogName,
-                        availableDogs: dogVM.dogNames
+                        availableDogs: dogVM.dogNames,
+                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented
                     )
                 case .routine:
                     RoutineSettingsView()
