@@ -109,6 +109,8 @@ class RoutineViewModel: ObservableObject {
 
 struct RoutineSettingsView: View {
     @StateObject private var viewModel = RoutineViewModel()
+    @State private var showDatePicker = false
+    @State private var selectedDate = Date()
     
     var body: some View {
         let routines = viewModel.filteredRoutines()
@@ -119,6 +121,9 @@ struct RoutineSettingsView: View {
                 // 공통 헤더 (요일 선택 포함)
                 CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
                     Image("icon_calendar")
+                        .onTapGesture {
+                            showDatePicker = true
+                        }
                 }
                 .padding(.top, 16)
                 
@@ -168,6 +173,13 @@ struct RoutineSettingsView: View {
         }
         .sheet(isPresented: $viewModel.showAddRoutine) {
             AddRoutineView()
+        }
+        .sheet(isPresented: $showDatePicker) {
+            CommonDatePickerSheet(selection: $selectedDate) {
+                showDatePicker = false
+            } onDismiss: {
+                showDatePicker = false
+            }
         }
     }
 }
