@@ -12,17 +12,22 @@ struct TrailItemView: View {
         VStack(alignment: .leading, spacing: 8) { // 아이템 전체 컨테이너
             // 1. 사진 영역 (ZStack으로 변경)
             ZStack(alignment: .topLeading) { // 이미지와 시간 뷰를 겹치기 위한 ZStack
-                Image(imageName) // 시스템 이미지 또는 Assets 이미지 사용
-                    .resizable()
+                if let url = URL(string: imageName), !imageName.isEmpty {
+                    AsyncImage(url: url) { image in
+                        image.resizable()
+                    } placeholder: {
+                        Color.gray.opacity(0.3)
+                    }
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 210, height: 150) // 크기 조절
                     .clipShape(RoundedRectangle(cornerRadius: 10)) // 모서리 둥글게
-                    .overlay( // 이미지 없을 경우 대비 회색 배경
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 210, height: 150)
-                            .opacity(imageName.isEmpty ? 1 : 0) // 이미지가 있으면 투명하게
-                    )
+                } else {
+                    Image("default_trail") // 기본 이미지 사용
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 210, height: 150) // 크기 조절
+                        .clipShape(RoundedRectangle(cornerRadius: 10)) // 모서리 둥글게
+                }
 
                 // 왕복 시간 뷰 추가
                 RoundTripTimeView(timeString: roundTripTime)
