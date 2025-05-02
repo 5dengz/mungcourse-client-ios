@@ -131,7 +131,7 @@ class DogService: DogServiceProtocol {
     
     // MARK: - Async/Await 기반 구현
 
-    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlResponse {
+    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -143,7 +143,9 @@ class DogService: DogServiceProtocol {
         }
         request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
 
-        let requestBody = ["fileName": fileName, "fileNameExtension": fileExtension]
+        // fileExtension에서 앞에 점(.)이 있으면 제거
+        let cleanExtension = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
+        let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension]
         do {
             request.httpBody = try JSONEncoder().encode(requestBody)
             print("➡️ Requesting S3 URL: \(endpoint) with token: \(authToken.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
@@ -167,10 +169,8 @@ class DogService: DogServiceProtocol {
 
         do {
             let decoder = JSONDecoder()
-            // Handle snake_case keys from server if needed
-            // decoder.keyDecodingStrategy = .convertFromSnakeCase
-            let decodedResponse = try decoder.decode(S3PresignedUrlResponse.self, from: data)
-            print("✅ Received S3 URL Response: preSignedUrl=\(decodedResponse.preSignedUrl.prefix(20))..., imageUrl=\(decodedResponse.imageUrl)")
+            let decodedResponse = try decoder.decode(S3PresignedUrlFullResponse.self, from: data)
+            print("✅ Received S3 URL Response: preSignedUrl=\(decodedResponse.data.preSignedUrl.prefix(20))..., url=\(decodedResponse.data.url.prefix(20))..., key=\(decodedResponse.data.key)")
             return decodedResponse
         } catch {
             print("❌ Error decoding S3 URL response: \(error). Data: \(String(data: data, encoding: .utf8) ?? "Invalid data")")

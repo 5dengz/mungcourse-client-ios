@@ -39,12 +39,6 @@ struct RegisterDogContentsView: View {
                     OptionalSegmentedPicker(title: "슬개골 탈구 수술 여부", selection: $hasPatellarLuxationSurgery)
                 }
                 
-                if let error = errorMessage { // Use the passed error message
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-
                 Button("다른 반려견 추가하기") {
                     // TODO: Call the action passed from parent
                     // addAnotherDogAction()

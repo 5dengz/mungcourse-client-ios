@@ -29,33 +29,46 @@ struct ProfileImageView: View {
                     }
                 }
 
-            // Integrate PhotosPicker with the existing button's appearance
-            PhotosPicker(
-                selection: $selectedItem,
-                matching: .images, // Only allow images
-                photoLibrary: .shared() // Use the shared photo library
-            ) {
-                // Use the existing button label content
-                ZStack {
-                    Circle()
-                        .fill(Color("gray600")) // Use asset color
-                        .frame(width: 34, height: 34)
-                    Image("icon_camera")
-                        .foregroundColor(.white)
-                        .font(.system(size: 16))
+            if image == nil {
+                PhotosPicker(
+                    selection: $selectedItem,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    ZStack {
+                        Circle()
+                            .fill(Color("gray600"))
+                            .frame(width: 34, height: 34)
+                        Image("icon_camera")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                    }
                 }
-            }
-            // Add task modifier to handle selection change
-            .onChange(of: selectedItem) { _, newItem in
-                Task {
-                    // Retrieve image data
-                    if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                        selectedImageData = data // Update the bound data
-                        if let uiImage = UIImage(data: data) {
-                            image = Image(uiImage: uiImage) // Update the preview image
+                .onChange(of: selectedItem) { _, newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                            selectedImageData = data
+                            if let uiImage = UIImage(data: data) {
+                                image = Image(uiImage: uiImage)
+                            }
                         }
                     }
                 }
+            } else {
+                Button(action: {
+                    image = nil
+                    selectedImageData = nil
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(Color("gray400"))
+                            .frame(width: 32, height: 32)
+                        Image(systemName: "trash")
+                            .foregroundColor(.white)
+                            .font(.system(size: 16))
+                    }
+                }
+                
             }
         }
         .padding(.vertical) // Add some vertical padding

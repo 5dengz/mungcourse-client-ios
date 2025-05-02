@@ -3,8 +3,20 @@ import Combine // 기존 Publisher 사용 함수가 있다면 유지
 
 // S3 Pre-signed URL 응답 모델
 struct S3PresignedUrlResponse: Decodable {
-    let preSignedUrl: String // 서버 응답 키와 일치시켜야 합니다. 예: preSignedUrl, uploadUrl 등
-    let imageUrl: String     // 서버 응답 키와 일치시켜야 합니다. 예: imageUrl, fileUrl 등
+    let key: String
+    let preSignedUrl: String
+    let url: String
+
+    private enum CodingKeys: String, CodingKey {
+        case key
+        case preSignedUrl
+        case url
+    }
+}
+
+// S3 Presigned URL 전체 응답 래퍼
+struct S3PresignedUrlFullResponse: Decodable {
+    let data: S3PresignedUrlResponse
 }
 
 // Dog 모델은 RegisterDog/Models/Dog.swift에서 import하여 사용합니다.
@@ -26,7 +38,7 @@ protocol DogServiceProtocol {
     func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error> // 이 함수는 registerDogWithDetails로 대체될 수 있음
 
     // --- 새로 추가할 비동기 함수 시그니처 ---
-    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlResponse
+    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse
     func uploadImageToS3(presignedUrl: String, imageData: Data) async throws
     func registerDogWithDetails(dogData: DogRegistrationData) async throws -> Dog
 }
