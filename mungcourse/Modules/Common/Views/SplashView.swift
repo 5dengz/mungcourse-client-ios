@@ -223,10 +223,9 @@ struct SplashView: View {
         return Date(timeIntervalSince1970: exp) > Date()
     }
 
-    // DogListResponse만 남기고 Dog 구조체는 삭제
-    struct DogListResponse: Decodable {
-        let data: [Dog]
-    }
+    // Remove local DogListResponse and use service model
+    typealias DogListResponse = 
+        mungcourse.Services.DogService.DogListResponse
 }
 
 #Preview {
