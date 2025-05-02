@@ -42,6 +42,7 @@ struct mungcourseApp: App {
             SplashView()
                 .environmentObject(dogVM)
                 .preferredColorScheme(.light)
+                .background(Color("gray100").ignoresSafeArea()) // 앱 전체 배경색 설정
         }
     }
 }

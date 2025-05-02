@@ -2,16 +2,17 @@ import SwiftUI
 
 // 단일 산책로 아이템 뷰
 struct TrailItemView: View {
-    // 임시 데이터 - 실제 데이터 모델로 교체 필요
+    // 데이터 모델
     let trailName: String
     let distance: String
     let imageName: String // 이미지 이름 또는 URL
-    let roundTripTime: String // 왕복 시간 추가 (예: "약 30분")
+    let roundTripTime: String // 왕복 시간 추가 (예: "약 30분") -> 사용되지 않으므로 제거 고려
+    let category: String // 카테고리 파라미터 추가
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) { // 아이템 전체 컨테이너
-            // 1. 사진 영역 (ZStack으로 변경)
-            ZStack(alignment: .topLeading) { // 이미지와 시간 뷰를 겹치기 위한 ZStack
+        VStack(alignment: .leading, spacing: 0) { // spacing 0으로 변경
+            // 1. 사진 영역
+            ZStack(alignment: .topLeading) {
                 if let url = URL(string: imageName), !imageName.isEmpty {
                     AsyncImage(url: url) { image in
                         image.resizable()
@@ -19,64 +20,57 @@ struct TrailItemView: View {
                         Color.gray.opacity(0.3)
                     }
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 210, height: 150) // 크기 조절
-                    .clipShape(RoundedRectangle(cornerRadius: 10)) // 모서리 둥글게
+                    .frame(width: 210, height: 146)
                 } else {
-                    Image("default_trail") // 기본 이미지 사용
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 210, height: 150) // 크기 조절
-                        .clipShape(RoundedRectangle(cornerRadius: 10)) // 모서리 둥글게
-                }
-
-                // 왕복 시간 뷰 추가
-                RoundTripTimeView(timeString: roundTripTime)
-                    .padding(8) // 이미지 가장자리로부터 약간의 여백
-            }
-
-
-            // 2. 정보 영역 (이름 + 거리)
-            HStack {
-                Text(trailName)
-                    .font(.system(size: 14)) // 이름 폰트 크기 14
-                    .lineLimit(1) // 한 줄로 제한
-                    .fontWeight(.semibold) // 이름 폰트 두께
-                Spacer() // 이름과 거리+아이콘 그룹 사이 공간
-                HStack(spacing: 2) { // 아이콘과 거리 텍스트 사이 간격 조절
-                    Image("pinpoint") // pinpoint 아이콘 추가
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 15, height: 15) // 아이콘 크기 조절
-                    Text(distance)
-                        .font(.system(size: 14)) // 거리 폰트 크기 14
-                        .fontWeight(.semibold)
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 210, height: 146)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .foregroundColor(.white)
+                                .font(.largeTitle)
+                        )
                 }
             }
-            .frame(width: 210) // HStack 너비 고정 (이미지 너비와 맞춤)
-            .padding(.vertical, 10) // 좌우 패딩
 
-            // 3. 산책 시작 버튼
-            Button {
-                // TODO: 산책 시작 액션 구현
-                print("\(trailName) 산책 시작")
-            } label: {
-                Text("산책 시작")
-                    .font(.caption)
-                    .fontWeight(.regular)
-                    .foregroundColor(.black)
-                    .frame(width: 211, height: 36) // 고정 크기 설정
-                    .background(Color.gray.opacity(0.1)) // 버튼 배경색
-                    .cornerRadius(8)
+            // 2. 정보 영역 (VStack + HStack)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(trailName)
+                        .font(.custom("Pretendard-SemiBold", size: 15))
+                        .lineLimit(1)
+                    Spacer()
+                    HStack(spacing: 2) {
+                        Image("pinpoint")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                        Text(distance)
+                            .font(.custom("Pretendard-Regular", size: 12))
+                    }
+                }
+                
+                Text(category)
+                    .font(.custom("Pretendard-Regular", size: 12))
+                    .foregroundColor(Color("gray700"))
+                    .lineLimit(1)
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(width: 210, height: 66)
         }
-
-        .background(Color.white) // 아이템 배경색
-        //.cornerRadius(15) // 아이템 모서리 둥글게
+        .background(Color.white)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color("gray300"), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
 #Preview {
-    // roundTripTime 파라미터 추가
-    TrailItemView(trailName: "샘플 산책로", distance: "1.5km", imageName: "", roundTripTime: "약 45분")
+    // category 파라미터 추가 및 roundTripTime 제거 (또는 더미값 유지)
+    TrailItemView(trailName: "샘플 산책로 이름", distance: "1.5km", imageName: "", roundTripTime: "", category: "공원")
         .padding()
 }
