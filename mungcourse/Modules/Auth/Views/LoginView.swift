@@ -70,7 +70,7 @@ struct LoginView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray100)
         .fullScreenCover(isPresented: $viewModel.needsDogRegistration) {
-            RegisterDogView(viewModel: viewModel)
+            RegisterDogView()
         }
         .onChange(of: viewModel.isLoggedIn) { oldValue, newValue in
             if newValue {

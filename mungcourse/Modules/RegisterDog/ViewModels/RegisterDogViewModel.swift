@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+// DogRegistrationData는 같은 타겟 내에 있으므로 별도 import 없이 사용합니다.
 
 // 반려견 등록에 필요한 Gender 열거형
 enum Gender: String, CaseIterable, Identifiable {
@@ -163,4 +164,4 @@ class RegisterDogViewModel: ObservableObject {
         selectedImageData = nil
         errorMessage = nil
     }
-} 
+}

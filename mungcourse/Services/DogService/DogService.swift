@@ -2,33 +2,7 @@ import Foundation
 import Combine
 import SwiftUI // For AppStorage if used for token
 
-// MARK: - 프로토콜 정의
-protocol DogServiceProtocol {
-    // Combine 기반 메서드
-    func fetchDogs() -> AnyPublisher<[Dog], Error>
-    func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error>
-    
-    // Async/Await 기반 메서드
-    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlResponse
-    func uploadImageToS3(presignedUrl: String, imageData: Data) async throws
-    func registerDogWithDetails(dogData: DogRegistrationData) async throws -> Dog
-}
 
-// MARK: - 응답 모델
-// S3 Pre-signed URL 응답 모델
-struct S3PresignedUrlResponse: Decodable {
-    let preSignedUrl: String
-    let imageUrl: String
-}
-
-// API Response Wrappers
-private struct DogListResponse: Codable {
-    let data: [Dog]
-}
-
-private struct DogDataResponse: Codable {
-    let data: Dog
-}
 
 // MARK: - 에러 타입
 enum NetworkError: Error {
@@ -285,4 +259,4 @@ class DogService: DogServiceProtocol {
             throw NetworkError.decodingError(error)
         }
     }
-} 
+}

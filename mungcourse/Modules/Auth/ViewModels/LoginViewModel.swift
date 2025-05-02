@@ -3,17 +3,7 @@ import Combine
 import SwiftUI
 
 // MARK: - 데이터 모델
-struct DogRegistrationData: Encodable {
-    let name: String
-    let gender: String
-    let breed: String
-    let birthDate: String // "yyyy-MM-dd"
-    let weight: Double
-    let postedAt: String // ISO8601 format
-    let hasArthritis: Bool
-    let neutered: Bool
-    var dogImgUrl: String?
-}
+// DogRegistrationData는 이제 RegisterDog/Models/DogRegistrationData.swift에서 import하여 사용합니다.
 
 // MARK: - 에러 타입
 struct IdentifiableError: Identifiable {

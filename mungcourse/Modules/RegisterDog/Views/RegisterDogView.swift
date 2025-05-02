@@ -54,7 +54,7 @@ struct RegisterDogView: View {
                     errorMessage: viewModel.errorMessage?.message,
                     isFormValid: viewModel.isFormValid,
                     isLoading: viewModel.isLoading,
-                    registerAction: viewModel.registerDog
+                    registerAction: registerAction
                 )
                 .padding(.horizontal, 20)
                 // Remove navigation modifiers from here
@@ -83,40 +83,11 @@ struct RegisterDogView: View {
 
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
-        guard let weightDouble = Double(weight) else {
-            viewModel.errorMessage = IdentifiableError(message: "유효한 몸무게를 입력해주세요.")
-            return
-        }
-        guard let selectedGender = gender else {
-            viewModel.errorMessage = IdentifiableError(message: "성별을 선택해주세요.")
-            return
-        }
-        
-        // Format birthDate to "yyyy-MM-dd"
-        let birthDateFormatter = DateFormatter()
-        birthDateFormatter.dateFormat = "yyyy-MM-dd"
-        let birthDateString = birthDateFormatter.string(from: dateOfBirth)
-
-        // Convert optional Bools to non-optional (assuming false if nil for API)
-        let neuteredStatus = isNeutered ?? false
-        let arthritisStatus = hasPatellarLuxationSurgery ?? false
-
-        // TODO: Replace with actual ViewModel call
-        // Call the new ViewModel function
-        viewModel.registerDogWithImage(
-            name: name, 
-            gender: selectedGender.rawValue, 
-            breed: breed, 
-            birthDate: birthDateString, 
-            weight: weightDouble, 
-            neutered: neuteredStatus, 
-            hasArthritis: arthritisStatus, 
-            imageData: selectedImageData
-        )
+        viewModel.registerDog()
     }
 }
 
 // MARK: - Preview
 #Preview {
     RegisterDogView()
-} 
+}
