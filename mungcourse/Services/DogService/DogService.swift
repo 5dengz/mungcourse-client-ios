@@ -2,7 +2,35 @@ import Foundation
 import Combine
 import SwiftUI // For AppStorage if used for token
 
-// Network Error Enum
+// MARK: - 프로토콜 정의
+protocol DogServiceProtocol {
+    // Combine 기반 메서드
+    func fetchDogs() -> AnyPublisher<[Dog], Error>
+    func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error>
+    
+    // Async/Await 기반 메서드
+    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlResponse
+    func uploadImageToS3(presignedUrl: String, imageData: Data) async throws
+    func registerDogWithDetails(dogData: DogRegistrationData) async throws -> Dog
+}
+
+// MARK: - 응답 모델
+// S3 Pre-signed URL 응답 모델
+struct S3PresignedUrlResponse: Decodable {
+    let preSignedUrl: String
+    let imageUrl: String
+}
+
+// API Response Wrappers
+private struct DogListResponse: Codable {
+    let data: [Dog]
+}
+
+private struct DogDataResponse: Codable {
+    let data: Dog
+}
+
+// MARK: - 에러 타입
 enum NetworkError: Error {
     case invalidURL
     case requestFailed(Error)
@@ -14,32 +42,120 @@ enum NetworkError: Error {
     case s3UploadFailed(statusCode: Int?)
 }
 
+// MARK: - DogService 구현
 class DogService: DogServiceProtocol {
-
     static let shared = DogService()
     private init() {}
 
-    // !!! IMPORTANT: Replace with your actual API base URL !!!
-    private let baseURL = URL(string: "https://api.mungcourse.com")!
+    // API 베이스 URL - 설정에 따라 사용
+    private var baseURL: URL {
+        if let urlString = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
+           !urlString.isEmpty,
+           let url = URL(string: urlString) {
+            return url
+        }
+        // 기본 URL
+        return URL(string: "https://api.mungcourse.com")!
+    }
 
     // Access Token (using AppStorage for simplicity, align with LoginViewModel)
-    // Alternatively, use a dedicated TokenManager/Keychain service
     @AppStorage("authToken") private var authToken: String = ""
 
-    // --- Existing Combine-based functions (Keep or adapt) ---
+    // MARK: - Combine 기반 구현 (첫 번째 파일에서 통합)
+    
+    // GET /v1/dogs
     func fetchDogs() -> AnyPublisher<[Dog], Error> {
-        // Placeholder - Implement using Combine or convert to async/await
-        print("⚠️ fetchDogs using Combine is not implemented.")
-        return Fail(error: NetworkError.requestFailed(URLError(.badURL))).eraseToAnyPublisher()
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        
+        // 토큰 추가
+        if !authToken.isEmpty {
+            request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        }
+
+        return Future<[Dog], Error> { promise in
+            URLSession.shared.dataTaskPublisher(for: request)
+                .map { $0.data }
+                .tryMap { data -> [Dog] in
+                    // HTTP 404 처리: 반려견 없음으로 간주하고 빈 배열 반환
+                    let response = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    if let message = response?["message"] as? String, message.contains("not found") {
+                        print("[DogService.fetchDogs] 반려견 없음")
+                        return []
+                    }
+                    
+                    // 서버 응답 JSON 전체 로그
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("[DogService.fetchDogs] 서버 응답: \(jsonString)")
+                    }
+                    
+                    // 응답 디코딩
+                    let responseWrapper = try JSONDecoder().decode(DogListResponse.self, from: data)
+                    return responseWrapper.data
+                }
+                .sink(
+                    receiveCompletion: { completion in
+                        if case .failure(let error) = completion {
+                            print("[DogService.fetchDogs] 오류: \(error.localizedDescription)")
+                            promise(.failure(error))
+                        }
+                    },
+                    receiveValue: { dogs in
+                        promise(.success(dogs))
+                    }
+                )
+                .store(in: &self.cancellables)
+        }
+        .eraseToAnyPublisher()
     }
 
+    // POST /v1/dogs (기본 등록)
     func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error> {
-        // Placeholder - This might be replaced by registerDogWithDetails
-        print("⚠️ registerDog using Combine is not implemented. Use registerDogWithDetails.")
-        return Fail(error: NetworkError.requestFailed(URLError(.badURL))).eraseToAnyPublisher()
-    }
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 토큰 추가
+        if !authToken.isEmpty {
+            request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        }
+        
+        // 요청 바디
+        let body: [String: Any] = ["name": name, "age": age, "breed": breed]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
-    // --- New Async/Await Network Functions ---
+        return Future<Dog, Error> { promise in
+            URLSession.shared.dataTaskPublisher(for: request)
+                .map { $0.data }
+                .tryMap { data -> Dog in
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("[DogService.registerDog] 응답: \(jsonString)")
+                    }
+                    
+                    let responseWrapper = try JSONDecoder().decode(DogDataResponse.self, from: data)
+                    return responseWrapper.data
+                }
+                .sink(
+                    receiveCompletion: { completion in
+                        if case .failure(let error) = completion {
+                            print("[DogService.registerDog] 오류: \(error.localizedDescription)")
+                            promise(.failure(error))
+                        }
+                    },
+                    receiveValue: { dog in
+                        promise(.success(dog))
+                    }
+                )
+                .store(in: &self.cancellables)
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Async/Await 기반 구현
 
     func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlResponse {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
@@ -169,8 +285,4 @@ class DogService: DogServiceProtocol {
             throw NetworkError.decodingError(error)
         }
     }
-}
-
-// Note: TokenManager class is removed as AppStorage is used directly.
-// If a more complex token management (like Keychain) is needed,
-// re-introduce TokenManager and use it here instead of @AppStorage. 
+} 
