@@ -62,7 +62,11 @@ struct SplashView: View {
             ContentView()
         }
         .fullScreenCover(isPresented: $shouldShowRegisterDog) {
-            RegisterDogView(showBackButton: false)
+            RegisterDogView(onComplete: {
+                // 등록 완료 후 홈 화면으로 이동
+                resetCovers()
+                shouldShowMain = true
+            }, showBackButton: false)
         }
     }
 

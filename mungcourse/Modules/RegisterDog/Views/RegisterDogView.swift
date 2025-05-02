@@ -7,6 +7,8 @@ struct RegisterDogView: View {
     // LoginViewModel 대신 RegisterDogViewModel 사용
     @StateObject private var viewModel = RegisterDogViewModel()
     @Environment(\.dismiss) private var dismiss
+    // 완료 후 처리 클로저 (기본 nil)
+    var onComplete: (() -> Void)? = nil
     // 뒤로가기 버튼 노출 여부
     var showBackButton: Bool = true
     
@@ -70,7 +72,9 @@ struct RegisterDogView: View {
             .navigationBarHidden(true) // Hide the default navigation bar
             .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
                 if isComplete {
+                    // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
                     dismiss()
+                    onComplete?()
                 }
             }
         }

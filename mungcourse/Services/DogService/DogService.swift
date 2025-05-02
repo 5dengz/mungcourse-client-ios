@@ -185,9 +185,9 @@ class DogService: DogServiceProtocol {
         }
 
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"  // S3 프리사인드 POST 방식 사용
+        request.httpMethod = "PUT"  // S3 프리사인드 PUT 방식 사용
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
-        request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
+        // Content-Length 헤더는 제거하여 서명 불일치 방지
 
         print("⬆️ Uploading image (\(imageData.count) bytes) to S3: \(url.absoluteString.prefix(60))...")
 
