@@ -156,9 +156,14 @@ struct RoutineSettingsView: View {
             Color.white.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // 헤더 (요일 선택 포함)
-                RoutineHeaderView(selectedDay: $viewModel.selectedDay)
-                    .padding(.top, 16)
+                // 공통 헤더 (요일 선택 포함)
+                CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
+                    Image("icon_calendar")
+                }
+                .padding(.top, 16)
+                
+                RoutineDaySelector(selectedDay: $viewModel.selectedDay)
+                    .padding(.top, 8)
                 
                 // 루틴 리스트
                 ScrollView {
