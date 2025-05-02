@@ -14,7 +14,7 @@ struct DogSelectionSheet: View {
                     .frame(height: geometry.size.height - 260)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        isPresented = false
+                        withAnimation(.easeInOut) { isPresented = false }
                     }
                 VStack(alignment: .leading, spacing: 16) {
                     Text("프로필 선택")
@@ -39,7 +39,7 @@ struct DogSelectionSheet: View {
                                 }
                                 .onTapGesture {
                                     selectedDog = dog
-                                    isPresented = false
+                                    withAnimation(.easeInOut) { isPresented = false }
                                 }
                             }
                         }
