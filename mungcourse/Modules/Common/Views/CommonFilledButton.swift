@@ -10,7 +10,7 @@ struct CommonFilledButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.headline)
+                .font(.custom("Pretendard-Bold", size: 18))
                 .foregroundColor(foregroundColor)
                 .frame(maxWidth: .infinity)
                 .padding()

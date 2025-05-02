@@ -31,27 +31,28 @@ struct RequiredDatePicker: View {
             }
             .sheet(isPresented: $isShowingDatePicker) {
                 VStack(spacing: 20) {
+                    Spacer().frame(height: 24) // 상단 여백 추가
+
                     DatePicker(
                         "날짜 선택",
                         selection: $selection,
                         displayedComponents: [.date]
                     )
-                    .datePickerStyle(GraphicalDatePickerStyle())
+                    .datePickerStyle(.graphical)
                     .labelsHidden()
                     .padding()
-                    
-                    Button("확인") {
+                    .tint(Color("main"))
+
+                    CommonFilledButton(title: "확인", action: {
                         isShowingDatePicker = false
-                    }
-                    .font(.headline)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color("main"))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                    })
                     .padding(.horizontal)
+                    .padding(.bottom, 16) // 하단 여백 추가
+                    .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 8) } // 홈 인디케이터 보호
+
+                    Spacer() // 버튼을 아래로 밀어줌
                 }
-                .presentationDetents([.height(400)])
+                .presentationDetents([.height(500)])
             }
         }
     }
