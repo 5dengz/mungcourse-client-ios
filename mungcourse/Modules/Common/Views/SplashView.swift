@@ -4,6 +4,8 @@ struct SplashView: View {
     @State private var animateSmall = false
     @State private var animateMedium = false
     @State private var animateLarge = false
+    @State private var shouldShowLogin = false
+    @State private var shouldShowMain = false
 
     var body: some View {
         ZStack {
@@ -45,6 +47,13 @@ struct SplashView: View {
         }
         .onAppear {
             animateSequence()
+            checkTokenAndNavigate()
+        }
+        .fullScreenCover(isPresented: $shouldShowLogin) {
+            LoginView()
+        }
+        .fullScreenCover(isPresented: $shouldShowMain) {
+            ContentView()
         }
     }
 
@@ -81,6 +90,37 @@ struct SplashView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             animateSequence()
         }
+    }
+
+    private func checkTokenAndNavigate() {
+        // 토큰 유효성 검사 (간단 버전, 실제 앱에서는 네트워크 검증도 추가 가능)
+        if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
+            if isTokenValid(token) {
+                shouldShowMain = true
+            } else {
+                shouldShowLogin = true
+            }
+        } else {
+            shouldShowLogin = true
+        }
+    }
+
+    private func isTokenValid(_ token: String) -> Bool {
+        let segments = token.split(separator: ".")
+        guard segments.count == 3 else { return false }
+        var base64 = String(segments[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let remainder = base64.count % 4
+        if remainder > 0 {
+            base64 = base64.padding(toLength: base64.count + 4 - remainder, withPad: "=", startingAt: 0)
+        }
+        guard let data = Data(base64Encoded: base64),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let exp = json["exp"] as? TimeInterval else {
+            return false
+        }
+        return Date(timeIntervalSince1970: exp) > Date()
     }
 }
 
