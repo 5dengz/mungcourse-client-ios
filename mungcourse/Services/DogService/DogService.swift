@@ -187,11 +187,13 @@ class DogService: DogServiceProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"  // S3 프리사인드 PUT 방식 사용
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
-        // Content-Length 헤더는 제거하여 서명 불일치 방지
-
+        // S3 presigned URL requires Content-Length header; set body directly to avoid chunked transfer
+        request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
         print("⬆️ Uploading image (\(imageData.count) bytes) to S3: \(url.absoluteString.prefix(60))...")
 
-        let (_, response) = try await URLSession.shared.upload(for: request, from: imageData)
+        // set body directly and use data(for:) to avoid chunked transfer
+        request.httpBody = imageData
+        let (_, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
              print("❌ Error: Invalid HTTP response received during S3 upload.")

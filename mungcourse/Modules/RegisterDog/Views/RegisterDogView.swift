@@ -12,6 +12,13 @@ struct RegisterDogView: View {
     // 뒤로가기 버튼 노출 여부
     var showBackButton: Bool = true
     
+    // MARK: - Initializer
+    init(onComplete: (() -> Void)? = nil, showBackButton: Bool = true) {
+        self.onComplete = onComplete
+        self.showBackButton = showBackButton
+        _viewModel = StateObject(wrappedValue: RegisterDogViewModel())
+    }
+    
     // MARK: - State Variables (Managed by the main view)
     @State private var profileImage: Image? = nil
     @State private var selectedImageData: Data? = nil // State for selected image data

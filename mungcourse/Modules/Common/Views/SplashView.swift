@@ -176,8 +176,10 @@ struct SplashView: View {
                 print("[SplashView] 강아지 목록 응답 원본: \(String(data: data, encoding: .utf8) ?? "데이터 디코딩 실패")")
                 if httpResponse.statusCode == 200 {
                     do {
-                        let response = try JSONDecoder().decode(DogListResponse.self, from: data)
-                        if response.data.isEmpty {
+                        // API wrapper를 통해 decoding
+                        let apiResponse = try JSONDecoder().decode(ServiceAPIResponse<[Dog]>.self, from: data)
+                        let dogs = apiResponse.data
+                        if dogs.isEmpty {
                             showAfterMinimumSplash {
                                 resetCovers()
                                 shouldShowRegisterDog = true
@@ -222,10 +224,6 @@ struct SplashView: View {
         }
         return Date(timeIntervalSince1970: exp) > Date()
     }
-
-    // Remove local DogListResponse and use service model
-    typealias DogListResponse = 
-        mungcourse.Services.DogService.DogListResponse
 }
 
 #Preview {
