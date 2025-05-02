@@ -6,7 +6,7 @@ struct RegisterDogContentsView: View {
     @Binding var profileImage: Image?
     @Binding var selectedImageData: Data?
     @Binding var name: String
-    @Binding var gender: RegisterDogView.Gender?
+    @Binding var gender: Gender?
     @Binding var breed: String
     @Binding var dateOfBirth: Date
     @Binding var weight: String
@@ -29,8 +29,8 @@ struct RegisterDogContentsView: View {
 
                 VStack(spacing: 35) { 
                     RequiredTextField(title: "이름", placeholder: "입력하기", text: $name)
-                    // Use fully qualified enum type name here
-                    RequiredSegmentedPicker(title: "성별", selection: $gender, options: RegisterDogView.Gender.allCases)
+                    // Gender 타입 사용 (RegisterDogView.Gender 대신)
+                    RequiredSegmentedPicker(title: "성별", selection: $gender, options: Gender.allCases)
                     RequiredPickerField(title: "견종", placeholder: "선택하기", selection: $breed)
                     RequiredDatePicker(title: "생년월일", selection: $dateOfBirth)
                     RequiredTextField(title: "몸무게(kg)", placeholder: "입력하기", text: $weight)

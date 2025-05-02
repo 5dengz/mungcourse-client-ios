@@ -4,8 +4,8 @@ import PhotosUI // Already added, but good practice to ensure
 // TODO: Create a dedicated DogViewModel instead of using LoginViewModel
 
 struct RegisterDogView: View {
-    // TODO: Replace LoginViewModel with a dedicated DogViewModel
-    @ObservedObject var viewModel: LoginViewModel
+    // LoginViewModel 대신 RegisterDogViewModel 사용
+    @StateObject private var viewModel = RegisterDogViewModel()
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - State Variables (Managed by the main view)
@@ -40,21 +40,21 @@ struct RegisterDogView: View {
                     title: "반려견 정보 입력"
                 )
                 
-                // The main content area
+                // ViewModel이 모든 상태를 관리하도록 변경
                 RegisterDogContentsView(
-                    profileImage: $profileImage,
-                    selectedImageData: $selectedImageData,
-                    name: $name,
-                    gender: $gender,
-                    breed: $breed,
-                    dateOfBirth: $dateOfBirth,
-                    weight: $weight,
-                    isNeutered: $isNeutered,
-                    hasPatellarLuxationSurgery: $hasPatellarLuxationSurgery,
+                    profileImage: $viewModel.profileImage,
+                    selectedImageData: $viewModel.selectedImageData,
+                    name: $viewModel.name,
+                    gender: $viewModel.gender,
+                    breed: $viewModel.breed,
+                    dateOfBirth: $viewModel.dateOfBirth,
+                    weight: $viewModel.weight,
+                    isNeutered: $viewModel.isNeutered,
+                    hasPatellarLuxationSurgery: $viewModel.hasPatellarLuxationSurgery,
                     errorMessage: viewModel.errorMessage?.message,
-                    isFormValid: isFormValid,
+                    isFormValid: viewModel.isFormValid,
                     isLoading: viewModel.isLoading,
-                    registerAction: registerAction
+                    registerAction: viewModel.registerDog
                 )
                 .padding(.horizontal, 20)
                 // Remove navigation modifiers from here
@@ -68,9 +68,8 @@ struct RegisterDogView: View {
                 }
             }
             .navigationBarHidden(true) // Hide the default navigation bar
-            .onChange(of: viewModel.isLoggedIn) { _, isLoggedIn in
-                if isLoggedIn {
-                    // 로그인 완료 시 화면 닫기
+            .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
+                if isComplete {
                     dismiss()
                 }
             }
@@ -119,5 +118,5 @@ struct RegisterDogView: View {
 
 // MARK: - Preview
 #Preview {
-    RegisterDogView(viewModel: LoginViewModel())
+    RegisterDogView()
 } 
