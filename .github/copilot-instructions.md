@@ -1,5 +1,0 @@
-- always answer in Korean
-- use Sequential Thinking MCP and Knowledge Graph Memory MCP 
-- use webresearch to check the latest and most accurate information
-- always refer to official documentation
-- use Perplexity-server MCP to check correct code and deprecated code

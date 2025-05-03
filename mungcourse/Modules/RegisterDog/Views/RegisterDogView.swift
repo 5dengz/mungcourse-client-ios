@@ -25,7 +25,7 @@ struct RegisterDogView: View {
         if let detail = initialDetail {
             vm.name = detail.name
             vm.breed = detail.breed
-            vm.gender = RegisterDogViewModel.Gender(rawValue: detail.gender)
+            vm.gender = Gender(rawValue: detail.gender)
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             if let date = formatter.date(from: detail.birthDate) {
@@ -44,17 +44,6 @@ struct RegisterDogView: View {
         }
         _viewModel = StateObject(wrappedValue: vm)
     }
-    
-    // MARK: - State Variables (Managed by the main view)
-    @State private var profileImage: Image? = nil
-    @State private var selectedImageData: Data? = nil // State for selected image data
-    @State private var name: String = ""
-    @State private var gender: Gender? = nil
-    @State private var breed: String = ""
-    @State private var dateOfBirth: Date = Date()
-    @State private var weight: String = ""
-    @State private var isNeutered: Bool? = nil
-    @State private var hasPatellarLuxationSurgery: Bool? = nil
     
     // MARK: - Body
     var body: some View {
@@ -108,7 +97,7 @@ struct RegisterDogView: View {
     
     // MARK: - Computed Properties (Validation logic might stay here or move)
     private var isFormValid: Bool {
-        !name.isEmpty && gender != nil && !breed.isEmpty && !weight.isEmpty
+        !viewModel.name.isEmpty && viewModel.gender != nil && !viewModel.breed.isEmpty && !viewModel.weight.isEmpty
     }
 
     // MARK: - Actions (Registration logic stays in the main view)
