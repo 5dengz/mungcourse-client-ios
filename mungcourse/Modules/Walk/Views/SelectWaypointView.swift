@@ -46,11 +46,12 @@ struct SelectWaypointView: View {
             } else {
                 // 검색 결과 목록
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    LazyVStack(spacing: 12) {
                         ForEach(viewModel.dogPlaces) { place in
-                            DogPlaceResultRow(place: place)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
+                            DogPlaceResultRow(place: place, isSelected: viewModel.isSelected(place.id), onSelect: {
+                                viewModel.toggleSelection(for: place.id)
+                            })
+                            .padding(.horizontal, 20)
                         }
                         
                         if viewModel.dogPlaces.isEmpty && !viewModel.searchText.isEmpty {
@@ -60,6 +61,7 @@ struct SelectWaypointView: View {
                                 .padding(.top, 32)
                         }
                     }
+                    .padding(.vertical, 12)
                 }
             }
         }
@@ -74,72 +76,49 @@ struct SelectWaypointView: View {
 // 검색 결과 행 컴포넌트
 struct DogPlaceResultRow: View {
     let place: DogPlace
+    let isSelected: Bool
+    let onSelect: () -> Void
     
     var body: some View {
-        HStack(spacing: 12) {
-            // 이미지 (있는 경우)
-            if let imageUrl = place.dogPlaceImgUrl, !imageUrl.isEmpty {
-                AsyncImage(url: URL(string: imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Color.gray.opacity(0.3)
-                }
-                .frame(width: 50, height: 50)
-                .cornerRadius(8)
-            } else {
-                // 이미지 없는 경우 대체 이미지
-                Image(systemName: "pawprint.circle.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(.gray.opacity(0.7))
-            }
+        HStack(spacing: 16) {
+            // 왼쪽 아이콘
+            Image("icon_search")
+                .resizable()
+                .frame(width: 22, height: 22)
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(place.name)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.black)
-                
-                HStack(spacing: 8) {
-                    // 카테고리
-                    Text(place.category)
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-                    
-                    // 거리
-                    Text(formatDistance(place.distance))
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-                }
-                
-                // 영업시간 (있는 경우)
-                if let hours = place.openingHours, !hours.isEmpty {
-                    Text(hours)
-                        .font(.system(size: 12))
-                        .foregroundColor(.gray)
-                }
-            }
+            // 장소명
+            Text(place.name)
+                .font(Font.custom("Pretendard-Regular", size: 16))
+                .foregroundColor(.black)
             
             Spacer()
+            
+            // 선택 버튼
+            Button(action: onSelect) {
+                ZStack {
+                    Circle()
+                        .stroke(Color("main"), lineWidth: 1)
+                        .frame(width: 22, height: 22)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(Color("main"))
+                            .frame(width: 22, height: 22)
+                        
+                        Image("icon_check")
+                            .resizable()
+                            .frame(width: 12, height: 12)
+                            .foregroundColor(.white)
+                    }
+                }
+            }
         }
-        .padding(12)
+        .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         )
-    }
-    
-    // 거리 표시 형식 변환
-    private func formatDistance(_ distance: Double) -> String {
-        if distance < 1000 {
-            return "\(Int(distance))m"
-        } else {
-            let kmDistance = distance / 1000
-            return String(format: "%.1fkm", kmDistance)
-        }
     }
 }
 

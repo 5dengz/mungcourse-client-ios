@@ -8,6 +8,7 @@ class SelectWaypointViewModel: ObservableObject {
     @Published var dogPlaces: [DogPlace] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
+    @Published var selectedPlaceId: Int? = nil
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -63,5 +64,17 @@ class SelectWaypointViewModel: ObservableObject {
         searchText = ""
         dogPlaces = []
         errorMessage = nil
+    }
+    
+    func toggleSelection(for placeId: Int) {
+        if selectedPlaceId == placeId {
+            selectedPlaceId = nil
+        } else {
+            selectedPlaceId = placeId
+        }
+    }
+    
+    func isSelected(_ placeId: Int) -> Bool {
+        return selectedPlaceId == placeId
     }
 } 
