@@ -13,7 +13,7 @@ struct SelectWaypointView: View {
             // 검색 입력 필드
             HStack {
                 TextField("가고 싶은 장소를 검색하세요", text: $viewModel.searchText)
-                    .font(Font.custom("Pretendard", size: 14))
+                    .font(Font.custom("Pretendard-SemiBold", size: 15))
                     .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
                 
                 if !viewModel.searchText.isEmpty {
@@ -48,18 +48,15 @@ struct SelectWaypointView: View {
                 // 검색 결과 목록
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(viewModel.dogPlaces) { place in
-                            DogPlaceResultRow(place: place, isSelected: viewModel.isSelected(place.id), onSelect: {
-                                viewModel.toggleSelection(for: place.id)
-                            })
-                            .padding(.horizontal, 20)
-                        }
-                        
                         if viewModel.dogPlaces.isEmpty && !viewModel.searchText.isEmpty {
-                            Text("검색 결과가 없습니다")
-                                .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.top, 32)
+                            EmptyResultView()
+                        } else {
+                            ForEach(viewModel.dogPlaces) { place in
+                                DogPlaceResultRow(place: place, isSelected: viewModel.isSelected(place.id), onSelect: {
+                                    viewModel.toggleSelection(for: place.id)
+                                })
+                                .padding(.horizontal, 20)
+                            }
                         }
                     }
                     .padding(.vertical, 12)
@@ -116,6 +113,31 @@ struct DogPlaceResultRow: View {
             }
         }
         .padding(16)
+    }
+}
+
+// 검색 결과가 없을 때 보여줄 뷰
+struct EmptyResultView: View {
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "magnifyingglass")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 40, height: 40)
+                .foregroundColor(Color("gray400"))
+                .padding(.top, 40)
+            
+            Text("검색어와 일치하는 장소가 없습니다")
+                .font(Font.custom("Pretendard-Regular", size: 16))
+                .foregroundColor(Color("gray600"))
+            
+            Text("다른 검색어로 시도해보세요")
+                .font(Font.custom("Pretendard-Regular", size: 14))
+                .foregroundColor(Color("gray400"))
+                .padding(.bottom, 40)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20)
     }
 }
 

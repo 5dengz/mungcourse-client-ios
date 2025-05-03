@@ -15,9 +15,9 @@ class SelectWaypointViewModel: ObservableObject {
     init() {
         // Add debounce to search text to avoid too many API calls
         $searchText
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .removeDuplicates()
-            .filter { !$0.isEmpty }
+            .filter { !$0.isEmpty && $0.count >= 1 }
             .sink { [weak self] query in
                 self?.searchDogPlaces(query: query)
             }
@@ -31,16 +31,24 @@ class SelectWaypointViewModel: ObservableObject {
         }
         
         guard let location = GlobalLocationManager.shared.lastLocation else {
-            self.errorMessage = "현재 위치를 찾을 수 없습니다."
+            self.errorMessage = nil
+            let defaultLat = 37.5666103
+            let defaultLng = 126.9783882
+            
+            performSearch(query: query, latitude: defaultLat, longitude: defaultLng)
             return
         }
         
+        performSearch(query: query, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+    }
+    
+    private func performSearch(query: String, latitude: Double, longitude: Double) {
         isLoading = true
         errorMessage = nil
         
         DogPlaceService.shared.searchDogPlaces(
-            currentLat: location.coordinate.latitude,
-            currentLng: location.coordinate.longitude,
+            currentLat: latitude,
+            currentLng: longitude,
             placeName: query
         ) { [weak self] result in
             DispatchQueue.main.async {
@@ -49,12 +57,11 @@ class SelectWaypointViewModel: ObservableObject {
                 switch result {
                 case .success(let places):
                     self?.dogPlaces = places
-                    if places.isEmpty {
-                        self?.errorMessage = "검색 결과가 없습니다."
-                    }
+                    self?.errorMessage = nil
                 case .failure(let error):
-                    self?.errorMessage = "검색 중 오류가 발생했습니다: \(error.localizedDescription)"
+                    print("검색 오류 발생: \(error.localizedDescription)")
                     self?.dogPlaces = []
+                    self?.errorMessage = nil
                 }
             }
         }
