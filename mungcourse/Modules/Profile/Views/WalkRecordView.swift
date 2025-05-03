@@ -46,6 +46,13 @@ struct WalkRecordView: View {
         .font(.custom("Pretendard-Regular", size: 14))
         .padding()
         .background(Color.white)
+        .onAppear {
+            if let dogId = dogVM.selectedDog?.id {
+                Task {
+                    await dogVM.fetchWalkRecords(dogId)
+                }
+            }
+        }
     }
 }
 
@@ -56,4 +63,4 @@ struct WalkRecordView_Previews: PreviewProvider {
             .environmentObject(DogViewModel())
     }
 }
-#endif 
+#endif
