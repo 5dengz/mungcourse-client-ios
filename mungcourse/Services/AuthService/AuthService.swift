@@ -4,6 +4,7 @@ import GoogleSignIn
 import KeychainAccess
 import AuthenticationServices  // Apple Sign-In을 위해 AuthenticationServices 추가
 import UIKit  // UIApplication 사용을 위해 추가
+import CryptoKit  // SHA256 해싱을 위해 추가
 
 // 인증 서비스 결과 타입
 enum AuthResult {
@@ -42,11 +43,38 @@ class AuthService: AuthServiceProtocol {
     static let shared = AuthService()
     private let keychain = Keychain(service: "com.mungcourse.app")
     private var appleSignInDelegate: AppleSignInDelegate?  // Apple 로그인 대리자 보관
+    private var currentNonce: String?  // Apple Sign-In을 위한 nonce 저장
     
     private init() {}
     
     private static var apiBaseURL: String {
         Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
+    
+    /// 난수 nonce 문자열 생성
+    private func randomNonceString(length: Int = 32) -> String {
+        let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        var remainingLength = length
+        while remainingLength > 0 {
+            var random: UInt8 = 0
+            let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+            if errorCode != errSecSuccess {
+                fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
+            }
+            if random < charset.count {
+                result.append(charset[Int(random)])
+                remainingLength -= 1
+            }
+        }
+        return result
+    }
+    
+    /// SHA256 해싱
+    private func sha256(_ input: String) -> String {
+        let inputData = Data(input.utf8)
+        let hashedData = SHA256.hash(data: inputData)
+        return hashedData.map { String(format: "%02x", $0) }.joined()
     }
     
     // 구글 로그인 메소드
@@ -122,11 +150,13 @@ class AuthService: AuthServiceProtocol {
             guard let self = self else { return }
             let appleIDProvider = ASAuthorizationAppleIDProvider()
             let request = appleIDProvider.createRequest()
-            // 필요한 경우 사용자 정보 요청
-            // request.requestedScopes = [.fullName, .email]
+            let nonce = self.randomNonceString()
+            self.currentNonce = nonce
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = self.sha256(nonce)
             let authorizationController = ASAuthorizationController(authorizationRequests: [request])
             // 대리자 생성
-            let delegate = AppleSignInDelegate { result in
+            let delegate = AppleSignInDelegate(nonce: nonce) { result in
                 switch result {
                 case .success(let identityToken):
                     // 서버로 토큰 전송
@@ -198,19 +228,26 @@ class AuthService: AuthServiceProtocol {
 // Apple Sign-In Delegate 클래스
 private class AppleSignInDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     typealias Completion = (Result<String, Error>) -> Void
+    private let nonce: String?
     private let completion: Completion
 
-    init(completion: @escaping Completion) {
+    init(nonce: String?, completion: @escaping Completion) {
+        self.nonce = nonce
         self.completion = completion
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        guard let currentNonce = nonce else {
+            completion(.failure(AuthError.unknown))
+            return
+        }
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let tokenData = credential.identityToken,
               let tokenString = String(data: tokenData, encoding: .utf8) else {
-            completion(.failure(error: AuthError.unknown))
+            completion(.failure(AuthError.unknown))
             return
         }
+        // TODO: 검증 필요 시 identityToken의 nonce 클레임이 currentNonce와 일치하는지 확인
         completion(.success(tokenString))
     }
 
