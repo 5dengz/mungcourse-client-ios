@@ -100,6 +100,7 @@ struct ProfileTabView: View {
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
     @Binding var showingDogSelection: Bool
     @State private var showSettings = false
+    @State private var showProfileEdit = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -129,7 +130,7 @@ struct ProfileTabView: View {
                 ProfileSectionView(
                     nickname: dogVM.mainDog?.name,
                     profileImageUrl: dogVM.mainDog?.dogImgUrl,
-                    onEdit: { /* 프로필 편집 액션 */ }
+                    onEdit: { showProfileEdit = true }
                 )
                 .padding(.bottom, 24)
                 // 탭 선택자
@@ -161,6 +162,10 @@ struct ProfileTabView: View {
         }
         .fullScreenCover(isPresented: $showSettings) {
             SettingsView()
+        }
+        .fullScreenCover(isPresented: $showProfileEdit) {
+            ProfileDogSelectionView()
+                .environmentObject(dogVM)
         }
     }
 }
