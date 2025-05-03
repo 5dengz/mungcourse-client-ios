@@ -63,6 +63,22 @@ struct SettingsView: View {
                         .padding()
                         .background(Color.white)
                     }
+                    Divider()
+                    Button(action: {
+                        AuthService.shared.logout()
+                        dismiss()
+                    }) {
+                        HStack {
+                            Text("로그아웃")
+                                .foregroundColor(.black)
+                            Spacer()
+                            Image("arrow_right")
+                                .renderingMode(.template)
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                        .background(Color.white)
+                    }
                 }
                 .background(Color(UIColor.systemGroupedBackground))
                 Spacer()

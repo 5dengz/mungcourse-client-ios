@@ -244,7 +244,23 @@ class AuthService: AuthServiceProtocol {
     // 로그아웃 메소드
     func logout() {
         print("로그아웃 처리")
-        TokenManager.shared.clearTokens()
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/logout") else {
+            TokenManager.shared.clearTokens()
+            return
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        if let accessToken = TokenManager.shared.getAccessToken() {
+            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        }
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("로그아웃 통신 에러:", error)
+            } else if let http = response as? HTTPURLResponse {
+                print("로그아웃 응답 코드:", http.statusCode)
+            }
+            TokenManager.shared.clearTokens()
+        }.resume()
     }
 }
 
