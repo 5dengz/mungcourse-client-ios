@@ -154,7 +154,6 @@ struct ContentView: View {
             NavigationStack {
                 SelectWaypointView(onBack: {
                     showSelectWaypoint = false
-                    isStartWalkOverlayPresented = true
                 })
             }
         }

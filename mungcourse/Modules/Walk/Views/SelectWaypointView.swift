@@ -12,9 +12,6 @@ struct SelectWaypointView: View {
             
             // 검색 입력 필드
             HStack {
-                Image("icon_search")
-                    .resizable()
-                    .frame(width: 22, height: 22)
                 TextField("가고 싶은 장소를 검색하세요", text: $viewModel.searchText)
                     .font(Font.custom("Pretendard", size: 14))
                     .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
@@ -26,6 +23,10 @@ struct SelectWaypointView: View {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.gray)
                     }
+                } else {
+                    Image("icon_search")
+                        .resizable()
+                        .frame(width: 22, height: 22)
                 }
             }
             .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
@@ -107,18 +108,14 @@ struct DogPlaceResultRow: View {
                         
                         Image("icon_check")
                             .resizable()
-                            .frame(width: 12, height: 12)
+                            .renderingMode(.template)
+                            .frame(width: 22, height: 22)
                             .foregroundColor(.white)
                     }
                 }
             }
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-        )
     }
 }
 
