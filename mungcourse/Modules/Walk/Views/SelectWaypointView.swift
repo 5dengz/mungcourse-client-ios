@@ -3,6 +3,7 @@ import SwiftUI
 struct SelectWaypointView: View {
     let onBack: () -> Void
     @StateObject private var viewModel = SelectWaypointViewModel()
+    @State private var showRouteSelection = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -61,12 +62,43 @@ struct SelectWaypointView: View {
                     }
                     .padding(.vertical, 12)
                 }
+                
+                // 선택 완료 버튼
+                CommonFilledButton(
+                    title: "선택 완료",
+                    action: {
+                        showRouteSelection = true
+                    },
+                    isEnabled: viewModel.isCompleteButtonEnabled,
+                    backgroundColor: Color("main")
+                )
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
         }
         .navigationBarHidden(true)
         .onAppear {
             // 화면이 나타날 때 위치 업데이트 시작
             GlobalLocationManager.shared.startUpdatingLocation()
+        }
+        .fullScreenCover(isPresented: $showRouteSelection) {
+            if let currentLocation = viewModel.getCurrentLocation() {
+                NavigationStack {
+                    RouteSelectionView(
+                        startLocation: currentLocation,
+                        waypoints: viewModel.getSelectedPlaces(),
+                        onBack: {
+                            showRouteSelection = false
+                        },
+                        onSelectRoute: { selectedRoute in
+                            print("선택된 경로: \(selectedRoute.type.title), 거리: \(selectedRoute.formattedDistance)")
+                            // 여기서 경로를 시작하는 로직 추가
+                            showRouteSelection = false
+                            onBack() // 경로 선택 후 이전 화면으로 돌아가기
+                        }
+                    )
+                }
+            }
         }
     }
 }

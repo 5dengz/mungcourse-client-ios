@@ -8,7 +8,7 @@ class SelectWaypointViewModel: ObservableObject {
     @Published var dogPlaces: [DogPlace] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
-    @Published var selectedPlaceId: Int? = nil
+    @Published var selectedPlaceIds: Set<Int> = []
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -74,14 +74,33 @@ class SelectWaypointViewModel: ObservableObject {
     }
     
     func toggleSelection(for placeId: Int) {
-        if selectedPlaceId == placeId {
-            selectedPlaceId = nil
+        if selectedPlaceIds.contains(placeId) {
+            selectedPlaceIds.remove(placeId)
         } else {
-            selectedPlaceId = placeId
+            selectedPlaceIds.insert(placeId)
         }
     }
     
     func isSelected(_ placeId: Int) -> Bool {
-        return selectedPlaceId == placeId
+        return selectedPlaceIds.contains(placeId)
+    }
+    
+    // 선택 완료 버튼 활성화 여부
+    var isCompleteButtonEnabled: Bool {
+        return !selectedPlaceIds.isEmpty
+    }
+    
+    // 선택된 장소들 가져오기
+    func getSelectedPlaces() -> [DogPlace] {
+        return dogPlaces.filter { selectedPlaceIds.contains($0.id) }
+    }
+    
+    // 현재 위치 가져오기
+    func getCurrentLocation() -> CLLocationCoordinate2D? {
+        if let location = GlobalLocationManager.shared.lastLocation {
+            return CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        }
+        // 기본 좌표 (서울 시청)
+        return CLLocationCoordinate2D(latitude: 37.5666103, longitude: 126.9783882)
     }
 } 
