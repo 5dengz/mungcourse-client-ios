@@ -183,35 +183,50 @@ class AuthService: AuthServiceProtocol {
             completion(.failure(error: AuthError.unknown))
             return
         }
+        // nonce를 요청 본문에 함께 포함하기 위해 currentNonce 확인
+        guard let nonce = self.currentNonce else {
+            print("[AuthService] currentNonce가 nil입니다. Apple 로그인 요청에 nonce를 포함할 수 없습니다.")
+            completion(.failure(error: AuthError.unknown))
+            return
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // 서버 API 명세에 따라 identityToken만 전송합니다.
-        let body = ["identityToken": identityToken]
-        // 요청 URL 및 헤더 디버깅 로그
-        print("[AuthService] Apple 로그인 요청 URL: \(url.absoluteString)")
-        print("[AuthService] Apple 로그인 요청 헤더: \(request.allHTTPHeaderFields ?? [:])")
-        // 요청 본문(JSON) 디버깅 로그
+        let body: [String: String] = [
+            "identityToken": identityToken,
+            "nonce": nonce
+        ]
+        // 요청 전체 로그 출력
+        print("[AuthService] ● Apple 로그인 요청 ●")
+        print("Method: \(request.httpMethod ?? "")")
+        print("URL: \(url.absoluteString)")
+        print("Headers: \(request.allHTTPHeaderFields ?? [:])")
         if let jsonData = try? JSONSerialization.data(withJSONObject: body),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            print("[AuthService] Apple 로그인 요청 본문(JSON): \(jsonString)")
+            print("Request Body: \(jsonString)")
             request.httpBody = jsonData
         } else {
             print("[AuthService] Apple 로그인 요청 본문 생성 실패")
         }
         URLSession.shared.dataTask(with: request) { data, response, error in
+            // 응답 전체 로그 출력
+            print("[AuthService] ● Apple 로그인 응답 ●")
             if let error = error {
-                print("애플 로그인 통신 에러:", error)
+                print("Error: \(error.localizedDescription)")
                 completion(.failure(error: error))
                 return
             }
             guard let http = response as? HTTPURLResponse else {
+                print("[AuthService] Apple 로그인 응답이 HTTPURLResponse가 아님")
                 completion(.failure(error: AuthError.unknown))
                 return
             }
-            print("애플 로그인 응답 코드:", http.statusCode)
+            print("Status Code: \(http.statusCode)")
+            print("Response Headers: \(http.allHeaderFields)")
             if let data = data, let bodyStr = String(data: data, encoding: .utf8) {
-                print("애플 로그인 응답 body:", bodyStr)
+                print("Response Body: \(bodyStr)")
+            } else {
+                print("[AuthService] Apple 로그인 응답 바디 없음")
             }
             // 상태 코드별 에러 처리
             switch http.statusCode {

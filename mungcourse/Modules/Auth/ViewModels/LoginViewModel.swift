@@ -29,6 +29,7 @@ class LoginViewModel: ObservableObject {
     // MARK: - 상태 속성
     @Published var isLoading = false
     @Published var errorMessage: IdentifiableError? = nil
+    @Published var needsDogRegistration: Bool = false  // 반려견 등록 화면 표시 여부
     // 로그인 상태는 TokenManager.shared.accessToken으로 관리합니다
     
     // MARK: - 서비스
