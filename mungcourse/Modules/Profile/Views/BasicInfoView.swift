@@ -5,34 +5,39 @@ struct BasicInfoView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("견종/성별")
-                Spacer()
-                Text("말티즈/여아")
-            }
-            Divider()
-            HStack {
-                Text("생년월일")
-                Spacer()
-                Text("2012.04.03")
-            }
-            Divider()
-            HStack {
-                Text("체중")
-                Spacer()
-                Text("3.2kg")
-            }
-            Divider()
-            HStack {
-                Text("중성화 여부")
-                Spacer()
-                Text("예")
-            }
-            Divider()
-            HStack {
-                Text("슬개골 탈골 수술 여부")
-                Spacer()
-                Text("예")
+            if let detail = dogVM.dogDetail {
+                HStack {
+                    Text("견종/성별")
+                    Spacer()
+                    Text("\(detail.breed)/\(detail.gender)")
+                }
+                Divider()
+                HStack {
+                    Text("생년월일")
+                    Spacer()
+                    Text(detail.birthDate)
+                }
+                Divider()
+                HStack {
+                    Text("체중")
+                    Spacer()
+                    Text("\(detail.weight, specifier: "%.1f")kg")
+                }
+                Divider()
+                HStack {
+                    Text("중성화 여부")
+                    Spacer()
+                    Text(detail.neutered ? "예" : "아니오")
+                }
+                Divider()
+                HStack {
+                    Text("슬개골 탈골 수술 여부")
+                    Spacer()
+                    Text(detail.hasArthritis ? "예" : "아니오")
+                }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 200)
             }
         }
         .padding()

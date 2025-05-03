@@ -301,4 +301,27 @@ class DogService: DogServiceProtocol {
         }
         .eraseToAnyPublisher()
     }
+
+    // GET /v1/dogs/{dogId} 강아지 세부 정보 조회
+    func fetchDogDetail(dogId: Int) async throws -> DogRegistrationResponseData {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // 토큰 추가
+        guard let token = authToken, !token.isEmpty else {
+            print("❌ Error: Auth token is missing for /v1/dogs/{dogId} request.")
+            throw NetworkError.missingToken
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.httpError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1, data: data)
+        }
+        let decoder = JSONDecoder()
+        let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
+        return apiResponse.data
+    }
 }

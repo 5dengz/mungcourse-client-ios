@@ -64,4 +64,5 @@ protocol DogServiceProtocol {
     func getS3PresignedUrl(fileName: String, fileExtension: String, contentType: String) async throws -> S3PresignedUrlFullResponse
     func uploadImageToS3(presignedUrl: String, imageData: Data, contentType: String) async throws
     func registerDogWithDetails(dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
+    func fetchDogDetail(dogId: Int) async throws -> DogRegistrationResponseData
 }

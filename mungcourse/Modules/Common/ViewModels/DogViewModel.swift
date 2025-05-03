@@ -7,6 +7,7 @@ class DogViewModel: ObservableObject {
     @Published var mainDog: Dog? = nil
     @Published var selectedDog: Dog? = nil
     @Published var selectedDogName: String = ""
+    @Published var dogDetail: DogRegistrationResponseData? = nil
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -39,5 +40,14 @@ class DogViewModel: ObservableObject {
 
     var dogNames: [String] {
         dogs.map { $0.name }
+    }
+
+    func fetchDogDetail(_ dogId: Int) async {
+        do {
+            let detail = try await DogService.shared.fetchDogDetail(dogId: dogId)
+            self.dogDetail = detail
+        } catch {
+            print("[DogViewModel] fetchDogDetail error: \(error)")
+        }
     }
 } 

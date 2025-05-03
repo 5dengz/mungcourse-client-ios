@@ -142,6 +142,20 @@ struct ProfileTabView: View {
         }
         .onAppear {
             viewModel.fetchUserInfo()
+            // 기본 반려견 상세 정보 요청
+            Task {
+                if let dogId = dogVM.mainDog?.id {
+                    await dogVM.fetchDogDetail(dogId)
+                }
+            }
+        }
+        // 메인 반려견이 변경될 때마다 상세 정보를 다시 요청
+        .onChange(of: dogVM.mainDog) { newMain in
+            if let id = newMain?.id {
+                Task {
+                    await dogVM.fetchDogDetail(id)
+                }
+            }
         }
         .fullScreenCover(isPresented: $showSettings) {
             SettingsView()
