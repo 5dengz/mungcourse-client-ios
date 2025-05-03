@@ -147,4 +147,5 @@ struct ProfileTabView: View {
 
 #Preview {
     ProfileTabView(showingDogSelection: .constant(false))
+        .environmentObject(DogViewModel())
 }
