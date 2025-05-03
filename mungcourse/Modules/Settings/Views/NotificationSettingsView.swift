@@ -14,15 +14,15 @@ struct NotificationSettingsView: View {
                 title: "알림 및 기능"
             )
             VStack(spacing: 1) {
-                Toggle("알림 활성화 (슬라이드 알림)", isOn: $isNotificationsEnabled)
+                Toggle("알림 활성화", isOn: $isNotificationsEnabled)
                     .padding()
                     .background(Color.white)
                 Divider()
-                Toggle("산책 푸시 알림 (슬라이드 설정)", isOn: $isWalkPushEnabled)
+                Toggle("산책 푸시 알림", isOn: $isWalkPushEnabled)
                     .padding()
                     .background(Color.white)
                 Divider()
-                Toggle("산책 중단 알림 (슬라이드 설정)", isOn: $isStopPushEnabled)
+                Toggle("산책 중단 알림", isOn: $isStopPushEnabled)
                     .padding()
                     .background(Color.white)
             }

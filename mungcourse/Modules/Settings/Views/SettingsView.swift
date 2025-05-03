@@ -5,16 +5,16 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
                 CommonHeaderView(
                     leftIcon: "icon_x",
                     leftAction: { dismiss() },
                     title: "설정"
                 )
-                VStack(spacing: 1) {
+                VStack(spacing: 0) {
                     NavigationLink(destination: NotificationSettingsView()) {
                         HStack {
                             Text("알림 및 기능")
+                                .font(.custom("Pretendard-Regular", size: 16))
                                 .foregroundColor(.black)
                             Spacer()
                             Image("arrow_right")
@@ -23,11 +23,12 @@ struct SettingsView: View {
                         }
                         .padding()
                         .background(Color.white)
+                        .padding(.bottom, 14)
                     }
-                    Divider()
                     Button(action: { /* 문의하기 액션 */ }) {
                         HStack {
                             Text("문의하기")
+                                .font(.custom("Pretendard-Regular", size: 16))
                                 .foregroundColor(.black)
                             Spacer()
                             Image("arrow_right")
@@ -36,11 +37,12 @@ struct SettingsView: View {
                         }
                         .padding()
                         .background(Color.white)
+                        .padding(.bottom, 14)
                     }
-                    Divider()
                     Button(action: { /* 이용약관 액션 */ }) {
                         HStack {
                             Text("이용약관")
+                                .font(.custom("Pretendard-Regular", size: 16))
                                 .foregroundColor(.black)
                             Spacer()
                             Image("arrow_right")
@@ -49,11 +51,12 @@ struct SettingsView: View {
                         }
                         .padding()
                         .background(Color.white)
+                        .padding(.bottom, 14)
                     }
-                    Divider()
                     NavigationLink(destination: AccountDeletionView()) {
                         HStack {
                             Text("회원 탈퇴")
+                                .font(.custom("Pretendard-Regular", size: 16))
                                 .foregroundColor(.black)
                             Spacer()
                             Image("arrow_right")
@@ -62,14 +65,15 @@ struct SettingsView: View {
                         }
                         .padding()
                         .background(Color.white)
+                        .padding(.bottom, 14)
                     }
-                    Divider()
                     Button(action: {
                         AuthService.shared.logout()
                         dismiss()
                     }) {
                         HStack {
                             Text("로그아웃")
+                                .font(.custom("Pretendard-Regular", size: 16))
                                 .foregroundColor(.black)
                             Spacer()
                             Image("arrow_right")
@@ -79,11 +83,11 @@ struct SettingsView: View {
                         .padding()
                         .background(Color.white)
                     }
-                }
                 .background(Color(UIColor.systemGroupedBackground))
                 Spacer()
             }
             .navigationBarHidden(true)
+            .padding(.horizontal, 16)
         }
         .ignoresSafeArea(edges: .bottom)
     }
@@ -95,4 +99,4 @@ struct SettingsView_Previews: PreviewProvider {
         SettingsView()
     }
 }
-#endif 
+#endif
