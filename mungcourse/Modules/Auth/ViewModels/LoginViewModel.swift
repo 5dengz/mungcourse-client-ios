@@ -30,7 +30,6 @@ class LoginViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: IdentifiableError? = nil
     @AppStorage("isLoggedIn") private(set) var isLoggedIn: Bool = false
-    @AppStorage("authToken") private var authToken: String = ""
     private var pendingAuthToken: String? = nil
     @Published var needsDogRegistration: Bool = false
     
@@ -47,13 +46,11 @@ class LoginViewModel: ObservableObject {
     func checkLoginStatus() {
         guard let token = TokenManager.shared.getAccessToken(), !token.isEmpty else {
             isLoggedIn = false
-            authToken = ""
             print("로그인 정보 없음: 재로그인 필요")
             return
         }
         
         if isTokenValid(token) {
-            authToken = token
             isLoggedIn = true
             print("로그인 유지: 유효한 토큰")
         } else {
@@ -172,7 +169,7 @@ class LoginViewModel: ObservableObject {
             self.isLoading = false
             
             if let token = self.pendingAuthToken {
-                self.authToken = token
+                // TokenManager에 이미 저장된 토큰을 사용
             }
             self.needsDogRegistration = false
             self.isLoggedIn = true
@@ -232,7 +229,6 @@ class LoginViewModel: ObservableObject {
                 // 3. 로그인 완료
                 await MainActor.run {
                     if let token = self.pendingAuthToken {
-                        self.authToken = token
                         print("Auth token saved.")
                     }
                     self.needsDogRegistration = false
@@ -253,7 +249,6 @@ class LoginViewModel: ObservableObject {
     // MARK: - 로그아웃 메서드
     func logout() {
         authService.logout()
-        self.authToken = ""
         self.isLoggedIn = false
     }
 }

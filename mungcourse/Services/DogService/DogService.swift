@@ -32,8 +32,10 @@ class DogService: DogServiceProtocol {
         return URL(string: "https://api.mungcourse.com")!
     }
 
-    // Access Token (using AppStorage for simplicity, align with LoginViewModel)
-    @AppStorage("authToken") private var authToken: String = ""
+    // Access token getter
+    private var authToken: String? {
+        TokenManager.shared.getAccessToken()
+    }
 
     // MARK: - Combine 기반 구현 (첫 번째 파일에서 통합)
     
@@ -44,27 +46,36 @@ class DogService: DogServiceProtocol {
         request.httpMethod = "GET"
         
         // 토큰 추가
-        if !authToken.isEmpty {
-            request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        if let token = authToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
         return Future<[Dog], Error> { promise in
             URLSession.shared.dataTaskPublisher(for: request)
-                .map { $0.data }
+                .tryMap { output -> Data in
+                    guard let httpResponse = output.response as? HTTPURLResponse else {
+                        throw NetworkError.invalidResponse
+                    }
+                    let data = output.data
+                    switch httpResponse.statusCode {
+                    case 200...299:
+                        return data
+                    case 404:
+                        print("[DogService.fetchDogs] 반려견 없음 (404)")
+                        return Data() // 빈 바이트로 빈 배열 처리
+                    default:
+                        throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
+                    }
+                }
                 .tryMap { data -> [Dog] in
-                    // HTTP 404 처리: 반려견 없음으로 간주하고 빈 배열 반환
-                    let response = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-                    if let message = response?["message"] as? String, message.contains("not found") {
-                        print("[DogService.fetchDogs] 반려견 없음")
+                    // 빈 Data는 빈 배열로 변환
+                    if data.isEmpty {
                         return []
                     }
-                    
-                    // 서버 응답 JSON 전체 로그
+                    // 서버 응답 전체 로그
                     if let jsonString = String(data: data, encoding: .utf8) {
                         print("[DogService.fetchDogs] 서버 응답: \(jsonString)")
                     }
-                    
-                    // 응답 디코딩
                     let responseWrapper = try JSONDecoder().decode(DogListResponse.self, from: data)
                     return responseWrapper.data
                 }
@@ -92,8 +103,8 @@ class DogService: DogServiceProtocol {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // 토큰 추가
-        if !authToken.isEmpty {
-            request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        if let token = authToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         
         // 요청 바디
@@ -137,18 +148,18 @@ class DogService: DogServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        guard !authToken.isEmpty else {
+        guard let token = authToken, !token.isEmpty else {
             print("❌ Error: Auth token is missing for /v1/s3 request.")
             throw NetworkError.missingToken
         }
-        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         // fileExtension에서 앞에 점(.)이 있으면 제거
         let cleanExtension = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
         let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension, "contentType": contentType]
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-            print("➡️ Requesting S3 URL: \(endpoint) with token: \(authToken.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
+            print("➡️ Requesting S3 URL: \(endpoint) with token: \(token.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
         } catch {
             print("❌ Error encoding S3 URL request body: \(error)")
             throw NetworkError.encodingError(error)
@@ -214,18 +225,18 @@ class DogService: DogServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        guard !authToken.isEmpty else {
+        guard let token = authToken, !token.isEmpty else {
              print("❌ Error: Auth token is missing for /v1/dogs request.")
             throw NetworkError.missingToken
         }
-        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
             let encoder = JSONEncoder()
             // If server expects specific date format, configure encoder
             // encoder.dateEncodingStrategy = .iso8601 // or .formatted(dateFormatter)
             request.httpBody = try encoder.encode(dogData)
-            print("➡️ Registering dog: \(endpoint) with token: \(authToken.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
+            print("➡️ Registering dog: \(endpoint) with token: \(token.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
         } catch {
              print("❌ Error encoding dog registration request body: \(error)")
             throw NetworkError.encodingError(error)
@@ -264,8 +275,8 @@ class DogService: DogServiceProtocol {
         let endpoint = baseURL.appendingPathComponent("/v1/dogs/main")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
-        if !authToken.isEmpty {
-            request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        if let token = authToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
         return Future<Dog, Error> { promise in

@@ -186,19 +186,45 @@ class AuthService: AuthServiceProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // 서버 API 명세에 따라 identityToken만 전송합니다.
         let body = ["identityToken": identityToken]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        // 요청 URL 및 헤더 디버깅 로그
+        print("[AuthService] Apple 로그인 요청 URL: \(url.absoluteString)")
+        print("[AuthService] Apple 로그인 요청 헤더: \(request.allHTTPHeaderFields ?? [:])")
+        // 요청 본문(JSON) 디버깅 로그
+        if let jsonData = try? JSONSerialization.data(withJSONObject: body),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            print("[AuthService] Apple 로그인 요청 본문(JSON): \(jsonString)")
+            request.httpBody = jsonData
+        } else {
+            print("[AuthService] Apple 로그인 요청 본문 생성 실패")
+        }
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("애플 로그인 통신 에러:", error)
                 completion(.failure(error: error))
                 return
             }
-            if let http = response as? HTTPURLResponse {
-                print("애플 로그인 응답 코드:", http.statusCode)
+            guard let http = response as? HTTPURLResponse else {
+                completion(.failure(error: AuthError.unknown))
+                return
             }
+            print("애플 로그인 응답 코드:", http.statusCode)
             if let data = data, let bodyStr = String(data: data, encoding: .utf8) {
                 print("애플 로그인 응답 body:", bodyStr)
+            }
+            // 상태 코드별 에러 처리
+            switch http.statusCode {
+            case 200...299:
+                break  // 정상 처리
+            case 401, 403:
+                print("[AuthService] Apple 로그인 정보 없음 (HTTP \(http.statusCode)): 토큰 초기화 및 재로그인 필요")
+                TokenManager.shared.clearTokens()
+                completion(.failure(error: AuthError.invalidCredentials))
+                return
+            default:
+                completion(.failure(error: AuthError.unknown))
+                return
             }
             guard let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -219,9 +245,6 @@ class AuthService: AuthServiceProtocol {
     func logout() {
         print("로그아웃 처리")
         TokenManager.shared.clearTokens()
-        // 여기서 실제 로그아웃 로직 구현
-        // - 토큰 삭제
-        // - 서버에 로그아웃 알림 등
     }
 }
 

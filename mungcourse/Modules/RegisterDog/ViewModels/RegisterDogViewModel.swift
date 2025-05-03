@@ -37,9 +37,6 @@ class RegisterDogViewModel: ObservableObject {
     private let dogService: DogServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     
-    // AppStorage 접근
-    @AppStorage("authToken") private var authToken: String = ""
-    
     // MARK: - 초기화
     init(dogService: DogServiceProtocol = DogService.shared) {
         self.dogService = dogService
