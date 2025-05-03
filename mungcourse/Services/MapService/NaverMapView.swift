@@ -48,6 +48,40 @@ struct NaverMapView: UIViewRepresentable {
         mapView.mapView.touchDelegate = context.coordinator
         mapView.mapView.addCameraDelegate(delegate: context.coordinator)
         
+        // 이펙트 마커 생성 (발바닥 마커 아래에 위치하도록 먼저 생성)
+        let effectImage = UIImage(named: "pinpoint_effect")
+        if effectImage == nil {
+            print("[디버그] pinpoint_effect 이미지를 불러오지 못했습니다.")
+        } else {
+            print("[디버그] pinpoint_effect 이미지 정상 로드됨")
+        }
+        
+        let effect = NMFMarker()
+        if let effectImage = effectImage {
+            effect.iconImage = NMFOverlayImage(image: effectImage)
+        }
+        effect.width = 30
+        effect.height = 14
+        effect.anchor = CGPoint(x: 0.5, y: 0.5)
+        effect.zIndex = 0 // 낮은 zIndex로 설정하여 발바닥 마커 아래에 표시
+        if let userLocation = userLocation {
+            effect.position = userLocation
+        }
+        effect.mapView = mapView.mapView
+        context.coordinator.effectMarker = effect
+        
+        // 펄스 애니메이션을 위한 타이머 설정 (원본 이미지 비율 30x14 유지)
+        Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { [weak effect] timer in
+            guard let effect = effect else {
+                timer.invalidate()
+                return
+            }
+            
+            let scale = 0.8 + 0.5 * sin(Date.timeIntervalSinceReferenceDate)
+            effect.width = 30 * scale
+            effect.height = 14 * scale
+        }
+        
         // 커스텀 발바닥 마커 생성
         let pawImage = UIImage(named: "pinpoint_paw")
         if pawImage == nil {
@@ -55,6 +89,7 @@ struct NaverMapView: UIViewRepresentable {
         } else {
             print("[디버그] pinpoint_paw 이미지 정상 로드됨")
         }
+        
         let paw = NMFMarker()
         if let pawImage = pawImage {
             paw.iconImage = NMFOverlayImage(image: pawImage)
@@ -62,28 +97,12 @@ struct NaverMapView: UIViewRepresentable {
         paw.width = 25
         paw.height = 32
         paw.anchor = CGPoint(x: 0.5, y: 1.0)
+        paw.zIndex = 1 // 높은 zIndex로 설정하여 이펙트 마커 위에 표시
         if let userLocation = userLocation {
             paw.position = userLocation
         }
         paw.mapView = mapView.mapView
         context.coordinator.pawMarker = paw
-        // 커스텀 이펙트 뷰 생성 및 애니메이션
-        let effectView = UIImageView(image: UIImage(named: "pinpoint_effect"))
-        effectView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        if let userLocation = userLocation {
-            let point = mapView.mapView.projection.point(from: userLocation)
-            effectView.center = point
-        }
-        // effectView가 pawMarker보다 먼저 addSubview되어야 z순서가 아래로 감
-        mapView.addSubview(effectView)
-        context.coordinator.effectView = effectView
-        let pulseAnim = CABasicAnimation(keyPath: "transform.scale")
-        pulseAnim.fromValue = 0.5
-        pulseAnim.toValue = 2.0
-        pulseAnim.duration = 1.0
-        pulseAnim.timingFunction = CAMediaTimingFunction(name: .easeOut)
-        pulseAnim.repeatCount = Float.infinity
-        effectView.layer.add(pulseAnim, forKey: "pulse")
         
         // 카메라 이동
         let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate, zoomTo: zoomLevel)
@@ -122,10 +141,7 @@ struct NaverMapView: UIViewRepresentable {
         // 마커와 이펙트 위치를 userLocation 기준으로 업데이트
         if let userLocation = userLocation {
             context.coordinator.pawMarker?.position = userLocation
-            if let effectView = context.coordinator.effectView {
-                let point = mapView.mapView.projection.point(from: userLocation)
-                effectView.center = point
-            }
+            context.coordinator.effectMarker?.position = userLocation
         }
         // 경로 오버레이 업데이트 (방어 코드 추가)
         print("[디버그] pathCoordinates 변경됨: count=\(pathCoordinates.count)")
@@ -142,7 +158,7 @@ struct NaverMapView: UIViewRepresentable {
         let parent: NaverMapView
         weak var pathOverlay: NMFPath?
         var pawMarker: NMFMarker?
-        var effectView: UIImageView?
+        var effectMarker: NMFMarker?
         
         init(_ parent: NaverMapView) {
             self.parent = parent
