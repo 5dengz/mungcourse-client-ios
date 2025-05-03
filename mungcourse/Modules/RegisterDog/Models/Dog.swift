@@ -1,6 +1,6 @@
 import Foundation
 
-struct Dog: Codable, Identifiable {
+struct Dog: Codable, Identifiable, Equatable {
     let id: Int
     let name: String
     let dogImgUrl: String?
