@@ -4,7 +4,7 @@ struct BasicInfoView: View {
     @EnvironmentObject var dogVM: DogViewModel
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 15) {
             if let detail = dogVM.dogDetail {
                 HStack {
                     Text("견종/성별")
@@ -13,6 +13,7 @@ struct BasicInfoView: View {
                 }
                 Divider()
                     .background(Color("gray300"))
+                    .padding(.bottom, 0)
                 HStack {
                     Text("생년월일")
                     Spacer()
@@ -20,6 +21,7 @@ struct BasicInfoView: View {
                 }
                 Divider()
                     .background(Color("gray300"))
+                    .padding(.bottom, 0)
                 HStack {
                     Text("체중")
                     Spacer()
@@ -27,6 +29,7 @@ struct BasicInfoView: View {
                 }
                 Divider()
                     .background(Color("gray300"))
+                    .padding(.bottom, 0)
                 HStack {
                     Text("중성화 여부")
                     Spacer()
@@ -34,6 +37,7 @@ struct BasicInfoView: View {
                 }
                 Divider()
                     .background(Color("gray300"))
+                    .padding(.bottom, 0)
                 HStack {
                     Text("슬개골 탈골 수술 여부")
                     Spacer()

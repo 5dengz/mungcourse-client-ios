@@ -12,7 +12,7 @@ struct WalkRecordView: View {
         let totalDurationMin = totalDurationSec / 60
         let totalCalories = dogVM.walkRecords.map { $0.calories }.reduce(0, +)
 
-        VStack(spacing: 10) {
+        VStack(spacing: 15) {
             HStack {
                 Text("산책 횟수")
                 Spacer()
@@ -20,6 +20,7 @@ struct WalkRecordView: View {
             }
             Divider()
                 .background(Color("gray300"))
+                .padding(.bottom, 0)
             HStack {
                 Text("총 거리")
                 Spacer()
@@ -27,6 +28,7 @@ struct WalkRecordView: View {
             }
             Divider()
                 .background(Color("gray300"))
+                .padding(.bottom, 0)
             HStack {
                 Text("총 소요시간")
                 Spacer()
@@ -34,6 +36,7 @@ struct WalkRecordView: View {
             }
             Divider()
                 .background(Color("gray300"))
+                .padding(.bottom, 0)
             HStack {
                 Text("칼로리")
                 Spacer()
