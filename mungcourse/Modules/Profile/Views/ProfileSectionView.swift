@@ -10,14 +10,18 @@ struct ProfileSectionView: View {
                 AsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
                 } placeholder: {
-                    Circle().fill(Color.gray.opacity(0.2))
+                    Image("profile_empty")
+                        .resizable()
+                        .scaledToFill()
                 }
                 .frame(width: 127, height: 127)
                 .clipShape(Circle())
             } else {
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
+                Image("profile_empty")
+                    .resizable()
+                    .scaledToFill()
                     .frame(width: 127, height: 127)
+                    .clipShape(Circle())
             }
             Spacer().frame(height: 16)
             Text(nickname ?? "강아지 이름")
