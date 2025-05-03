@@ -8,6 +8,7 @@ class DogViewModel: ObservableObject {
     @Published var selectedDog: Dog? = nil
     @Published var selectedDogName: String = ""
     @Published var dogDetail: DogRegistrationResponseData? = nil
+    @Published var walkRecords: [WalkRecordData] = []
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -36,6 +37,7 @@ class DogViewModel: ObservableObject {
     func selectDog(_ dog: Dog) {
         selectedDog = dog
         selectedDogName = dog.name
+        walkRecords = []
     }
 
     var dogNames: [String] {
@@ -48,6 +50,15 @@ class DogViewModel: ObservableObject {
             self.dogDetail = detail
         } catch {
             print("[DogViewModel] fetchDogDetail error: \(error)")
+        }
+    }
+
+    func fetchWalkRecords(_ dogId: Int) async {
+        do {
+            let records = try await DogService.shared.fetchWalkRecords(dogId: dogId)
+            self.walkRecords = records
+        } catch {
+            print("[DogViewModel] fetchWalkRecords error: \(error)")
         }
     }
 } 

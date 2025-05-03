@@ -53,6 +53,16 @@ struct DogRegistrationResponseData: Decodable {
     let isMain: Bool
 }
 
+// 강아지 산책 기록 모델
+struct WalkRecordData: Decodable {
+    let id: Int
+    let distanceKm: Double
+    let durationSec: Int
+    let calories: Int
+    let startedAt: String
+    let endedAt: String
+}
+
 protocol DogServiceProtocol {
     // --- 기존 함수 시그니처 (Publisher 방식 예시) ---
     // 필요에 따라 async/await 방식으로 변경하거나 유지할 수 있습니다.
@@ -65,4 +75,6 @@ protocol DogServiceProtocol {
     func uploadImageToS3(presignedUrl: String, imageData: Data, contentType: String) async throws
     func registerDogWithDetails(dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
     func fetchDogDetail(dogId: Int) async throws -> DogRegistrationResponseData
+    // GET /v1/dogs/{dogId}/walks 강아지 산책 기록 조회
+    func fetchWalkRecords(dogId: Int) async throws -> [WalkRecordData]
 }

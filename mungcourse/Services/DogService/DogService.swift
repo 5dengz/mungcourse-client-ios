@@ -324,4 +324,24 @@ class DogService: DogServiceProtocol {
         let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
         return apiResponse.data
     }
+
+    // GET /v1/dogs/{dogId}/walks 강아지 산책 기록 조회
+    func fetchWalkRecords(dogId: Int) async throws -> [WalkRecordData] {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)/walks")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let token = authToken, !token.isEmpty else {
+            throw NetworkError.missingToken
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.httpError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1, data: data)
+        }
+        let decoder = JSONDecoder()
+        let apiResponse = try decoder.decode(ServiceAPIResponse<[WalkRecordData]>.self, from: data)
+        return apiResponse.data
+    }
 }

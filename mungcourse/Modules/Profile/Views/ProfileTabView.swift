@@ -142,18 +142,20 @@ struct ProfileTabView: View {
         }
         .onAppear {
             viewModel.fetchUserInfo()
-            // 기본 반려견 상세 정보 요청
             Task {
                 if let dogId = dogVM.mainDog?.id {
+                    // 상세 정보 및 산책 기록 조회
                     await dogVM.fetchDogDetail(dogId)
+                    await dogVM.fetchWalkRecords(dogId)
                 }
             }
         }
-        // 메인 반려견이 변경될 때마다 상세 정보를 다시 요청
+        // 메인 반려견이 변경될 때마다 상세 정보 및 산책 기록 재요청
         .onChange(of: dogVM.mainDog) { newMain in
             if let id = newMain?.id {
                 Task {
                     await dogVM.fetchDogDetail(id)
+                    await dogVM.fetchWalkRecords(id)
                 }
             }
         }
