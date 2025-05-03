@@ -99,6 +99,7 @@ struct ProfileTabView: View {
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
     @Binding var showingDogSelection: Bool
+    @State private var showSettings = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -115,7 +116,7 @@ struct ProfileTabView: View {
                                 .font(.title2)
                                 .foregroundColor(.black)
                         }
-                        Button(action: { /* 설정 액션 */ }) {
+                        Button(action: { showSettings = true }) {
                             Image(systemName: "gearshape")
                                 .font(.title2)
                                 .foregroundColor(.primary)
@@ -141,6 +142,9 @@ struct ProfileTabView: View {
         }
         .onAppear {
             viewModel.fetchUserInfo()
+        }
+        .fullScreenCover(isPresented: $showSettings) {
+            SettingsView()
         }
     }
 }
