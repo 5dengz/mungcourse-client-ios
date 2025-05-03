@@ -142,7 +142,7 @@ class DogService: DogServiceProtocol {
     
     // MARK: - Async/Await 기반 구현
 
-    func getS3PresignedUrl(fileName: String, fileExtension: String, contentType: String) async throws -> S3PresignedUrlFullResponse {
+    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -156,7 +156,7 @@ class DogService: DogServiceProtocol {
 
         // fileExtension에서 앞에 점(.)이 있으면 제거
         let cleanExtension = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
-        let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension, "contentType": contentType]
+        let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension]
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
             print("➡️ Requesting S3 URL: \(endpoint) with token: \(token.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")

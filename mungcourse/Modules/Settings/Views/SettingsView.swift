@@ -11,7 +11,7 @@ struct SettingsView: View {
                     title: "설정"
                 )
                 VStack(spacing: 0) {
-                    NavigationLink(destination: NotificationSettingsView()) {
+                    NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {
                         HStack {
                             Text("알림 및 기능")
                                 .font(.custom("Pretendard-Regular", size: 16))
@@ -21,9 +21,9 @@ struct SettingsView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.gray)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 16)
                     }
                     Button(action: { /* 문의하기 액션 */ }) {
                         HStack {
@@ -35,9 +35,9 @@ struct SettingsView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.gray)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 16)
                     }
                     Button(action: { /* 이용약관 액션 */ }) {
                         HStack {
@@ -49,9 +49,9 @@ struct SettingsView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.gray)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 16)
                     }
                     NavigationLink(destination: AccountDeletionView()) {
                         HStack {
@@ -63,9 +63,9 @@ struct SettingsView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.gray)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 16)
                     }
                     Button(action: {
                         AuthService.shared.logout()
@@ -80,7 +80,7 @@ struct SettingsView: View {
                                 .renderingMode(.template)
                                 .foregroundColor(.gray)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
                         .background(Color.white)
                     }
                 .background(Color(UIColor.systemGroupedBackground))

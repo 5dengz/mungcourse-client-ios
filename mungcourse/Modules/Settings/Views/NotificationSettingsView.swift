@@ -9,26 +9,47 @@ struct NotificationSettingsView: View {
     var body: some View {
         VStack(spacing: 0) {
             CommonHeaderView(
-                leftIcon: "icon_x",
+                leftIcon: "arrow_back",
                 leftAction: { dismiss() },
                 title: "알림 및 기능"
             )
-            VStack(spacing: 1) {
-                Toggle("알림 활성화", isOn: $isNotificationsEnabled)
-                    .padding()
-                    .background(Color.white)
-                Divider()
-                Toggle("산책 푸시 알림", isOn: $isWalkPushEnabled)
-                    .padding()
-                    .background(Color.white)
-                Divider()
-                Toggle("산책 중단 알림", isOn: $isStopPushEnabled)
-                    .padding()
-                    .background(Color.white)
+            VStack(spacing: 0) {
+                HStack {
+                    Text("알림 활성화")
+                        .font(.custom("Pretendard-Regular", size: 16))
+                        .foregroundColor(.black)
+                    Spacer()
+                    Toggle("", isOn: $isNotificationsEnabled)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 16)
+                .background(Color.white)
+                .padding(.bottom, 16)
+                HStack {
+                    Text("산책 푸시 알림")
+                        .font(.custom("Pretendard-Regular", size: 16))
+                        .foregroundColor(.black)
+                    Spacer()
+                    Toggle("", isOn: $isWalkPushEnabled)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 16)
+                .background(Color.white)
+                .padding(.bottom, 16)
+                HStack {
+                    Text("산책 중단 알림")
+                        .font(.custom("Pretendard-Regular", size: 16))
+                        .foregroundColor(.black)
+                    Spacer()
+                    Toggle("", isOn: $isStopPushEnabled)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 16)
+                .background(Color.white)
             }
-            .background(Color(UIColor.systemGroupedBackground))
             Spacer()
         }
+        .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
     }
 }
@@ -39,4 +60,4 @@ struct NotificationSettingsView_Previews: PreviewProvider {
         NotificationSettingsView()
     }
 }
-#endif 
+#endif
