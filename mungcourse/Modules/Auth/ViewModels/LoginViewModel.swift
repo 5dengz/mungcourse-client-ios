@@ -29,9 +29,7 @@ class LoginViewModel: ObservableObject {
     // MARK: - 상태 속성
     @Published var isLoading = false
     @Published var errorMessage: IdentifiableError? = nil
-    @AppStorage("isLoggedIn") private(set) var isLoggedIn: Bool = false
-    private var pendingAuthToken: String? = nil
-    @Published var needsDogRegistration: Bool = false
+    // 로그인 상태는 TokenManager.shared.accessToken으로 관리합니다
     
     // MARK: - 서비스
     private let authService: AuthServiceProtocol
@@ -45,16 +43,14 @@ class LoginViewModel: ObservableObject {
     // MARK: - 로그인 관련 메서드
     func checkLoginStatus() {
         guard let token = TokenManager.shared.getAccessToken(), !token.isEmpty else {
-            isLoggedIn = false
+            // 토큰 없음: 로그아웃 처리
+            authService.logout()
             print("로그인 정보 없음: 재로그인 필요")
             return
         }
-        
-        if isTokenValid(token) {
-            isLoggedIn = true
-            print("로그인 유지: 유효한 토큰")
-        } else {
-            logout()
+        if !isTokenValid(token) {
+            // 토큰 만료: 로그아웃 처리
+            authService.logout()
             print("토큰 만료: 재로그인 필요")
         }
     }
@@ -92,7 +88,6 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    self.pendingAuthToken = token
                     self.checkDogs()
                 case .failure(let error):
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -113,7 +108,6 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    self.pendingAuthToken = token
                     self.checkDogs()
                 case .failure(let error):
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -134,7 +128,6 @@ class LoginViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let token):
-                    self.pendingAuthToken = token
                     self.checkDogs()
                 case .failure(let error):
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -168,11 +161,7 @@ class LoginViewModel: ObservableObject {
             guard let self = self else { return }
             self.isLoading = false
             
-            if let token = self.pendingAuthToken {
-                // TokenManager에 이미 저장된 토큰을 사용
-            }
             self.needsDogRegistration = false
-            self.isLoggedIn = true
             print("반려견 등록 완료: 메인 화면으로 이동")
         }
     }
@@ -228,13 +217,9 @@ class LoginViewModel: ObservableObject {
                 
                 // 3. 로그인 완료
                 await MainActor.run {
-                    if let token = self.pendingAuthToken {
-                        print("Auth token saved.")
-                    }
                     self.needsDogRegistration = false
-                    self.isLoggedIn = true
                     self.isLoading = false
-                    print("Registration complete. Logged in.")
+                    print("Registration complete.")
                 }
             } catch {
                 print("반려견 등록 중 오류 발생: \(error.localizedDescription)")
@@ -249,6 +234,5 @@ class LoginViewModel: ObservableObject {
     // MARK: - 로그아웃 메서드
     func logout() {
         authService.logout()
-        self.isLoggedIn = false
     }
 }

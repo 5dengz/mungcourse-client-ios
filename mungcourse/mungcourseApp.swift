@@ -12,7 +12,7 @@ import GoogleSignIn
 @main
 struct mungcourseApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @StateObject private var tokenManager = TokenManager.shared
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
     @StateObject private var dogVM = DogViewModel()
 
@@ -38,10 +38,17 @@ struct mungcourseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SplashView()
-                .environmentObject(dogVM)
-                .preferredColorScheme(.light)
-                .background(Color("gray100").ignoresSafeArea()) // 앱 전체 배경색 설정
+            // 온보딩, 로그인, 메인 화면 분기
+            if !hasCompletedOnboarding {
+                OnboardingView()
+            } else if tokenManager.accessToken == nil {
+                LoginView()
+            } else {
+                SplashView()
+                    .environmentObject(dogVM)
+                    .preferredColorScheme(.light)
+                    .background(Color("gray100").ignoresSafeArea())
+            }
         }
     }
 }

@@ -1,25 +1,36 @@
 import Foundation
 import KeychainAccess
+import Combine
 
-final class TokenManager {
+final class TokenManager: ObservableObject {
     static let shared = TokenManager()
     private let keychain = Keychain(service: "com.mungcourse.app")
-    private init() {}
+    @Published private(set) var accessToken: String?
+    @Published private(set) var refreshToken: String?
+    
+    private init() {
+        self.accessToken = keychain["accessToken"]
+        self.refreshToken = keychain["refreshToken"]
+    }
     
     // MARK: - 토큰 저장/조회/삭제
     func saveTokens(accessToken: String, refreshToken: String) {
         keychain["accessToken"] = accessToken
         keychain["refreshToken"] = refreshToken
+        self.accessToken = accessToken
+        self.refreshToken = refreshToken
     }
     func getAccessToken() -> String? {
-        return keychain["accessToken"]
+        return accessToken
     }
     func getRefreshToken() -> String? {
-        return keychain["refreshToken"]
+        return refreshToken
     }
     func clearTokens() {
         keychain["accessToken"] = nil
         keychain["refreshToken"] = nil
+        self.accessToken = nil
+        self.refreshToken = nil
     }
     // MARK: - refreshToken으로 accessToken 갱신
     func refreshAccessToken(completion: @escaping (Bool) -> Void) {

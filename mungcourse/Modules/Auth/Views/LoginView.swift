@@ -72,12 +72,6 @@ struct LoginView: View {
         .fullScreenCover(isPresented: $viewModel.needsDogRegistration) {
             RegisterDogView()
         }
-        .onChange(of: viewModel.isLoggedIn) { oldValue, newValue in
-            if newValue {
-                // 로그인 성공 시 메인 화면으로 이동하는 로직
-                print("로그인 성공: 메인 화면으로 이동")
-            }
-        }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active {
                 // 앱이 활성화될 때 로그인 상태 확인
