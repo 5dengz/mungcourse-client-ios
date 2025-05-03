@@ -6,6 +6,8 @@ struct RouteSelectionView: View {
     let onSelectRoute: (RouteOption) -> Void
     
     @StateObject private var viewModel: RouteSelectionViewModel
+    @State private var showRouteWalkView = false
+    @State private var selectedRoute: RouteOption? = nil
     
     init(startLocation: CLLocationCoordinate2D, waypoints: [DogPlace], onBack: @escaping () -> Void, onSelectRoute: @escaping (RouteOption) -> Void) {
         self.onBack = onBack
@@ -73,7 +75,9 @@ struct RouteSelectionView: View {
                     CommonFilledButton(
                         title: "이 경로로 산책하기",
                         action: {
+                            selectedRoute = viewModel.routeOptions[selectedIndex]
                             onSelectRoute(viewModel.routeOptions[selectedIndex])
+                            showRouteWalkView = true
                         },
                         backgroundColor: Color("main")
                     )
@@ -85,6 +89,13 @@ struct RouteSelectionView: View {
             .cornerRadius(20, corners: [.topLeft, .topRight])
         }
         .navigationBarHidden(true)
+        .fullScreenCover(isPresented: $showRouteWalkView) {
+            if let route = selectedRoute {
+                NavigationStack {
+                    RouteWalkView(route: route)
+                }
+            }
+        }
     }
 }
 
