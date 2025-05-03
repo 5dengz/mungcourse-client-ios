@@ -1,11 +1,12 @@
 import SwiftUI
 // TODO: PhotosUI import for image picker functionality
 import PhotosUI // Already added, but good practice to ensure
+import UIKit
 // TODO: Create a dedicated DogViewModel instead of using LoginViewModel
 
 struct RegisterDogView: View {
-    // LoginViewModel 대신 RegisterDogViewModel 사용
-    @StateObject private var viewModel = RegisterDogViewModel()
+    var initialDetail: DogRegistrationResponseData?  // 편집용 초기 데이터
+    @StateObject private var viewModel: RegisterDogViewModel
     @Environment(\.dismiss) private var dismiss
     // 완료 후 처리 클로저 (기본 nil)
     var onComplete: (() -> Void)? = nil
@@ -13,10 +14,35 @@ struct RegisterDogView: View {
     var showBackButton: Bool = true
     
     // MARK: - Initializer
-    init(onComplete: (() -> Void)? = nil, showBackButton: Bool = true) {
+    init(initialDetail: DogRegistrationResponseData? = nil,
+         onComplete: (() -> Void)? = nil,
+         showBackButton: Bool = true) {
+        self.initialDetail = initialDetail
         self.onComplete = onComplete
         self.showBackButton = showBackButton
-        _viewModel = StateObject(wrappedValue: RegisterDogViewModel())
+        // ViewModel 생성 및 초기값 설정
+        let vm = RegisterDogViewModel()
+        if let detail = initialDetail {
+            vm.name = detail.name
+            vm.breed = detail.breed
+            vm.gender = RegisterDogViewModel.Gender(rawValue: detail.gender)
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            if let date = formatter.date(from: detail.birthDate) {
+                vm.dateOfBirth = date
+            }
+            vm.weight = String(detail.weight)
+            vm.isNeutered = detail.neutered
+            vm.hasPatellarLuxationSurgery = detail.hasArthritis
+            if let urlString = detail.dogImgUrl,
+               let url = URL(string: urlString),
+               let data = try? Data(contentsOf: url),
+               let uiImage = UIImage(data: data) {
+                vm.profileImage = Image(uiImage: uiImage)
+                vm.selectedImageData = data
+            }
+        }
+        _viewModel = StateObject(wrappedValue: vm)
     }
     
     // MARK: - State Variables (Managed by the main view)
@@ -29,13 +55,6 @@ struct RegisterDogView: View {
     @State private var weight: String = ""
     @State private var isNeutered: Bool? = nil
     @State private var hasPatellarLuxationSurgery: Bool? = nil
-    
-    // TODO: Define Gender Enum (Keep here or move to a shared location)
-    enum Gender: String, CaseIterable, Identifiable {
-        case female = "여아"
-        case male = "남아"
-        var id: String { self.rawValue }
-    }
     
     // MARK: - Body
     var body: some View {

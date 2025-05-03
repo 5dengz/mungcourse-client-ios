@@ -4,6 +4,7 @@ struct ProfileSectionView: View {
     let nickname: String?
     let profileImageUrl: String?
     var onEdit: (() -> Void)?
+    var onTapImage: (() -> Void)?
     var body: some View {
         VStack(spacing: 8) {
             if let urlStr = profileImageUrl, let url = URL(string: urlStr) {
@@ -16,12 +17,14 @@ struct ProfileSectionView: View {
                 }
                 .frame(width: 127, height: 127)
                 .clipShape(Circle())
+                .onTapGesture { onTapImage?() }
             } else {
                 Image("profile_empty")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 127, height: 127)
                     .clipShape(Circle())
+                    .onTapGesture { onTapImage?() }
             }
             Spacer().frame(height: 16)
             Text(nickname ?? "강아지 이름")

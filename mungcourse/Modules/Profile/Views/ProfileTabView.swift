@@ -98,9 +98,10 @@ struct ProfileTabView: View {
     @EnvironmentObject var dogVM: DogViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
-    @Binding var showingDogSelection: Bool
+    @Binding var showingDogSelection: Bool // (unused in Profile Tab)
     @State private var showSettings = false
-    @State private var showProfileEdit = false
+    @State private var showSelectDog = false
+    @State private var showEditDog = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -111,17 +112,10 @@ struct ProfileTabView: View {
                     leftAction: { /* 뒤로가기 액션 */ },
                     title: "프로필"
                 ) {
-                    HStack(spacing: 16) {
-                        Button(action: { showingDogSelection = true }) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .font(.title2)
-                                .foregroundColor(.black)
-                        }
-                        Button(action: { showSettings = true }) {
-                            Image(systemName: "gearshape")
-                                .font(.title2)
-                                .foregroundColor(.primary)
-                        }
+                    Button(action: { showSettings = true }) {
+                        Image(systemName: "gearshape")
+                            .font(.title2)
+                            .foregroundColor(.primary)
                     }
                 }
                 .padding(.top, 16)
@@ -130,7 +124,8 @@ struct ProfileTabView: View {
                 ProfileSectionView(
                     nickname: dogVM.mainDog?.name,
                     profileImageUrl: dogVM.mainDog?.dogImgUrl,
-                    onEdit: { showProfileEdit = true }
+                    onEdit: { showEditDog = true },
+                    onTapImage: { showSelectDog = true }
                 )
                 .padding(.bottom, 24)
                 // 탭 선택자
@@ -163,7 +158,19 @@ struct ProfileTabView: View {
         .fullScreenCover(isPresented: $showSettings) {
             SettingsView()
         }
-        .fullScreenCover(isPresented: $showProfileEdit) {
+        .fullScreenCover(isPresented: $showEditDog) {
+            // 프로필 편집 (현재 강아지 정보로 초기화)
+            if let detail = dogVM.dogDetail {
+                RegisterDogView(initialDetail: detail, onComplete: {
+                    // 완료 후 필요한 작업 (ex: refetch)
+                }, showBackButton: true)
+                    .environmentObject(dogVM)
+            } else {
+                RegisterDogView(onComplete: {}, showBackButton: true)
+                    .environmentObject(dogVM)
+            }
+        }
+        .fullScreenCover(isPresented: $showSelectDog) {
             ProfileDogSelectionView()
                 .environmentObject(dogVM)
         }
