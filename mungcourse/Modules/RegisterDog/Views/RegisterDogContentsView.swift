@@ -18,6 +18,8 @@ struct RegisterDogContentsView: View {
     let isFormValid: Bool
     let isLoading: Bool
     var registerAction: () -> Void
+    // 수정 모드 여부 (첫 로그인이 아닌 경우)
+    let isEditing: Bool
     
     // TODO: Define actions passed from the parent if needed
     // var addAnotherDogAction: () -> Void
@@ -39,16 +41,19 @@ struct RegisterDogContentsView: View {
                     OptionalSegmentedPicker(title: "슬개골 탈구 수술 여부", selection: $hasPatellarLuxationSurgery)
                 }
                 
-                Button(action: {
-                    // TODO: Call the action passed from parent
-                    // addAnotherDogAction()
-                    print("Add another dog tapped (in subview)")
-                }) {
-                    Text("다른 반려견 추가하기")
-                        .font(.custom("Pretendard-Regular", size: 14))
-                        .foregroundColor(Color("gray400"))
+                // 수정 모드일 때만 다른 반려견 추가하기 버튼 표시
+                if isEditing {
+                    Button(action: {
+                        // TODO: Call the action passed from parent
+                        // addAnotherDogAction()
+                        print("Add another dog tapped (in subview)")
+                    }) {
+                        Text("다른 반려견 추가하기")
+                            .font(.custom("Pretendard-Regular", size: 14))
+                            .foregroundColor(Color("gray400"))
+                    }
+                    .padding(.top, 29)
                 }
-                .padding(.top, 29)
                 
                 CommonFilledButton(
                     title: "완료",

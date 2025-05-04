@@ -87,7 +87,8 @@ struct RegisterDogView: View {
                     errorMessage: viewModel.errorMessage?.message,
                     isFormValid: viewModel.isFormValid,
                     isLoading: viewModel.isLoading,
-                    registerAction: registerAction
+                    registerAction: registerAction,
+                    isEditing: isEditing // 수정 모드 여부 전달
                 )
                 .padding(.horizontal, 20)
                 // Remove navigation modifiers from here
