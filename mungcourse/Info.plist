@@ -50,6 +50,8 @@
 	<string>$(BASE_HOST)</string>
 	<key>API_BASE_URL</key>
 	<string>https://$(BASE_HOST)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>
