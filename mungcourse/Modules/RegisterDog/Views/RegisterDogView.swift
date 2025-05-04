@@ -12,6 +12,13 @@ struct RegisterDogView: View {
     var onComplete: (() -> Void)? = nil
     // 뒤로가기 버튼 노출 여부
     var showBackButton: Bool = true
+    // 삭제 확인 팝업 표시 상태
+    @State private var showDeleteConfirmation = false
+    
+    // 수정 모드 여부 계산
+    private var isEditing: Bool {
+        initialDetail != nil
+    }
     
     // MARK: - Initializer
     init(initialDetail: DogRegistrationResponseData? = nil,
@@ -54,8 +61,17 @@ struct RegisterDogView: View {
                 CommonHeaderView(
                     leftIcon: showBackButton ? "arrow_back" : nil, // 조건부 노출
                     leftAction: showBackButton ? { dismiss() } : nil, // 조건부 노출
-                    title: "반려견 정보 입력"
-                )
+                    title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
+                ) {
+                    // 수정 모드일 때만 삭제 버튼 표시
+                    if isEditing {
+                        Button(action: { showDeleteConfirmation = true }) {
+                            Text("삭제")
+                                .font(.custom("Pretendard-Regular", size: 16))
+                                .foregroundColor(Color("gray300"))
+                        }
+                    }
+                }
                 
                 // ViewModel이 모든 상태를 관리하도록 변경
                 RegisterDogContentsView(
@@ -92,6 +108,14 @@ struct RegisterDogView: View {
                     onComplete?()
                 }
             }
+            .alert("반려견 삭제", isPresented: $showDeleteConfirmation) {
+                Button("취소", role: .cancel) { }
+                Button("삭제", role: .destructive) {
+                    deleteDog()
+                }
+            } message: {
+                Text("정말로 이 반려견 정보를 삭제하시겠습니까?")
+            }
         }
     }
     
@@ -103,6 +127,24 @@ struct RegisterDogView: View {
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
         viewModel.registerDog()
+    }
+    
+    // 반려견 삭제 메서드
+    private func deleteDog() {
+        guard let dogId = initialDetail?.id else { return }
+        
+        // TODO: 실제 삭제 API 호출 구현
+        // viewModel.deleteDog(dogId) { success in
+        //     if success {
+        //         dismiss()
+        //         onComplete?()
+        //     }
+        // }
+        
+        // 임시 구현: 그냥 닫기
+        print("반려견 ID \(dogId) 삭제 요청")
+        dismiss()
+        onComplete?()
     }
 }
 
