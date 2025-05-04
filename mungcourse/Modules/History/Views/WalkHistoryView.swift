@@ -100,7 +100,7 @@ struct WalkHistoryView: View {
             ZStack(alignment: .top) {
                 // 배경색을 상단 SafeArea까지 확장
                 Color.white
-                    .ignoresSafeArea()
+                .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // 자체 구현 헤더 (그림자 없음)
@@ -145,8 +145,8 @@ struct WalkHistoryView: View {
                                 .font(.system(size: 20)) // 화살표 크기 증가
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 20)
                     
                     // 요일 헤더
                     HStack(spacing: 0) {
@@ -157,15 +157,15 @@ struct WalkHistoryView: View {
                                 .frame(maxWidth: .infinity)
                         }
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 20)
                     
                     // 날짜 그리드 - 가로 간격 7.5, 세로 간격 11.5로 설정
                     LazyVGrid(columns: columns, spacing: 11.5) {
                         // 첫번째 요일에 맞추어 빈 셀 추가
                         ForEach(0..<viewModel.firstWeekdayOfMonth(), id: \.self) { _ in
                             Text("")
-                                .frame(height: 40)
+                                .frame(height: 60)
                         }
                         
                         // 날짜들 표시

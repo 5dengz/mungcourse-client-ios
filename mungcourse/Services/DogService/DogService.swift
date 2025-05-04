@@ -211,6 +211,7 @@ class DogService: DogServiceProtocol {
         guard let url = URL(string: presignedUrl) else { throw NetworkError.invalidURL }
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
+        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
         // 크기만 알려주는 건 OK
         request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
         request.httpBody = imageData
