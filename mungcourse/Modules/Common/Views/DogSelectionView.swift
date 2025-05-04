@@ -152,7 +152,7 @@ struct DogSelectionView: View {
                                 
                                 Text("반려견 추가")
                                     .font(.custom("Pretendard-Regular", size: 18))
-                                    .foregroundColor(Color("gray400"))
+                                    .foregroundColor(Color("gray500"))
                             }
                             .onTapGesture {
                                 showAddDogView = true
@@ -164,23 +164,21 @@ struct DogSelectionView: View {
                     .padding(.bottom, 20)
                 }
                 
-                Spacer()
-                
                 // 선택 완료 버튼 (조건부 표시 - 산책 모드에서는 항상 표시)
                 if showCompleteButton && !isWalkMode {
                     CommonFilledButton(title: "선택 완료", action: {
                         dismiss()
                         onComplete?()
                     })
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 48)
                 } else if isWalkMode {
                     CommonFilledButton(title: "선택 완료", action: {
                         dismiss()
                         onComplete?()
                     })
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 48)
                 }
             }
             .padding(.top, 20)
