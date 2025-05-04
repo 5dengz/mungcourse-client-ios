@@ -5,7 +5,7 @@ struct AccountDeletionView: View {
     @State private var selectedReason: String?
     @State private var reasonText: String = ""
     
-    let reasons = ["더 이상 서비스가 필요하지 않음", "사용성이 불편함", "개인정보 보호 문제", "더 좋은 대체 서비스를 찾음", "기타"]
+    let reasons = ["기능이 다양하지 않아요", "배터리 소모가 너무 심해요", "추천 경로가 마음에 들지 않아요", "경로 측정이 잘 안 돼요", "기타"]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -14,42 +14,27 @@ struct AccountDeletionView: View {
                 leftAction: { dismiss() },
                 title: "회원 탈퇴"
             )
-            .padding(.bottom, 28)
+            .padding(.bottom, 34)
             
             VStack(spacing: 0) {
-                HStack {
-                    Text("탈퇴 이유를 알려주세요")
-                        .font(.custom("Pretendard-Medium", size: 16))
-                        .foregroundColor(.black)
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 20)
-                .background(Color.white)
+                Text("탈퇴 이유를 알려주세요")
+                    .font(.custom("Pretendard-SemiBold", size: 18))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 28)
                 
-                VStack(spacing: 15) {
+                VStack(spacing: 16) {
                     ForEach(reasons, id: \.self) { reason in
-                        HStack {
-                            Text(reason)
-                                .font(.custom("Pretendard-Regular", size: 16))
-                                .foregroundColor(.black)
-                            Spacer()
-                            if selectedReason == reason {
-                                Image("icon_check")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .contentShape(Rectangle())
+                        ReasonItemView(
+                            text: reason,
+                            isSelected: selectedReason == reason
+                        )
                         .onTapGesture {
                             selectedReason = reason
                         }
                     }
                 }
-                .padding(.vertical, 10)
-                .background(Color.white)
+                .padding(.horizontal, 16)
                 
                 if selectedReason == "기타" {
                     VStack(alignment: .leading) {
@@ -58,7 +43,7 @@ struct AccountDeletionView: View {
                             .background(Color(UIColor.systemGray6))
                             .cornerRadius(8)
                             .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 20)
                     }
                     .background(Color.white)
                 }
@@ -82,6 +67,45 @@ struct AccountDeletionView: View {
         }
         .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
+    }
+}
+
+struct ReasonItemView: View {
+    let text: String
+    let isSelected: Bool
+    
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(width: 330, height: 57)
+                .background(.white)
+                .cornerRadius(12)
+                .shadow(
+                    color: Color(red: 0, green: 0, blue: 0, opacity: 0.05), 
+                    radius: 12, 
+                    y: 2
+                )
+            
+            Text(text)
+                .font(Font.custom("Pretendard", size: 14))
+                .foregroundColor(.black)
+                .offset(x: -49.50, y: 0)
+            
+            if isSelected {
+                Ellipse()
+                    .foregroundColor(.clear)
+                    .frame(width: 22, height: 22)
+                    .background(Color(red: 0.15, green: 0.75, blue: 0))
+                    .overlay(
+                        Ellipse()
+                            .inset(by: 0.50)
+                            .stroke(Color(red: 0.15, green: 0.75, blue: 0), lineWidth: 0.50)
+                    )
+                    .offset(x: -137, y: -0.50)
+            }
+        }
+        .frame(width: 330, height: 57)
     }
 }
 
