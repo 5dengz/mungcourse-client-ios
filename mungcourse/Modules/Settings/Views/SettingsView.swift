@@ -12,7 +12,7 @@ struct SettingsView: View {
                 )
                 .padding(.top, 16)
                 .padding(.bottom, 16)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 12)
 
                 VStack(spacing: 0) {
                     NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {

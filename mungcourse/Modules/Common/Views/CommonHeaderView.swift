@@ -45,7 +45,7 @@ extension CommonHeaderView {
                 Spacer()
                 rightContent()
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 20)
 
             Text(title)
                 .font(Font.custom("Pretendard-SemiBold", size: 20))

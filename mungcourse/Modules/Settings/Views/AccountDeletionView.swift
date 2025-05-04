@@ -3,7 +3,6 @@ import SwiftUI
 struct AccountDeletionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedReasons: Set<String> = []
-    @State private var reasonText: String = ""
     @State private var showConfirmation = false
     
     let reasons = ["기능이 다양하지 않아요", "배터리 소모가 너무 심해요", "추천 경로가 마음에 들지 않아요", "경로 측정이 잘 안 돼요", "기타"]
@@ -35,21 +34,6 @@ struct AccountDeletionView: View {
                             }
                         )
                     }
-                }
-                
-                
-                if selectedReasons.contains("기타") {
-                    VStack(alignment: .leading) {
-                        TextField("상세 이유를 적어주세요", text: $reasonText)
-                            .font(Font.custom("Pretendard", size: 14))
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color("gray300"))
-                            .cornerRadius(8)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 20)
-                    }
-                    .background(Color.white)
                 }
                 
                 Spacer()
