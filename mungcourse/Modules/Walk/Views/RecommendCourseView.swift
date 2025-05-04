@@ -149,13 +149,6 @@ struct RecommendCourseView: View {
     }
 }
 
-extension View {
-    // 코너 라운딩
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
 // RecommendCourseViewModel
 class RecommendCourseViewModel: ObservableObject {
     @Published var isLoading = false

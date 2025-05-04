@@ -93,8 +93,8 @@ struct StartWalkView: View {
                 let walkData = WalkSessionData(
                     distance: session.distance,
                     duration: Int(session.duration),
-                    coordinates: session.path,
-                    date: session.endTime
+                    date: session.endTime,
+                    coordinates: session.path
                 )
                 NavigationStack {
                     WalkCompleteView(walkData: walkData)
@@ -120,27 +120,8 @@ struct StartWalkView: View {
 }
 
 
-// Extension for rounded corners on specific edges
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
-
-// Custom shape for rounded corners
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}
+// RoundedCorner 구조체와 View extension은 Common/Utils/CommonViewExtensions.swift 로 이동했습니다.
+// 사용하려면 해당 파일이 프로젝트에 포함되어 있어야 합니다.
 
 #Preview {
     NavigationStack {

@@ -143,7 +143,18 @@ struct RegisterDogView: View {
     
     // 반려견 삭제 메서드
     private func deleteDog() {
-        guard let dogId = initialDetail?.id else { return }
+        guard let dogDetail = initialDetail, let dogId = dogDetail.id else {
+            // id가 없는 경우 에러 처리
+            let errorResponse = ErrorResponse(
+                statusCode: 400,
+                message: "반려견 ID를 찾을 수 없습니다.",
+                error: "Invalid ID",
+                success: false,
+                timestamp: ""
+            )
+            viewModel.errorMessage = RegisterDogError(errorResponse: errorResponse)
+            return
+        }
         
         viewModel.isLoading = true
         
@@ -157,13 +168,14 @@ struct RegisterDogView: View {
                 onComplete?()
             } else {
                 // 삭제 실패 시 에러 메시지 표시
-                viewModel.errorMessage = ErrorResponse(
+                let errorResponse = ErrorResponse(
                     statusCode: 500,
                     message: "반려견 정보 삭제 중 오류가 발생했습니다.",
                     error: "Unknown error",
                     success: false,
                     timestamp: ""
                 )
+                viewModel.errorMessage = RegisterDogError(errorResponse: errorResponse)
             }
         }
     }
