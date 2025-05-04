@@ -18,13 +18,14 @@ class DogBreedSearchViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        // 초기 상태는 모든 견종 표시
-        self.filteredBreeds = DogBreeds.all
+        // 초기 상태는 빈 결과 목록 (검색 시에만 결과 표시)
+        self.filteredBreeds = []
     }
     
     func searchBreeds(query: String) {
         if query.isEmpty {
-            filteredBreeds = DogBreeds.all
+            // 검색어가 비었을 때는 결과를 비움
+            filteredBreeds = []
             return
         }
         
@@ -33,7 +34,7 @@ class DogBreedSearchViewModel: ObservableObject {
     
     func clearSearch() {
         searchText = ""
-        filteredBreeds = DogBreeds.all
+        filteredBreeds = []
     }
     
     func selectBreed(_ breed: String) {

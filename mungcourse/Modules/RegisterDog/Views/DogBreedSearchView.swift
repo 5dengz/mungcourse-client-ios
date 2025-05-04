@@ -40,17 +40,39 @@ struct DogBreedSearchView: View {
             // 검색 결과 목록
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    if viewModel.filteredBreeds.isEmpty && !viewModel.searchText.isEmpty {
-                        EmptyBreedResultView()
-                    } else {
-                        ForEach(viewModel.filteredBreeds, id: \.self) { breed in
-                            BreedResultRow(breed: breed, isSelected: viewModel.selectedBreed == breed, onSelect: {
-                                viewModel.selectBreed(breed)
-                                onSelect(breed)
-                                dismiss()
-                            })
-                            .padding(.horizontal, 20)
+                    if !viewModel.searchText.isEmpty {
+                        if viewModel.filteredBreeds.isEmpty {
+                            // 검색어가 있고 결과가 없을 때
+                            EmptyBreedResultView()
+                        } else {
+                            // 검색 결과 표시
+                            ForEach(viewModel.filteredBreeds, id: \.self) { breed in
+                                BreedResultRow(breed: breed, isSelected: viewModel.selectedBreed == breed, onSelect: {
+                                    viewModel.selectBreed(breed)
+                                    onSelect(breed)
+                                    dismiss()
+                                })
+                                .padding(.horizontal, 20)
+                            }
                         }
+                    } else {
+                        // 검색어가 없을 때는 안내 메시지 표시
+                        VStack(spacing: 24) {
+                            Image("icon_search")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(Color("gray400"))
+                                .padding(.top, 40)
+                            
+                            Text("견종을 검색해주세요")
+                                .font(Font.custom("Pretendard-Regular", size: 16))
+                                .foregroundColor(Color("gray600"))
+                                .padding(.bottom, 40)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 60)
                     }
                 }
                 .padding(.vertical, 12)
