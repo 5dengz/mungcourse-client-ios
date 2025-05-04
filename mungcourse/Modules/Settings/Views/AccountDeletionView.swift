@@ -14,24 +14,24 @@ struct AccountDeletionView: View {
                 leftAction: { dismiss() },
                 title: "회원 탈퇴"
             )
-            .padding(.bottom, 34)
+            .padding(.bottom, 28)
             
             VStack(spacing: 0) {
                 Text("탈퇴 이유를 알려주세요")
                     .font(.custom("Pretendard-SemiBold", size: 18))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 24)
                 
                 VStack(spacing: 16) {
                     ForEach(reasons, id: \.self) { reason in
                         ReasonItemView(
                             text: reason,
-                            isSelected: selectedReason == reason
+                            isSelected: selectedReason == reason,
+                            onSelect: {
+                                selectedReason = reason
+                            }
                         )
-                        .onTapGesture {
-                            selectedReason = reason
-                        }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -48,22 +48,20 @@ struct AccountDeletionView: View {
                     .background(Color.white)
                 }
                 
-                Button(action: {
-                    // 탈퇴 처리 로직
-                }) {
-                    Text("탈퇴하기")
-                        .font(.custom("Pretendard-Medium", size: 16))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 15)
-                        .background(Color("pointRed"))
-                        .cornerRadius(8)
-                }
+                Spacer()
+                
+                CommonFilledButton(
+                    title: "탈퇴하기",
+                    action: {
+                        // 탈퇴 처리 로직
+                    },
+                    isEnabled: selectedReason != nil,
+                    backgroundColor: Color("pointRed"),
+                    cornerRadius: 8
+                )
                 .padding(.horizontal, 16)
-                .padding(.top, 30)
+                .padding(.bottom, 30)
             }
-            
-            Spacer()
         }
         .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
@@ -73,39 +71,50 @@ struct AccountDeletionView: View {
 struct ReasonItemView: View {
     let text: String
     let isSelected: Bool
+    let onSelect: () -> Void
     
     var body: some View {
-        ZStack {
+        HStack(spacing: 16) {
+            Text(text)
+                .font(Font.custom("Pretendard", size: 14))
+                .foregroundColor(.black)
+                .padding(.leading, 16)
+            
+            Spacer()
+            
+            // 선택 버튼
+            Button(action: onSelect) {
+                ZStack {
+                    Circle()
+                        .stroke(Color("main"), lineWidth: 1)
+                        .frame(width: 22, height: 22)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(Color("main"))
+                            .frame(width: 22, height: 22)
+                        
+                        Image("icon_check")
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 22, height: 22)
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+            .padding(.trailing, 16)
+        }
+        .frame(width: 330, height: 57)
+        .background(
             Rectangle()
-                .foregroundColor(.clear)
-                .frame(width: 330, height: 57)
-                .background(.white)
+                .foregroundColor(.white)
                 .cornerRadius(12)
                 .shadow(
                     color: Color(red: 0, green: 0, blue: 0, opacity: 0.05), 
                     radius: 12, 
                     y: 2
                 )
-            
-            Text(text)
-                .font(Font.custom("Pretendard", size: 14))
-                .foregroundColor(.black)
-                .offset(x: -49.50, y: 0)
-            
-            if isSelected {
-                Ellipse()
-                    .foregroundColor(.clear)
-                    .frame(width: 22, height: 22)
-                    .background(Color(red: 0.15, green: 0.75, blue: 0))
-                    .overlay(
-                        Ellipse()
-                            .inset(by: 0.50)
-                            .stroke(Color(red: 0.15, green: 0.75, blue: 0), lineWidth: 0.50)
-                    )
-                    .offset(x: -137, y: -0.50)
-            }
-        }
-        .frame(width: 330, height: 57)
+        )
     }
 }
 
