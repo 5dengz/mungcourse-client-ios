@@ -162,4 +162,127 @@ class RegisterDogViewModel: ObservableObject {
         selectedImageData = nil
         errorMessage = nil
     }
+    
+    // MARK: - Delete Dog API
+    func deleteDog(dogId: Int, completion: @escaping (Bool) -> Void) {
+        isLoading = true
+        errorMessage = nil
+        
+        // 토큰 확인
+        guard let accessToken = TokenManager.shared.getAccessToken() else {
+            errorMessage = ErrorResponse(
+                statusCode: 401,
+                message: "인증이 필요합니다. 다시 로그인해주세요.",
+                error: "Unauthorized",
+                success: false,
+                timestamp: ""
+            )
+            isLoading = false
+            completion(false)
+            return
+        }
+        
+        // API URL 구성
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/dogs/\(dogId)") else {
+            errorMessage = ErrorResponse(
+                statusCode: 400,
+                message: "잘못된 요청입니다.",
+                error: "Bad Request",
+                success: false,
+                timestamp: ""
+            )
+            isLoading = false
+            completion(false)
+            return
+        }
+        
+        // HTTP 요청 구성
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        
+        // API 요청 실행
+        NetworkManager.shared.performAPIRequest(request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                // 네트워크 에러 처리
+                if let error = error {
+                    self?.errorMessage = ErrorResponse(
+                        statusCode: 500,
+                        message: "서버 연결 중 오류가 발생했습니다: \(error.localizedDescription)",
+                        error: "Network Error",
+                        success: false,
+                        timestamp: ""
+                    )
+                    completion(false)
+                    return
+                }
+                
+                // HTTP 응답 확인
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    self?.errorMessage = ErrorResponse(
+                        statusCode: 500,
+                        message: "서버 응답을 확인할 수 없습니다.",
+                        error: "Unknown Response",
+                        success: false,
+                        timestamp: ""
+                    )
+                    completion(false)
+                    return
+                }
+                
+                // 성공 응답 처리 (2xx)
+                if (200...299).contains(httpResponse.statusCode) {
+                    print("반려견 ID \(dogId) 삭제 성공")
+                    completion(true)
+                    return
+                }
+                
+                // 에러 응답 파싱 및 처리
+                if let data = data {
+                    do {
+                        let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
+                        self?.errorMessage = errorResponse
+                        print("API 에러: \(errorResponse.message)")
+                    } catch {
+                        print("에러 응답 파싱 실패: \(error)")
+                        self?.errorMessage = ErrorResponse(
+                            statusCode: httpResponse.statusCode,
+                            message: "서버 오류가 발생했습니다.",
+                            error: "Unknown Error",
+                            success: false,
+                            timestamp: ""
+                        )
+                    }
+                }
+                
+                completion(false)
+            }
+        }
+    }
+    
+    // MARK: - Mock API Implementation (for development)
+    private func mockRegisterDogAPI() {
+        // 테스트를 위한 지연 시간 추가
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            // 랜덤으로 성공/실패 처리 (테스트용)
+            let isSuccess = true // Set to false to test error case
+            
+            if isSuccess {
+                print("강아지 등록 성공 (목업)")
+                self?.isRegistrationComplete = true
+            } else {
+                self?.errorMessage = ErrorResponse(
+                    statusCode: 500,
+                    message: "서버 오류가 발생했습니다. 다시 시도해주세요.",
+                    error: "Server Error",
+                    success: false,
+                    timestamp: ""
+                )
+            }
+            
+            self?.isLoading = false
+        }
+    }
 }
