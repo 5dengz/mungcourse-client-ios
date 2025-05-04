@@ -282,6 +282,68 @@ class AuthService: AuthServiceProtocol {
         }.resume()
     }
     
+    // 회원 탈퇴 메서드
+    func deleteAccount() -> AnyPublisher<Bool, Error> {
+        return Future<Bool, Error> { promise in
+            guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/me") else {
+                promise(.failure(AuthError.unknown))
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "DELETE"
+            
+            if let accessToken = TokenManager.shared.getAccessToken() {
+                request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            }
+            
+            print("[AuthService] 회원 탈퇴 요청")
+            print("URL: \(url.absoluteString)")
+            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("[AuthService] 회원 탈퇴 통신 에러:", error)
+                    DispatchQueue.main.async {
+                        promise(.failure(error))
+                    }
+                    return
+                }
+                
+                guard let http = response as? HTTPURLResponse else {
+                    print("[AuthService] 회원 탈퇴 응답이 HTTPURLResponse가 아님")
+                    DispatchQueue.main.async {
+                        promise(.failure(AuthError.unknown))
+                    }
+                    return
+                }
+                
+                print("[AuthService] 회원 탈퇴 응답 코드:", http.statusCode)
+                
+                if let data = data, let bodyStr = String(data: data, encoding: .utf8) {
+                    print("[AuthService] 회원 탈퇴 응답 바디:", bodyStr)
+                }
+                
+                switch http.statusCode {
+                case 200...299:
+                    // 성공 시 토큰 삭제
+                    DispatchQueue.main.async {
+                        TokenManager.shared.clearTokens()
+                        promise(.success(true))
+                    }
+                case 401, 403:
+                    print("[AuthService] 회원 탈퇴 권한 없음 (HTTP \(http.statusCode))")
+                    DispatchQueue.main.async {
+                        promise(.failure(AuthError.invalidCredentials))
+                    }
+                default:
+                    DispatchQueue.main.async {
+                        promise(.failure(AuthError.unknown))
+                    }
+                }
+            }.resume()
+        }.eraseToAnyPublisher()
+    }
+    
     // 로그아웃 메소드
     func logout() {
         print("로그아웃 처리")
