@@ -39,17 +39,15 @@ struct RegisterDogContentsView: View {
                     OptionalSegmentedPicker(title: "슬개골 탈구 수술 여부", selection: $hasPatellarLuxationSurgery)
                 }
                 
-                CommonFilledButton(
-                    title: "다른 반려견 추가하기",
-                    action: {
-                        // TODO: Call the action passed from parent
-                        // addAnotherDogAction()
-                        print("Add another dog tapped (in subview)")
-                    },
-                    isEnabled: true,
-                    backgroundColor: Color.white,
-                    foregroundColor: Color("gray700")
-                )
+                Button(action: {
+                    // TODO: Call the action passed from parent
+                    // addAnotherDogAction()
+                    print("Add another dog tapped (in subview)")
+                }) {
+                    Text("다른 반려견 추가하기")
+                        .font(.custom("Pretendard-Regular", size: 14))
+                        .foregroundColor(Color("gray400"))
+                }
                 .padding(.top, 29)
                 
                 CommonFilledButton(
@@ -57,7 +55,7 @@ struct RegisterDogContentsView: View {
                     action: registerAction,
                     isEnabled: isFormValid && !isLoading
                 )
-                .padding(.top, 0)
+                .padding(.top, 20)
 
                 Spacer() // Keep spacer if needed within the scroll content
             }

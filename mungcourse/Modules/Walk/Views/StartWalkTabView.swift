@@ -6,10 +6,11 @@ struct StartWalkTabView: View {
     var onDismiss: (() -> Void)? = nil
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("산책 시작 방식")
                 .font(.custom("Pretendard-SemiBold", size: 18))
                 .padding(.top, 36)
+                .padding(.leading, 29)
             
             CommonFilledButton(
                 title: "경유지 선택",
@@ -21,6 +22,8 @@ struct StartWalkTabView: View {
                 cornerRadius: 12
             )
             .font(.custom("Pretendard-SemiBold", size: 18))
+            .shadow(color: Color.gray.opacity(0.3), radius: 4, x: 0, y: 2)
+            .padding(.horizontal, 29)
             
             CommonFilledButton(
                 title: "바로 추천",
@@ -32,10 +35,10 @@ struct StartWalkTabView: View {
                 cornerRadius: 12
             )
             .font(.custom("Pretendard-SemiBold", size: 18))
+            .padding(.horizontal, 29)
             
             Spacer()
         }
-        .padding(.horizontal, 32)
         .presentationDetents([.height(230)])
         .presentationCornerRadius(20)
         .onDisappear {
