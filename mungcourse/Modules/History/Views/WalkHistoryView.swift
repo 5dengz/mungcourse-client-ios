@@ -100,24 +100,20 @@ struct WalkHistoryView: View {
             ZStack(alignment: .top) {
                 // 배경색을 상단 SafeArea까지 확장
                 Color.white
-                .ignoresSafeArea()
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // 자체 구현 헤더 (그림자 없음)
+                    // 자체 구현 헤더 (흰색 배경과 하단 그림자 적용)
                     ZStack {
                         Text("산책 기록")
-                            .font(.custom("Pretendard-SemiBold", size: 18))
+                            .font(.custom("Pretendard-SemiBold", size: 20))
                             .foregroundColor(Color("gray900"))
                             .frame(maxWidth: .infinity)
                             .multilineTextAlignment(.center)
                     }
                     .frame(height: 85)
-                    
-                    // 헤더와 콘텐츠 사이에 그림자만 적용
-                    Rectangle()
-                        .fill(Color.clear)
-                        .frame(height: 1)
-                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                    .background(Color.white) // 명시적으로 흰색 배경 지정
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
                     
                     // 년월 선택 및 좌우 이동 버튼
                     HStack {
@@ -132,7 +128,7 @@ struct WalkHistoryView: View {
                         Spacer()
                         
                         Text(viewModel.currentMonth.formatYearMonth())
-                            .font(.custom("Pretendard-SemiBold", size: 16))
+                            .font(.custom("Pretendard-SemiBold", size: 18))
                             .foregroundColor(Color("gray900"))
                         
                         Spacer()
@@ -145,8 +141,8 @@ struct WalkHistoryView: View {
                                 .font(.system(size: 20)) // 화살표 크기 증가
                         }
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 20)
+                    .padding(.horizontal, 28)
+                    .padding(.vertical, 32)
                     
                     // 요일 헤더
                     HStack(spacing: 0) {
@@ -157,15 +153,15 @@ struct WalkHistoryView: View {
                                 .frame(maxWidth: .infinity)
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 14)
                     
                     // 날짜 그리드 - 가로 간격 7.5, 세로 간격 11.5로 설정
                     LazyVGrid(columns: columns, spacing: 11.5) {
                         // 첫번째 요일에 맞추어 빈 셀 추가
                         ForEach(0..<viewModel.firstWeekdayOfMonth(), id: \.self) { _ in
                             Text("")
-                                .frame(height: 60)
+                                .frame(height: 40)
                         }
                         
                         // 날짜들 표시
@@ -175,17 +171,17 @@ struct WalkHistoryView: View {
                                 navigateToDetail = true
                             }) {
                                 Text(date.formatDay())
-                                    .font(.custom("Pretendard-Regular", size: 14))
+                                    .font(.custom("Pretendard-Regular", size: 16))
                                     .foregroundColor(date.isToday() ? .white : Color("gray400"))
                                     .frame(width: 40, height: 40)
                                     .background(
                                         Circle()
-                                            .fill(date.isToday() ? Color("main") : Color("gray300"))
+                                            .fill(date.isToday() ? Color("main") : Color("gray200"))
                                     )
                             }
                         }
                     }
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, 28)
                     
                     Spacer()
                 }
