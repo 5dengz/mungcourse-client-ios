@@ -97,13 +97,13 @@ struct WalkHistoryView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .top) {
                 // 배경색을 상단 SafeArea까지 확장
                 Color.white
-                    .ignoresSafeArea(edges: .top)
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // 자체 구현 헤더
+                    // 자체 구현 헤더 (그림자 없음)
                     ZStack {
                         Text("산책 기록")
                             .font(.custom("Pretendard-SemiBold", size: 18))
@@ -112,12 +112,12 @@ struct WalkHistoryView: View {
                             .multilineTextAlignment(.center)
                     }
                     .frame(height: 85)
-                    .background(
-                        Rectangle()
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                    )
-                    .padding(.bottom, 5) // 하단 패딩만 적용
+                    
+                    // 헤더와 콘텐츠 사이에 그림자만 적용
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 1)
+                        .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
                     
                     // 년월 선택 및 좌우 이동 버튼
                     HStack {
@@ -190,6 +190,7 @@ struct WalkHistoryView: View {
                     Spacer()
                 }
             }
+            .toolbar(.hidden) // 기본 내비게이션 바를 숨김
             .navigationDestination(isPresented: $navigateToDetail) {
                 if let date = selectedDate {
                     WalkHistoryDetailView(date: date)
