@@ -1,12 +1,6 @@
 import SwiftUI
 import Combine
 
-// NSError를 Identifiable로 래핑하는 구조체
-struct IdentifiableError: Identifiable {
-    let id = UUID()
-    let error: Error
-}
-
 struct AccountDeletionConfirmView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading = false
@@ -184,14 +178,14 @@ struct AccountDeletionConfirmView: View {
         .onAppear {
             viewModel.loadData()
         }
-        // 에러 알림 처리 (IdentifiableError 사용)
+        // 에러 알림 처리 (공통 IdentifiableError 사용)
         .alert(item: Binding<IdentifiableError?>(
             get: { viewModel.error != nil ? IdentifiableError(error: viewModel.error!) : nil },
             set: { _ in viewModel.error = nil }
         )) { identifiableError in
             Alert(
                 title: Text("회원 탈퇴 실패"),
-                message: Text(identifiableError.error.localizedDescription),
+                message: Text(identifiableError.localizedDescription),
                 dismissButton: .default(Text("확인"))
             )
         }

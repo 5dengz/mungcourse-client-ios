@@ -37,7 +37,7 @@ struct CommonPopupModal: View {
                 Text(title)
                     .font(.custom("Pretendard-SemiBold", size: 20))
                     .foregroundColor(.black)
-                    .padding(.top, 24)
+                    .padding(.top, 28)
                 
                 // 메시지 텍스트
                 Text(message)
@@ -45,6 +45,7 @@ struct CommonPopupModal: View {
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
                 
                 // 버튼 영역
                 HStack(spacing: 12) {
@@ -71,7 +72,7 @@ struct CommonPopupModal: View {
                     }
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                .padding(.bottom, 28)
             }
             .background(Color.white)
             .cornerRadius(16)
