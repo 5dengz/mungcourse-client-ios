@@ -38,6 +38,7 @@ public struct CommonDatePickerSheet: View {
             Spacer()
         }
         .presentationDetents([.height(500)])
+        .presentationCornerRadius(20)
         .onDisappear {
             onDismiss?()
         }

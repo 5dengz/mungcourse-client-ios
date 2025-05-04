@@ -50,6 +50,7 @@ struct DogSelectionSheet: View {
             Spacer()
         }
         .presentationDetents([.height(260)])
+        .presentationCornerRadius(20)
         .onDisappear {
             // 시트가 사라질 때 필요한 작업이 있다면 여기에 추가
         }
