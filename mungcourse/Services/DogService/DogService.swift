@@ -148,37 +148,24 @@ class DogService: DogServiceProtocol {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(authToken ?? "")", forHTTPHeaderField: "Authorization")
 
-        guard let token = authToken, !token.isEmpty else {
-            print("❌ Error: Auth token is missing for /v1/s3 request.")
-            throw NetworkError.missingToken
-        }
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let cleanExt = fileExtension.hasPrefix(".")
+            ? String(fileExtension.dropFirst())
+            : fileExtension
+        let body = ["fileName": fileName, "fileNameExtension": cleanExt]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        // fileExtension에서 앞에 점(.)이 있으면 제거
-        let cleanExtension = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
-        
-        // 백엔드 요구사항에 맞는 정확한 필드명 사용
-        let requestBody = [
-            "fileName": fileName,
-            "fileNameExtension": cleanExtension
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-            // 디버깅을 위한 로깅 개선
-            if let jsonString = String(data: request.httpBody!, encoding: .utf8) {
-                print("✉️ S3 Request Body: \(jsonString)")
-            }
-            print("➡️ Requesting S3 URL: \(endpoint) with token: \(token.prefix(10))...")
-        } catch {
-            print("❌ Error encoding S3 URL request body: \(error)")
-            throw NetworkError.encodingError(error)
+        // —> **로그로 헤더/바디 확인**
+        print("🔍 PresignedURL Request Headers:", request.allHTTPHeaderFields ?? [:])
+        if let b = request.httpBody,
+           let s = String(data: b, encoding: .utf8) {
+            print("🔍 PresignedURL Request Body:", s)
         }
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, resp) = try await URLSession.shared.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse else {
+        guard let httpResponse = resp as? HTTPURLResponse else {
             print("❌ Error: Invalid HTTP response received for S3 URL request.")
             throw NetworkError.invalidResponse
         }
@@ -209,32 +196,29 @@ class DogService: DogServiceProtocol {
         }
     }
 
-    func uploadImageToS3(presignedUrl: String, imageData: Data, contentType: String) async throws {
-        guard let url = URL(string: presignedUrl) else {
-             print("❌ Error: Invalid pre-signed URL string: \(presignedUrl)")
-            throw NetworkError.invalidURL
-        }
-
+    func uploadImageToS3(presignedUrl: String, imageData: Data) async throws {
+        guard let url = URL(string: presignedUrl) else { throw NetworkError.invalidURL }
         var request = URLRequest(url: url)
-        request.httpMethod = "PUT"  // S3 프리사인드 PUT 방식 사용
-        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
-        // S3 presigned URL requires Content-Length header; set body directly to avoid chunked transfer
+        request.httpMethod = "PUT"
+
+        // ✅ 백엔드 요구: public-read ACL 헤더
+        request.setValue("public-read", forHTTPHeaderField: "x-amz-acl")
+        // ✅ 헤더에 Content-Type 이나 다른 건 절대 붙이지 않음!
+        //    (아예 setValue for "Content-Type" 호출이 없어야 함)
+
+        // 크기만 알려주는 건 OK
         request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
-        print("⬆️ Uploading image (\(imageData.count) bytes) to S3: \(url.absoluteString.prefix(60))...")
-
-        // set body directly and use data(for:) to avoid chunked transfer
         request.httpBody = imageData
-        let (_, response) = try await URLSession.shared.data(for: request)
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-             print("❌ Error: Invalid HTTP response received during S3 upload.")
-            throw NetworkError.invalidResponse
-        }
+        // —> **로그로 헤더/바디 확인**
+        print("🔍 S3 Upload Request Headers:", request.allHTTPHeaderFields ?? [:])
+        print("🔍 S3 Upload Body Size:", imageData.count, "bytes")
 
-        // S3 PUT success is typically 200 OK
-        guard (200...299).contains(httpResponse.statusCode) else {
-             print("❌ Error: S3 Upload failed with status: \(httpResponse.statusCode)")
-            throw NetworkError.s3UploadFailed(statusCode: httpResponse.statusCode)
+        let (_, resp) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = resp as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Error: S3 Upload failed with status: \((resp as? HTTPURLResponse)?.statusCode ?? -1)")
+            throw NetworkError.s3UploadFailed(statusCode: (resp as? HTTPURLResponse)?.statusCode)
         }
         print("✅ Image uploaded successfully to S3.")
     }

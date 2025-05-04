@@ -11,6 +11,7 @@ struct StartWalkTabView: View {
                 .font(.custom("Pretendard-SemiBold", size: 18))
                 .padding(.top, 36)
                 .padding(.leading, 29)
+                .padding(.bottom, 15)
             
             CommonFilledButton(
                 title: "산책 바로 시작",
@@ -22,7 +23,10 @@ struct StartWalkTabView: View {
                 cornerRadius: 12
             )
             .font(.custom("Pretendard-SemiBold", size: 18))
-            .shadow(color: Color.gray.opacity(0.3), radius: 4, x: 0, y: 2)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(Color("gray300"), lineWidth: 1)
+            )
             .padding(.horizontal, 29)
             
             CommonFilledButton(

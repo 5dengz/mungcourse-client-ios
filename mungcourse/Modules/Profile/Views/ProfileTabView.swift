@@ -172,8 +172,6 @@ struct ProfileTabView: View {
         }
         .fullScreenCover(isPresented: $showSelectDog) {
             DogSelectionView(
-                title: "프로필을 확인할\n반려견을 선택해주세요.",
-                subtitle: "",
                 showHeader: false,
                 showAddDogButton: true,
                 showCompleteButton: false,

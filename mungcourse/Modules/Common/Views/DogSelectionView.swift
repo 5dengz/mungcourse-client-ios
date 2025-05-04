@@ -4,9 +4,16 @@ struct DogSelectionView: View {
     @EnvironmentObject var dogVM: DogViewModel
     @Environment(\.dismiss) private var dismiss
     
-    // 제목과 부제목
-    var title: String = "반려견을 선택해주세요"
-    var subtitle: String = "프로필을 확인할\n반려견을 선택해주세요."
+    // 모드별 텍스트 처리를 위한 변수
+    // 일반 모드에 사용되는 주요 텍스트 (현재는 사용하지 않음)
+    var mainTitle: String = ""
+    
+    // 일반 모드에 사용되는 헤더 텍스트 (이것이 화면 상단에 표시되는 제목)
+    var headerTitle: String = "반려견을 선택해주세요"
+    
+    // 산책 모드에 사용되는 텍스트
+    private let walkModeTitle = "함께하는 반려견이 있나요?"
+    private let walkModeSubtitle = "산책 기록을 함께 저장할게요!"
     
     // UI 요소 표시 여부 제어
     var showHeader: Bool = true
@@ -36,52 +43,63 @@ struct DogSelectionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 상단 헤더 (조건부 표시)
-            if showHeader {
-                CommonHeaderView(
-                    leftIcon: "arrow_back",
-                    leftAction: { dismiss() },
-                    title: "반려견 선택"
-                )
-            } else if isWalkMode {
-                // 산책 모드 헤더: 취소 버튼과 건너뛰기 버튼
-                CommonHeaderView(
-                    leftIcon: "arrow_back",
-                    leftAction: {
+            // 산책 모드일 때만 커스텀 헤더 표시
+            if isWalkMode {
+                HStack {
+                    Button(action: {
                         dismiss()
                         onCancel?()
-                    },
-                    title: ""
-                ) {
+                    }) {
+                        Text("취소")
+                            .font(.custom("Pretendard-Regular", size: 18))
+                            .foregroundColor(Color("main"))
+                    }
+                    
+                    Spacer()
+                    
                     Button(action: {
                         dismiss()
                         onSkip?()
                     }) {
                         Text("건너뛰기")
-                            .font(.custom("Pretendard-Regular", size: 16))
-                            .foregroundColor(Color("main"))
+                            .font(.custom("Pretendard-Regular", size: 18))
+                            .foregroundColor(Color("gray400"))
                     }
                 }
+                .padding(.horizontal, 30)
+                .padding(.vertical, 12)
             }
             
             // 콘텐츠 영역
             VStack(spacing: 20) {
-                // 제목 (산책 모드인 경우 다른 제목 사용)
-                Text(isWalkMode ? "함께하는 반려견이 있나요?" : title)
-                    .font(.custom("Pretendard-SemiBold", size: 24))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(nil)
-                    .padding(.top, showHeader ? 0 : 20)
-                
-                // 부제목 (산책 모드인 경우에만 표시하거나, subtitle이 비어있지 않은 경우만 표시)
-                if isWalkMode || !subtitle.isEmpty {
-                    Text(isWalkMode ? "산책 기록을 함께 저장할게요!" : subtitle)
-                        .font(.custom("Pretendard-Regular", size: 14))
-                        .foregroundColor(Color("gray600"))
+                // 텍스트 영역 VStack
+                VStack(spacing: 8) {
+                    // 제목 - 산책 모드와 일반 모드에 따라 다른 텍스트 사용
+                    Text(isWalkMode ? walkModeTitle : headerTitle)
+                        .font(.custom("Pretendard-SemiBold", size: 24))
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .lineLimit(nil)
+                        .padding(.top, 20)
+                    
+                    // 부제목 영역 - 산책 모드일 때는 항상 표시, 아닐 때는 mainTitle이 있을 때만
+                    if isWalkMode {
+                        // 산책 모드 부제목
+                        Text(walkModeSubtitle)
+                            .font(.custom("Pretendard-Regular", size: 14))
+                            .foregroundColor(Color("gray600"))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(nil)
+                    } else if !mainTitle.isEmpty {
+                        // 일반 모드 - 더 이상 줄바꿈 처리 없이 단순 텍스트로 표시
+                        Text(mainTitle)
+                            .font(.custom("Pretendard-Regular", size: 14))
+                            .foregroundColor(Color("gray600"))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(nil)
+                    }
                 }
                 
                 // 반려견 그리드
@@ -126,12 +144,12 @@ struct DogSelectionView: View {
                                 dogVM.selectDog(dog)
                                 dogVM.mainDog = dog
                                 
-                                // 즉시 선택 모드인 경우 바로 dismiss 호출
-                                if immediateSelection || isWalkMode {
+                                // 즉시 선택 모드 또는 산책 모드인 경우 dismiss 호출
+                                if immediateSelection {
                                     dismiss()
-                                    if isWalkMode {
-                                        onComplete?()
-                                    }
+                                } else if isWalkMode {
+                                    dismiss()
+                                    onComplete?()
                                 }
                             }
                         }
@@ -164,15 +182,8 @@ struct DogSelectionView: View {
                     .padding(.bottom, 20)
                 }
                 
-                // 선택 완료 버튼 (조건부 표시 - 산책 모드에서는 항상 표시)
-                if showCompleteButton && !isWalkMode {
-                    CommonFilledButton(title: "선택 완료", action: {
-                        dismiss()
-                        onComplete?()
-                    })
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 48)
-                } else if isWalkMode {
+                // 선택 완료 버튼 (showCompleteButton이 true이거나 산책 모드일 때 표시)
+                if showCompleteButton || isWalkMode {
                     CommonFilledButton(title: "선택 완료", action: {
                         dismiss()
                         onComplete?()
