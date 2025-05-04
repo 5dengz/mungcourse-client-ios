@@ -44,7 +44,7 @@ struct DogSelectionSheet: View {
                     }
                 }
                 .padding(.horizontal, 29)
-                .padding(.top, 10)
+                .padding(.top, 5)
             }
             
             Spacer()

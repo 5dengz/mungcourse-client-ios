@@ -6,12 +6,13 @@ struct OnboardingPageView: View {
     let imageName: String
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .center) {
             // 배경 이미지
             Image(imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: 310, height: 575)
+                .frame(maxWidth: .infinity) // 좌우 너비 기준 중간에 배치
             
             // 텍스트 콘텐츠 (인디케이터보다 44 위에 위치)
             VStack(spacing: 16) {
@@ -38,6 +39,7 @@ struct OnboardingPageView: View {
                     .blur(radius: 3)
             )
             .padding(.horizontal, 20)
+            .frame(maxHeight: .infinity, alignment: .bottom) // 텍스트는 여전히 하단에 위치
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

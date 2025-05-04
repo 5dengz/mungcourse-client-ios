@@ -29,52 +29,80 @@ struct OnboardingView: View {
     ]
     
     var body: some View {
-        VStack {
-            
-            Spacer()
-            
-            // 페이지 컨텐츠
-            TabView(selection: $currentPage) {
-                ForEach(0..<pages.count, id: \.self) { index in
-                    OnboardingPageView(
-                        mainTitle: pages[index].mainTitle,
-                        subTitle: pages[index].subTitle,
-                        imageName: pages[index].imageName
-                    )
-                    .tag(index)
-                    
-                }
-            }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-            .animation(.easeInOut, value: currentPage)
-            
-            
-            
-            // 페이지 인디케이터
-            HStack(spacing: 8) {
-                ForEach(0..<pages.count, id: \.self) { index in
-                    Circle()
-                        .fill(currentPage == index ? Color.main : Color.gray.opacity(0.3))
-                        .frame(width: 8, height: 8)
-                }
-            }
-            .padding(10)
-            
-            
-            
-            // 다음 버튼
-            CommonFilledButton(
-                title: currentPage < pages.count - 1 ? "다음" : "시작하기",
-                action: {
-                    if currentPage < pages.count - 1 {
-                        currentPage += 1
-                    } else {
-                        hasCompletedOnboarding = true
+        ZStack(alignment: .topTrailing) {
+            // 메인 콘텐츠
+            VStack {
+                Spacer()
+                
+                // 페이지 컨텐츠
+                TabView(selection: $currentPage) {
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        OnboardingPageView(
+                            mainTitle: pages[index].mainTitle,
+                            subTitle: pages[index].subTitle,
+                            imageName: pages[index].imageName
+                        )
+                        .tag(index)
                     }
                 }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .animation(.easeInOut, value: currentPage)
+                
+                // 페이지 인디케이터
+                HStack(spacing: 8) {
+                    ForEach(0..<pages.count, id: \.self) { index in
+                        Circle()
+                            .fill(currentPage == index ? Color.main : Color.gray.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                    }
+                }
+                .padding(10)
+                
+                // 다음 버튼
+                CommonFilledButton(
+                    title: currentPage < pages.count - 1 ? "다음" : "시작하기",
+                    action: {
+                        if currentPage < pages.count - 1 {
+                            currentPage += 1
+                        } else {
+                            completeOnboarding()
+                        }
+                    }
+                )
+                .padding(.horizontal, 30)
+                .padding(.bottom, 30)
+            }
+            
+            // 건너뛰기 버튼 - 최상위 레이어로 설정
+            Button(action: {
+                completeOnboarding()
+            }) {
+                Text("건너뛰기")
+                    .font(.custom("Pretendard-SemiBold", size: 15))
+                    .foregroundColor(Color.gray600)
+                    .padding(.top, 30)
+                    .padding(.trailing, 30)
+            }
+            .zIndex(100) // z-인덱스를 높여서 항상 최상단에 표시
+        }
+    }
+    
+    // 온보딩 완료 처리를 위한 함수
+    private func completeOnboarding() {
+        print("온보딩 완료 - 상태 변경 전: \(hasCompletedOnboarding)")
+        hasCompletedOnboarding = true
+        print("온보딩 완료 - 상태 변경 후: \(hasCompletedOnboarding)")
+        
+        // UserDefaults 값이 확실히 저장되도록 동기화
+        UserDefaults.standard.synchronize()
+        
+        // 메인 스레드에서 상태 업데이트 보장
+        DispatchQueue.main.async {
+            // 상태 변경을 알리기 위한 노티피케이션 발송
+            NotificationCenter.default.post(
+                name: UserDefaults.didChangeNotification,
+                object: nil
             )
-            .padding(.horizontal, 30)
-            .padding(.bottom, 30)
         }
     }
 }

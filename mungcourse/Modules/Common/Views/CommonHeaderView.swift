@@ -54,7 +54,8 @@ extension CommonHeaderView {
                 .allowsHitTesting(false)
         }
         .frame(height: 44)
-        .padding(.vertical, 16)
+        .padding(.top, 5)
+        .padding(.bottom, 10)
     }
 }
 

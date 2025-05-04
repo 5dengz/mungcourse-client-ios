@@ -15,6 +15,7 @@ struct mungcourseApp: App {
     @StateObject private var tokenManager = TokenManager.shared
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
     @StateObject private var dogVM = DogViewModel()
+    @State private var forceUpdate: Bool = false // 강제 업데이트를 위한 상태
 
     
     init() {
@@ -34,21 +35,48 @@ struct mungcourseApp: App {
         // 디버깅: Info.plist에서 API_BASE_URL 값 확인
         let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String
         print("[DEBUG] API_BASE_URL 런타임 값:", apiBaseURL ?? "nil")
+        
+        // UserDefaults 변경사항 모니터링 설정
+        NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            // 디버깅용 로그
+            print("[DEBUG] UserDefaults 변경 감지: hasCompletedOnboarding =", UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"))
+        }
     }
 
     var body: some Scene {
         WindowGroup {
-            // 온보딩, 로그인, 메인 화면 분기
-            if !hasCompletedOnboarding {
-                OnboardingView()
-            } else if tokenManager.accessToken == nil {
-                LoginView()
-            } else {
-                SplashView()
-                    .environmentObject(dogVM)
-                    .preferredColorScheme(.light)
-                    .background(Color("gray100").ignoresSafeArea())
+            // 상태 값에 따라 뷰 표시 (forceUpdate를 사용하여 뷰 갱신 강제)
+            Group {
+                if !hasCompletedOnboarding {
+                    OnboardingView()
+                } else if tokenManager.accessToken == nil {
+                    LoginView()
+                } else {
+                    SplashView()
+                        .environmentObject(dogVM)
+                        .preferredColorScheme(.light)
+                        .background(Color("gray100").ignoresSafeArea())
+                }
             }
+            // 상태 변경을 감지하기 위해 UserDefaults 변경 알림을 수신
+            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+                // 메인 스레드에서 상태 업데이트 보장
+                DispatchQueue.main.async {
+                    // UserDefaults에서 직접 읽어와 상태 갱신
+                    let newValue = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+                    if hasCompletedOnboarding != newValue {
+                        print("[DEBUG] OnReceive - hasCompletedOnboarding 업데이트: \(hasCompletedOnboarding) -> \(newValue)")
+                        hasCompletedOnboarding = newValue
+                        // 강제 갱신 트리거
+                        forceUpdate.toggle()
+                    }
+                }
+            }
+            .id(forceUpdate) // 상태가 변경될 때마다 View를 강제로 다시 그림
         }
     }
 }
