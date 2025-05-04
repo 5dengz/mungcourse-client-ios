@@ -4,6 +4,7 @@ struct AccountDeletionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedReasons: Set<String> = []
     @State private var reasonText: String = ""
+    @State private var showConfirmation = false
     
     let reasons = ["기능이 다양하지 않아요", "배터리 소모가 너무 심해요", "추천 경로가 마음에 들지 않아요", "경로 측정이 잘 안 돼요", "기타"]
 
@@ -55,7 +56,8 @@ struct AccountDeletionView: View {
                 CommonFilledButton(
                     title: "계속하기",
                     action: {
-                        // 탈퇴 처리 로직
+                        // 탈퇴 확인 화면으로 이동
+                        showConfirmation = true
                     },
                     isEnabled: !selectedReasons.isEmpty,
                     backgroundColor: Color("main"),
@@ -67,6 +69,12 @@ struct AccountDeletionView: View {
         }
         .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
+        .sheet(isPresented: $showConfirmation) {
+            AccountDeletionConfirmView(onDelete: {
+                // 실제 회원 탈퇴 처리 로직
+                dismiss() // 탈퇴 후 이전 화면으로 돌아가기
+            })
+        }
     }
     
     private func toggleSelection(_ reason: String) {
