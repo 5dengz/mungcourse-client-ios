@@ -64,7 +64,7 @@ struct CommonHeaderView_Previews: PreviewProvider {
         VStack(spacing: 32) {
             CommonHeaderView(leftIcon: "arrow_back", leftAction: {}, title: "테스트")
 
-            CommonHeaderView(leftIcon: "chevron.left", leftAction: {}, title: "프로필") {
+            CommonHeaderView(leftIcon: "arrow_back", leftAction: {}, title: "프로필") {
                 HStack(spacing: 16) {
                     Image(systemName: "arrow.triangle.2.circlepath")
                         .font(.title2)
@@ -78,4 +78,4 @@ struct CommonHeaderView_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
-#endif 
+#endif

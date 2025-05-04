@@ -50,7 +50,7 @@ struct ProfileArea: View {
                             Text(dogName)
                                 .font(.custom("Pretendard-SemiBold", size: 24))
                                 .foregroundColor(Color("AccentColor"))
-                            Image(systemName: "chevron-down")
+                            Image("arrow_down")
                                 .font(.caption)
                                 .foregroundColor(Color("AccentColor"))
                         }
