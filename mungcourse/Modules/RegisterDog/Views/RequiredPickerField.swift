@@ -5,7 +5,7 @@ struct RequiredPickerField: View {
     let title: String
     let placeholder: String
     @Binding var selection: String
-    @State private var isShowingPicker = false
+    @State private var showBreedSearchView = false
     
     var body: some View {
         InputFieldContainer(title: title) {
@@ -20,36 +20,18 @@ struct RequiredPickerField: View {
             .inputBoxStyle()
             .contentShape(Rectangle())
             .onTapGesture {
-                isShowingPicker = true
+                showBreedSearchView = true
             }
-            .sheet(isPresented: $isShowingPicker) {
-                NavigationView {
-                    List(DogBreeds.all, id: \.self) { breed in
-                        Button(action: {
-                            selection = breed
-                            isShowingPicker = false
-                        }) {
-                            HStack {
-                                Text(breed)
-                                    .foregroundColor(.black)
-                                if selection == breed {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(Color("main"))
-                                }
-                            }
-                        }
+            .fullScreenCover(isPresented: $showBreedSearchView) {
+                DogBreedSearchView(
+                    onBack: {
+                        showBreedSearchView = false
+                    },
+                    onSelect: { breed in
+                        selection = breed
+                        showBreedSearchView = false
                     }
-                    .navigationTitle(title)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("닫기") {
-                                isShowingPicker = false
-                            }
-                        }
-                    }
-                }
+                )
             }
         }
     }
@@ -65,4 +47,4 @@ struct RequiredPickerField: View {
         }
     }
     return PreviewWrapper()
-} 
+}
