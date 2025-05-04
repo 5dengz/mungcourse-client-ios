@@ -23,7 +23,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 20)
                     }
                     Button(action: { /* 문의하기 액션 */ }) {
                         HStack {
@@ -37,7 +37,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 20)
                     }
                     Button(action: { /* 이용약관 액션 */ }) {
                         HStack {
@@ -51,7 +51,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 20)
                     }
                     NavigationLink(destination: AccountDeletionView()) {
                         HStack {
@@ -65,7 +65,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 20)
                     }
                     Button(action: {
                         AuthService.shared.logout()
@@ -76,9 +76,6 @@ struct SettingsView: View {
                                 .font(.custom("Pretendard-Regular", size: 16))
                                 .foregroundColor(.black)
                             Spacer()
-                            Image("arrow_right")
-                                .renderingMode(.template)
-                                .foregroundColor(.gray)
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)

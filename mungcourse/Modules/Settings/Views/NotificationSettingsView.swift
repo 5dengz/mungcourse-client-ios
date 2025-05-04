@@ -24,7 +24,7 @@ struct NotificationSettingsView: View {
                 }
                 .padding(.horizontal, 16)
                 .background(Color.white)
-                .padding(.bottom, 16)
+                .padding(.bottom, 20)
                 HStack {
                     Text("산책 푸시 알림")
                         .font(.custom("Pretendard-Regular", size: 16))
@@ -35,7 +35,7 @@ struct NotificationSettingsView: View {
                 }
                 .padding(.horizontal, 16)
                 .background(Color.white)
-                .padding(.bottom, 16)
+                .padding(.bottom, 20)
                 HStack {
                     Text("산책 중단 알림")
                         .font(.custom("Pretendard-Regular", size: 16))

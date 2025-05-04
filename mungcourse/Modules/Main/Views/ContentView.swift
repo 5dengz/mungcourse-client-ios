@@ -116,23 +116,16 @@ struct ContentView: View {
                 .background(Color.white.ignoresSafeArea(edges: .bottom))
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
             }
-
-            if isStartWalkOverlayPresented {
-                StartWalkTabView(
-                    isOverlayPresented: $isStartWalkOverlayPresented,
-                    onSelectWaypoint: {
-                        showSelectWaypoint = true
-                        isStartWalkOverlayPresented = false
-                    },
-                    onRecommendCourse: {
-                        showRecommendCourse = true
-                        isStartWalkOverlayPresented = false
-                    }
-                )
-                .transition(.opacity)
-                .zIndex(1)
-            }
         }
+        .startWalkTabSheet(
+            isPresented: $isStartWalkOverlayPresented,
+            onSelectWaypoint: {
+                showSelectWaypoint = true
+            },
+            onRecommendCourse: {
+                showRecommendCourse = true
+            }
+        )
         .fullScreenCover(isPresented: $showSelectWaypoint) {
             NavigationStack {
                 SelectWaypointView(onBack: {
