@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 56BAE79D2DBF93F000243818 /* KeychainAccess */; };
-		56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 56F78F012DAD051800B3CC88 /* NMapsMap */; };
 		56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242A2DBF6BE9008B375A /* GoogleSignIn */; };
 		56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
@@ -75,7 +74,6 @@
 			files = (
 				56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */,
 				56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */,
-				56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */,
 				56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -146,7 +144,6 @@
 			);
 			name = mungcourse;
 			packageProductDependencies = (
-				56F78F012DAD051800B3CC88 /* NMapsMap */,
 				56FC242A2DBF6BE9008B375A /* GoogleSignIn */,
 				56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */,
 				56BAE79D2DBF93F000243818 /* KeychainAccess */,
@@ -235,7 +232,6 @@
 			mainGroup = 56F123032DA2C33500632733;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
@@ -618,14 +614,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.21.0;
-			};
-		};
 		56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
@@ -649,11 +637,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
-		};
-		56F78F012DAD051800B3CC88 /* NMapsMap */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
-			productName = NMapsMap;
 		};
 		56FC242A2DBF6BE9008B375A /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
