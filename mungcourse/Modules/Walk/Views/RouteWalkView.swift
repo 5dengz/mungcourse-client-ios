@@ -88,8 +88,8 @@ struct RouteWalkView: View {
                 let walkData = WalkSessionData(
                     distance: session.distance,
                     duration: Int(session.duration),
-                    coordinates: session.path,
-                    date: session.endTime
+                    date: session.endTime,
+                    coordinates: session.path
                 )
                 NavigationStack {
                     WalkCompleteView(walkData: walkData)
