@@ -26,6 +26,7 @@ struct HomeView: View {
             .padding(.top, 20)
         }
         .navigationTitle("홈")
+        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogName, dogs: availableDogs)
     }
 }
 
