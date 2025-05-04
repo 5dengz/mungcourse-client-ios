@@ -35,6 +35,7 @@ struct ContentView: View {
     @State private var isStartWalkOverlayPresented = false
     @State private var showSelectWaypoint = false
     @State private var showRecommendCourse = false
+    @State private var showStartWalk = false
     @State private var showingDogSelection = false
     @EnvironmentObject var dogVM: DogViewModel
 
@@ -58,7 +59,10 @@ struct ContentView: View {
                         showingDogSelection: $showingDogSelection,
                         dogName: $dogVM.selectedDogName,
                         availableDogs: dogVM.dogNames,
-                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented
+                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
+                        onSelectCourse: {
+                            showSelectWaypoint = true
+                        }
                     )
                 case .startWalk:
                     HomeView(
@@ -66,7 +70,10 @@ struct ContentView: View {
                         showingDogSelection: $showingDogSelection,
                         dogName: $dogVM.selectedDogName,
                         availableDogs: dogVM.dogNames,
-                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented
+                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
+                        onSelectCourse: {
+                            showSelectWaypoint = true
+                        }
                     )
                 case .routine:
                     RoutineSettingsView()
@@ -120,7 +127,7 @@ struct ContentView: View {
         .startWalkTabSheet(
             isPresented: $isStartWalkOverlayPresented,
             onSelectWaypoint: {
-                showSelectWaypoint = true
+                showStartWalk = true
             },
             onRecommendCourse: {
                 showRecommendCourse = true
@@ -139,6 +146,11 @@ struct ContentView: View {
                     showRecommendCourse = false
                     isStartWalkOverlayPresented = true
                 })
+            }
+        }
+        .fullScreenCover(isPresented: $showStartWalk) {
+            NavigationStack {
+                StartWalkView()
             }
         }
         .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogVM.selectedDogName, dogs: dogVM.dogNames)

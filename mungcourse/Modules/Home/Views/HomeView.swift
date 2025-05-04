@@ -6,6 +6,7 @@ struct HomeView: View {
     @Binding var dogName: String
     let availableDogs: [String]
     @Binding var isStartWalkOverlayPresented: Bool
+    var onSelectCourse: () -> Void
 
     var body: some View {
         ScrollView {
@@ -16,7 +17,10 @@ struct HomeView: View {
                     dogName: $dogName,
                     availableDogs: availableDogs
                 )
-                ButtonArea(isStartWalkOverlayPresented: $isStartWalkOverlayPresented)
+                ButtonArea(
+                    isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
+                    onSelectCourse: onSelectCourse
+                )
                 NearbyTrailsView()
                 PastRoutesView()
                     .padding(.bottom, 35)
@@ -88,6 +92,8 @@ struct ProfileArea: View {
 
 struct ButtonArea: View {
     @Binding var isStartWalkOverlayPresented: Bool
+    var onSelectCourse: () -> Void
+    
     var body: some View {
         HStack(spacing: 9) {
             MainButton(
@@ -105,7 +111,7 @@ struct ButtonArea: View {
                 backgroundColor: Color("white"),
                 foregroundColor: Color("main"),
                 action: {
-                    print("코스 선택 버튼 탭됨")
+                    onSelectCourse()
                 }
             )
         }

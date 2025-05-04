@@ -13,7 +13,7 @@ struct StartWalkTabView: View {
                 .padding(.leading, 29)
             
             CommonFilledButton(
-                title: "경유지 선택",
+                title: "산책 바로 시작",
                 action: {
                     onSelectWaypoint()
                 },
@@ -26,7 +26,7 @@ struct StartWalkTabView: View {
             .padding(.horizontal, 29)
             
             CommonFilledButton(
-                title: "바로 추천",
+                title: "코스 추천",
                 action: {
                     onRecommendCourse()
                 },

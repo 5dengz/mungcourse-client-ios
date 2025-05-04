@@ -28,6 +28,7 @@ class WalkCompleteViewModel: ObservableObject {
     
     // 서비스 의존성
     private var cancellables = Set<AnyCancellable>()
+    private var walkId: Int? = nil // 산책 ID (API 응답에서 받은 값)
     
     // MARK: - 초기화
     
@@ -101,16 +102,89 @@ class WalkCompleteViewModel: ObservableObject {
         
         isLoading = true
         
-        // 네트워크 요청을 시뮬레이션하는 코드
-        // 실제 구현에서는 API 호출 로직으로 대체해야 함
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+        // API를 통해 피드백 등급 업데이트
+        updateWalkRating(rating: feedbackRating) { [weak self] success in
             guard let self = self else { return }
-            self.isLoading = false
-            self.isFeedbackSubmitted = true
-            self.closeFeedbackModal()
             
-            print("피드백 제출: \(self.feedbackRating)점")
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if success {
+                    print("✅ 산책 평가 업데이트 성공: \(self.feedbackRating)점")
+                    self.isFeedbackSubmitted = true
+                } else {
+                    print("❌ 산책 평가 업데이트 실패")
+                    self.errorMessage = "산책 평가 업데이트에 실패했습니다. 다시 시도해주세요."
+                }
+                
+                self.closeFeedbackModal()
+            }
         }
+    }
+    
+    // 산책 평가 업데이트 API 호출
+    private func updateWalkRating(rating: Int, completion: @escaping (Bool) -> Void) {
+        // TODO: 실제 산책 ID를 사용해야 함 (현재는 임시 구현)
+        // API 엔드포인트: PATCH /v1/walks/{walkId}/rating
+        
+        // 현재는 간단히 네트워크 요청을 시뮬레이션
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            // 성공 시뮬레이션
+            completion(true)
+        }
+        
+        // 실제 구현 예시:
+        /*
+        guard let walkId = walkId else {
+            print("❌ 산책 ID가 없어 평가 업데이트 불가")
+            completion(false)
+            return
+        }
+        
+        guard let url = URL(string: "\(Self.apiBaseURL)/v1/walks/\(walkId)/rating") else {
+            print("❌ 산책 평가 업데이트 실패: 잘못된 URL")
+            completion(false)
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = ["rating": rating]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            print("❌ 산책 평가 JSON 변환 실패: \(error)")
+            completion(false)
+            return
+        }
+        
+        NetworkManager.shared.performAPIRequest(request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ 산책 평가 업데이트 실패: \(error)")
+                    completion(false)
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("❌ 산책 평가 업데이트 실패: 응답 없음")
+                    completion(false)
+                    return
+                }
+                
+                if httpResponse.statusCode == 200 {
+                    print("✅ 산책 평가 업데이트 성공: \(rating)점")
+                    completion(true)
+                } else {
+                    print("❌ 산책 평가 업데이트 실패: 상태 코드 \(httpResponse.statusCode)")
+                    completion(false)
+                }
+            }
+        }
+        */
     }
     
     // 홈으로 이동 액션을 ViewModel에서 관리
@@ -118,6 +192,11 @@ class WalkCompleteViewModel: ObservableObject {
         // 여기서는 간단한 로그만 출력
         // 실제 구현에서는 NavigationPath 또는 콜백을 통해 화면 전환 처리
         print("홈으로 이동")
+    }
+    
+    // API 기본 URL 설정
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
     }
     
     // MARK: - 헬퍼 메서드

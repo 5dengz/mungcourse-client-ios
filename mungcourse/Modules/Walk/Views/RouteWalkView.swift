@@ -5,6 +5,7 @@ struct RouteWalkView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: RouteWalkViewModel
     @State private var showCompleteAlert = false
+    @State private var showCompleteView = false
     @State private var completedSession: WalkSession? = nil
     
     init(route: RouteOption) {
@@ -61,9 +62,16 @@ struct RouteWalkView: View {
                     if let session = completedSession {
                         // TODO: 실제 dogIds를 선택받아야 함
                         viewModel.uploadWalkSession(session, dogIds: [1]) { success in
-                            // 업로드 성공/실패에 따라 알림 등 처리 가능
+                            if success {
+                                print("✅ 산책 데이터 업로드 성공")
+                                // 산책 완료 화면으로 이동
+                                showCompleteView = true
+                            } else {
+                                print("❌ 산책 데이터 업로드 실패")
+                                // 실패 시에도 일단 산책 완료 화면으로 이동
+                                showCompleteView = true
+                            }
                         }
-                        showCompleteAlert = true
                     }
                 }
             )
@@ -74,12 +82,19 @@ struct RouteWalkView: View {
             WalkHeaderView(onBack: { dismiss() }),
             alignment: .top
         )
-        .alert("산책 완료", isPresented: $showCompleteAlert) {
-            Button("확인") {
-                dismiss()
+        // 산책 완료 화면 표시
+        .fullScreenCover(isPresented: $showCompleteView) {
+            if let session = completedSession {
+                let walkData = WalkSessionData(
+                    distance: session.distance,
+                    duration: Int(session.duration),
+                    coordinates: session.path,
+                    date: session.endTime
+                )
+                NavigationStack {
+                    WalkCompleteView(walkData: walkData)
+                }
             }
-        } message: {
-            Text("총 거리: \(viewModel.formattedDistance)km\n소요 시간: \(viewModel.formattedDuration)\n소모 칼로리: \(viewModel.formattedCalories)kcal")
         }
         .alert("위치 권한 필요", isPresented: $viewModel.showPermissionAlert) {
             Button("설정으로 이동") {
