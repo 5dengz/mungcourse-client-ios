@@ -54,7 +54,7 @@ struct SettingsView: View {
                         .background(Color.white)
                         .padding(.bottom, 35)
                     }
-                    NavigationLink(destination: AccountDeletionView()) {
+                    NavigationLink(destination: AccountDeletionView().navigationBarHidden(true)) {
                         HStack {
                             Text("회원 탈퇴")
                                 .font(.custom("Pretendard-Regular", size: 16))
