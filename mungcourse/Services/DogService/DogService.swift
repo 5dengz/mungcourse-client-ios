@@ -163,10 +163,10 @@ class DogService: DogServiceProtocol {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         // —> **로그로 헤더/바디 확인**
-        print("🔍 PresignedURL Request Headers:", request.allHTTPHeaderFields ?? [:])
-        if let b = request.httpBody,
-           let s = String(data: b, encoding: .utf8) {
-            print("🔍 PresignedURL Request Body:", s)
+        print("➡️ PresignedURL Request: POST \(endpoint.absoluteString)")
+        print("🔍 PresignedURL Request Headers: \(request.allHTTPHeaderFields ?? [:])")
+        if let b = request.httpBody, let s = String(data: b, encoding: .utf8) {
+            print("🔍 PresignedURL Request Body: \(s)")
         }
 
         let (data, resp) = try await URLSession.shared.data(for: request)
@@ -178,6 +178,10 @@ class DogService: DogServiceProtocol {
 
         // 응답 상태코드 로깅 개선
         print("📡 S3 URL Request - Status Code: \(httpResponse.statusCode)")
+        print("🔍 PresignedURL Response Headers: \(httpResponse.allHeaderFields)")
+        if let respBody = String(data: data, encoding: .utf8) {
+            print("🔍 PresignedURL Response Body: \(respBody)")
+        }
         
         guard (200...299).contains(httpResponse.statusCode) else {
             // 오류 응답 상세 로깅
@@ -214,24 +218,31 @@ class DogService: DogServiceProtocol {
         if let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty {
             request.setValue("Bearer \(refresh)", forHTTPHeaderField: "Authorization-Refresh")
         }
-        // ✅ 백엔드 요구: public-read ACL 헤더
+        // ✅ public-read ACL만 있고
+        //    Content-Type: … 호출이 없습니다!
         request.setValue("public-read", forHTTPHeaderField: "x-amz-acl")
-        // ✅ 헤더에 Content-Type 이나 다른 건 절대 붙이지 않음!
-        //    (아예 setValue for "Content-Type" 호출이 없어야 함)
-
         // 크기만 알려주는 건 OK
         request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
         request.httpBody = imageData
 
         // —> **로그로 헤더/바디 확인**
-        print("🔍 S3 Upload Request Headers:", request.allHTTPHeaderFields ?? [:])
-        print("🔍 S3 Upload Body Size:", imageData.count, "bytes")
+        print("➡️ S3 Upload Request: PUT \(request.url?.absoluteString ?? "")")
+        print("🔍 S3 Upload Request Headers: \(request.allHTTPHeaderFields ?? [:])")
+        print("🔍 S3 Upload Request Body Size: \(imageData.count) bytes")
 
-        let (_, resp) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = resp as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            print("❌ Error: S3 Upload failed with status: \((resp as? HTTPURLResponse)?.statusCode ?? -1)")
-            throw NetworkError.s3UploadFailed(statusCode: (resp as? HTTPURLResponse)?.statusCode)
+        let (respData, resp) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = resp as? HTTPURLResponse else {
+            print("❌ Error: Invalid HTTP response received during S3 upload.")
+            throw NetworkError.invalidResponse
+        }
+        print("🔍 S3 Upload Response Status Code: \(httpResponse.statusCode)")
+        print("🔍 S3 Upload Response Headers: \(httpResponse.allHeaderFields)")
+        if let bodyString = String(data: respData, encoding: .utf8) {
+            print("🔍 S3 Upload Response Body: \(bodyString)")
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Error: S3 Upload failed with status: \(httpResponse.statusCode)")
+            throw NetworkError.s3UploadFailed(statusCode: httpResponse.statusCode)
         }
         print("✅ Image uploaded successfully to S3.")
     }

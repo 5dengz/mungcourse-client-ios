@@ -100,6 +100,7 @@ struct WalkHistoryView: View {
                     .font(.custom("Pretendard-SemiBold", size: 18))
                     .background(Color.white)
                     .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .frame(height: 75) // 높이를 75로 설정
                 
                 // 년월 선택 및 좌우 이동 버튼
                 HStack {
