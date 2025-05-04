@@ -142,6 +142,7 @@ class DogService: DogServiceProtocol {
     
     // MARK: - Async/Await 기반 구현
 
+    // contentType 매개변수 제거 및 로깅 개선
     func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
@@ -156,10 +157,20 @@ class DogService: DogServiceProtocol {
 
         // fileExtension에서 앞에 점(.)이 있으면 제거
         let cleanExtension = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
-        let requestBody = ["fileName": fileName, "fileNameExtension": cleanExtension]
+        
+        // 백엔드 요구사항에 맞는 정확한 필드명 사용
+        let requestBody = [
+            "fileName": fileName,
+            "fileNameExtension": cleanExtension
+        ]
+        
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-            print("➡️ Requesting S3 URL: \(endpoint) with token: \(token.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
+            // 디버깅을 위한 로깅 개선
+            if let jsonString = String(data: request.httpBody!, encoding: .utf8) {
+                print("✉️ S3 Request Body: \(jsonString)")
+            }
+            print("➡️ Requesting S3 URL: \(endpoint) with token: \(token.prefix(10))...")
         } catch {
             print("❌ Error encoding S3 URL request body: \(error)")
             throw NetworkError.encodingError(error)
@@ -168,13 +179,19 @@ class DogService: DogServiceProtocol {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-             print("❌ Error: Invalid HTTP response received for S3 URL request.")
+            print("❌ Error: Invalid HTTP response received for S3 URL request.")
             throw NetworkError.invalidResponse
         }
 
+        // 응답 상태코드 로깅 개선
+        print("📡 S3 URL Request - Status Code: \(httpResponse.statusCode)")
+        
         guard (200...299).contains(httpResponse.statusCode) else {
+            // 오류 응답 상세 로깅
             print("❌ Error: S3 URL request failed with status: \(httpResponse.statusCode)")
-            if let errorBody = String(data: data, encoding: .utf8) { print("   Error body: \(errorBody)") }
+            if let errorBody = String(data: data, encoding: .utf8) {
+                print("📄 Error response: \(errorBody)")
+            }
             throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
 
@@ -184,7 +201,10 @@ class DogService: DogServiceProtocol {
             print("✅ Received S3 URL Response: preSignedUrl=\(decodedResponse.data.preSignedUrl.prefix(20))..., url=\(decodedResponse.data.url.prefix(20))..., key=\(decodedResponse.data.key)")
             return decodedResponse
         } catch {
-            print("❌ Error decoding S3 URL response: \(error). Data: \(String(data: data, encoding: .utf8) ?? "Invalid data")")
+            print("❌ Error decoding S3 URL response: \(error)")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📄 Raw response: \(jsonString)")
+            }
             throw NetworkError.decodingError(error)
         }
     }

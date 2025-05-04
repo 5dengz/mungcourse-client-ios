@@ -103,7 +103,7 @@ class RegisterDogViewModel: ObservableObject {
                     let contentType = "image/jpeg"
                     
                     print("S3 Presigned URL 요청 중...")
-                    let s3Info = try await dogService.getS3PresignedUrl(fileName: fileName, fileExtension: fileExtension, contentType: contentType)
+                    let s3Info = try await dogService.getS3PresignedUrl(fileName: fileName, fileExtension: fileExtension)
                     
                     print("이미지 업로드 중...")
                     try await dogService.uploadImageToS3(presignedUrl: s3Info.data.preSignedUrl, imageData: imageData, contentType: contentType)

@@ -71,7 +71,7 @@ protocol DogServiceProtocol {
     func registerDog(name: String, age: Int, breed: String) -> AnyPublisher<Dog, Error> // 이 함수는 registerDogWithDetails로 대체될 수 있음
 
     // --- 새로 추가할 비동기 함수 시그니처 ---
-    func getS3PresignedUrl(fileName: String, fileExtension: String, contentType: String) async throws -> S3PresignedUrlFullResponse
+    func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse
     func uploadImageToS3(presignedUrl: String, imageData: Data, contentType: String) async throws
     func registerDogWithDetails(dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
     func fetchDogDetail(dogId: Int) async throws -> DogRegistrationResponseData
