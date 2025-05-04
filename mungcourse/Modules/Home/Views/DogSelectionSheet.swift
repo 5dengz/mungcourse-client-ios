@@ -10,7 +10,7 @@ struct DogSelectionSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("프로필 선택")
                 .font(.custom("Pretendard-SemiBold", size: 18))
-                .padding(.top, 29)
+                .padding(.top, 36)
                 .padding(.leading, 29)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -49,7 +49,7 @@ struct DogSelectionSheet: View {
             
             Spacer()
         }
-        .presentationDetents([.height(260)])
+        .presentationDetents([.height(230)])
         .presentationCornerRadius(20)
         .onDisappear {
             // 시트가 사라질 때 필요한 작업이 있다면 여기에 추가

@@ -58,3 +58,28 @@ struct CommonDatePickerSheet_Previews: PreviewProvider {
     }
 }
 #endif
+
+// 날짜 선택기를 모디파이어로 사용하기 위한 확장
+extension View {
+    func commonDatePickerSheet(
+        isPresented: Binding<Bool>, 
+        selection: Binding<Date>, 
+        onConfirm: (() -> Void)? = nil, 
+        onDismiss: (() -> Void)? = nil,
+        title: String = "날짜 선택",
+        confirmButtonTitle: String = "확인"
+    ) -> some View {
+        self.sheet(isPresented: isPresented) {
+            CommonDatePickerSheet(
+                selection: selection,
+                onConfirm: {
+                    onConfirm?()
+                    isPresented.wrappedValue = false
+                },
+                onDismiss: onDismiss,
+                title: title,
+                confirmButtonTitle: confirmButtonTitle
+            )
+        }
+    }
+}

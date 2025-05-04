@@ -132,23 +132,6 @@ struct ContentView: View {
                 .transition(.opacity)
                 .zIndex(1)
             }
-
-            if showingDogSelection {
-                ZStack(alignment: .bottom) {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture { showingDogSelection = false }
-                        .transition(.opacity)
-                    DogSelectionSheet(
-                        isPresented: $showingDogSelection,
-                        selectedDog: $dogVM.selectedDogName,
-                        dogs: dogVM.dogNames
-                    )
-                    .transition(.move(edge: .bottom))
-                }
-                .animation(.easeInOut, value: showingDogSelection)
-                .zIndex(1)
-            }
         }
         .fullScreenCover(isPresented: $showSelectWaypoint) {
             NavigationStack {
@@ -165,5 +148,6 @@ struct ContentView: View {
                 })
             }
         }
+        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogVM.selectedDogName, dogs: dogVM.dogNames)
     }
 }
