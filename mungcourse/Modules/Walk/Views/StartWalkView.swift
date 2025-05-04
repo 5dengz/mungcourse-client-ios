@@ -11,6 +11,7 @@ struct StartWalkView: View {
     @State private var completedSession: WalkSession? = nil
     @State private var effectScale: CGFloat = 0.5
     @State private var effectOpacity: Double = 1.0
+    @EnvironmentObject var dogVM: DogViewModel // 강아지 뷰모델 주입
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -64,9 +65,11 @@ struct StartWalkView: View {
                     print("[디버그] WalkControllerView onEnd pressed")
                     completedSession = viewModel.endWalk()
                     if let session = completedSession {
+                        // 선택된 강아지 ID 가져오기
+                        let dogIds = dogVM.selectedDog != nil ? [dogVM.selectedDog!.id] : []
+                        
                         // API 업로드 및 WalkCompleteView로 이동
-                        // TODO: 실제 dogIds를 선택받아야 함. 임시로 [1] 사용
-                        viewModel.uploadWalkSession(session, dogIds: [1]) { success in
+                        viewModel.uploadWalkSession(session, dogIds: dogIds) { success in
                             if success {
                                 print("✅ 산책 데이터 업로드 성공")
                                 // 산책 완료 화면으로 이동
@@ -126,5 +129,6 @@ struct StartWalkView: View {
 #Preview {
     NavigationStack {
         StartWalkView()
+            .environmentObject(DogViewModel())
     }
 }

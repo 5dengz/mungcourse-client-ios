@@ -6,7 +6,7 @@ struct DogSelectionView: View {
     
     // 제목과 부제목
     var title: String = "반려견을 선택해주세요"
-    var subtitle: String = "프로필을 확인할\n반려견을 선택해주세요"
+    var subtitle: String = "프로필을 확인할\n반려견을 선택해주세요."
     
     // UI 요소 표시 여부 제어
     var showHeader: Bool = true
@@ -14,11 +14,20 @@ struct DogSelectionView: View {
     var showCompleteButton: Bool = true
     var immediateSelection: Bool = false
     
+    // 산책 모드 여부 (산책 시작 전 강아지 선택)
+    var isWalkMode: Bool = false
+    
     // 반려견 추가 화면으로 이동하기 위한 상태 변수
     @State private var showAddDogView = false
     
     // 선택 완료 시 실행할 액션
     var onComplete: (() -> Void)? = nil
+    
+    // 산책 시 건너뛰기 버튼 액션
+    var onSkip: (() -> Void)? = nil
+    
+    // 산책 시 선택 취소 버튼 액션
+    var onCancel: (() -> Void)? = nil
     
     private let columns = [
         GridItem(.flexible()),
@@ -34,18 +43,37 @@ struct DogSelectionView: View {
                     leftAction: { dismiss() },
                     title: "반려견 선택"
                 )
+            } else if isWalkMode {
+                // 산책 모드 헤더: 취소 버튼과 건너뛰기 버튼
+                CommonHeaderView(
+                    leftIcon: "arrow_back",
+                    leftAction: {
+                        dismiss()
+                        onCancel?()
+                    },
+                    title: ""
+                ) {
+                    Button(action: {
+                        dismiss()
+                        onSkip?()
+                    }) {
+                        Text("건너뛰기")
+                            .font(.custom("Pretendard-Regular", size: 16))
+                            .foregroundColor(Color("main"))
+                    }
+                }
             }
             
             // 콘텐츠 영역
             VStack(spacing: 20) {
-                // 제목
-                Text(title)
+                // 제목 (산책 모드인 경우 다른 제목 사용)
+                Text(isWalkMode ? "함께하는 반려견이 있나요?" : title)
                     .font(.custom("Pretendard-SemiBold", size: 24))
                     .multilineTextAlignment(.center)
                     .padding(.top, showHeader ? 0 : 20)
                 
-                // 부제목
-                Text(subtitle)
+                // 부제목 (산책 모드인 경우 다른 부제목 사용)
+                Text(isWalkMode ? "산책 기록을 함께 저장할게요!" : subtitle)
                     .font(.custom("Pretendard-Regular", size: 14))
                     .foregroundColor(Color("gray600"))
                     .multilineTextAlignment(.center)
@@ -93,14 +121,17 @@ struct DogSelectionView: View {
                                 dogVM.mainDog = dog
                                 
                                 // 즉시 선택 모드인 경우 바로 dismiss 호출
-                                if immediateSelection {
+                                if immediateSelection || isWalkMode {
                                     dismiss()
+                                    if isWalkMode {
+                                        onComplete?()
+                                    }
                                 }
                             }
                         }
                         
-                        // 반려견 추가 버튼 (조건부 표시)
-                        if showAddDogButton {
+                        // 반려견 추가 버튼 (조건부 표시 - 산책 모드에서는 표시하지 않음)
+                        if showAddDogButton && !isWalkMode {
                             VStack(spacing: 11) {
                                 ZStack {
                                     Circle()
@@ -129,8 +160,15 @@ struct DogSelectionView: View {
                 
                 Spacer()
                 
-                // 선택 완료 버튼 (조건부 표시)
-                if showCompleteButton {
+                // 선택 완료 버튼 (조건부 표시 - 산책 모드에서는 항상 표시)
+                if showCompleteButton && !isWalkMode {
+                    CommonFilledButton(title: "선택 완료", action: {
+                        dismiss()
+                        onComplete?()
+                    })
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                } else if isWalkMode {
                     CommonFilledButton(title: "선택 완료", action: {
                         dismiss()
                         onComplete?()

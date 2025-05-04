@@ -37,6 +37,7 @@ struct ContentView: View {
     @State private var showRecommendCourse = false
     @State private var showStartWalk = false
     @State private var showingDogSelection = false
+    @State private var showWalkDogSelection = false // 산책용 강아지 선택 화면
     @EnvironmentObject var dogVM: DogViewModel
 
     private let imageHeight: CGFloat = 24
@@ -127,12 +128,34 @@ struct ContentView: View {
         .startWalkTabSheet(
             isPresented: $isStartWalkOverlayPresented,
             onSelectWaypoint: {
-                showStartWalk = true
+                showWalkDogSelection = true // 경유지 선택 전에 강아지 선택 화면 표시
             },
             onRecommendCourse: {
-                showRecommendCourse = true
+                showWalkDogSelection = true // AI 추천 코스 선택 전에 강아지 선택 화면 표시
             }
         )
+        .fullScreenCover(isPresented: $showWalkDogSelection) {
+            // 산책 강아지 선택 완료 후 선택한 모드에 따라 다른 화면 표시
+            DogSelectionView(
+                isWalkMode: true,
+                onComplete: {
+                    if isStartWalkOverlayPresented {
+                        isStartWalkOverlayPresented = false
+                        showStartWalk = true
+                    }
+                },
+                onSkip: {
+                    if isStartWalkOverlayPresented {
+                        isStartWalkOverlayPresented = false
+                        showStartWalk = true
+                    }
+                },
+                onCancel: {
+                    // 취소 시 메인 화면으로 돌아감
+                }
+            )
+            .environmentObject(dogVM)
+        }
         .fullScreenCover(isPresented: $showSelectWaypoint) {
             NavigationStack {
                 SelectWaypointView(onBack: {
@@ -151,6 +174,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showStartWalk) {
             NavigationStack {
                 StartWalkView()
+                    .environmentObject(dogVM)
             }
         }
         .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogVM.selectedDogName, dogs: dogVM.dogNames)
