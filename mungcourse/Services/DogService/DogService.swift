@@ -147,7 +147,6 @@ class DogService: DogServiceProtocol {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(authToken ?? "")", forHTTPHeaderField: "Authorization")
 
         let cleanExt = fileExtension.hasPrefix(".")
