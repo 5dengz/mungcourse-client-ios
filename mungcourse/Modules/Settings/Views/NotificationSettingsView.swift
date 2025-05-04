@@ -13,6 +13,7 @@ struct NotificationSettingsView: View {
                 leftAction: { dismiss() },
                 title: "알림 및 기능"
             )
+            .padding(.bottom, 28)
             VStack(spacing: 0) {
                 HStack {
                     Text("알림 활성화")
@@ -24,7 +25,7 @@ struct NotificationSettingsView: View {
                 }
                 .padding(.horizontal, 16)
                 .background(Color.white)
-                .padding(.bottom, 20)
+                .padding(.bottom, 35)
                 HStack {
                     Text("산책 푸시 알림")
                         .font(.custom("Pretendard-Regular", size: 16))
@@ -35,7 +36,7 @@ struct NotificationSettingsView: View {
                 }
                 .padding(.horizontal, 16)
                 .background(Color.white)
-                .padding(.bottom, 20)
+                .padding(.bottom, 35)
                 HStack {
                     Text("산책 중단 알림")
                         .font(.custom("Pretendard-Regular", size: 16))

@@ -10,6 +10,7 @@ struct SettingsView: View {
                     leftAction: { dismiss() },
                     title: "설정"
                 )
+                .padding(.bottom, 28)
                 VStack(spacing: 0) {
                     NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {
                         HStack {
@@ -23,7 +24,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 35)
                     }
                     Button(action: { /* 문의하기 액션 */ }) {
                         HStack {
@@ -37,7 +38,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 35)
                     }
                     Button(action: { /* 이용약관 액션 */ }) {
                         HStack {
@@ -51,7 +52,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 35)
                     }
                     NavigationLink(destination: AccountDeletionView()) {
                         HStack {
@@ -65,7 +66,7 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 16)
                         .background(Color.white)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 35)
                     }
                     Button(action: {
                         AuthService.shared.logout()
@@ -86,6 +87,7 @@ struct SettingsView: View {
             .navigationBarHidden(true)
             .padding(.horizontal, 16)
         }
+        .padding(.top, 16)
         .ignoresSafeArea(edges: .bottom)
     }
 }
