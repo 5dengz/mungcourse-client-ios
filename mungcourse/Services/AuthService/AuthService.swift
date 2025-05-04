@@ -110,7 +110,9 @@ class AuthService: AuthServiceProtocol {
     // 서버로 idToken 전달 (POST /v1/auth/google/login)
     private func sendGoogleTokenToServer(idToken: String, completion: @escaping (AuthResult) -> Void) {
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/google/login") else {
-            completion(.failure(error: AuthError.unknown))
+            DispatchQueue.main.async {
+                completion(.failure(error: AuthError.unknown))
+            }
             return
         }
         var request = URLRequest(url: url)
@@ -121,7 +123,9 @@ class AuthService: AuthServiceProtocol {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("서버 통신 에러:", error)
-                completion(.failure(error: error))
+                DispatchQueue.main.async {
+                    completion(.failure(error: error))
+                }
                 return
             }
             if let response = response as? HTTPURLResponse {
@@ -136,11 +140,17 @@ class AuthService: AuthServiceProtocol {
                   let tokens = dataDict["tokens"] as? [String: Any],
                   let accessToken = tokens["accessToken"] as? String,
                   let refreshToken = tokens["refreshToken"] as? String else {
-                completion(.failure(error: AuthError.unknown))
+                DispatchQueue.main.async {
+                    completion(.failure(error: AuthError.unknown))
+                }
                 return
             }
-            TokenManager.shared.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
-            completion(.success(token: accessToken))
+            
+            // 메인 스레드에서 토큰 저장 및 콜백 호출
+            DispatchQueue.main.async {
+                TokenManager.shared.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
+                completion(.success(token: accessToken))
+            }
         }.resume()
     }
     
@@ -180,13 +190,17 @@ class AuthService: AuthServiceProtocol {
     // 서버로 identityToken 전달 (POST /v1/auth/apple/login)
     private func sendAppleTokenToServer(identityToken: String, completion: @escaping (AuthResult) -> Void) {
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/apple/login") else {
-            completion(.failure(error: AuthError.unknown))
+            DispatchQueue.main.async {
+                completion(.failure(error: AuthError.unknown))
+            }
             return
         }
         // nonce를 요청 본문에 함께 포함하기 위해 currentNonce 확인
         guard let nonce = self.currentNonce else {
             print("[AuthService] currentNonce가 nil입니다. Apple 로그인 요청에 nonce를 포함할 수 없습니다.")
-            completion(.failure(error: AuthError.unknown))
+            DispatchQueue.main.async {
+                completion(.failure(error: AuthError.unknown))
+            }
             return
         }
         var request = URLRequest(url: url)
@@ -213,12 +227,16 @@ class AuthService: AuthServiceProtocol {
             print("[AuthService] ● Apple 로그인 응답 ●")
             if let error = error {
                 print("Error: \(error.localizedDescription)")
-                completion(.failure(error: error))
+                DispatchQueue.main.async {
+                    completion(.failure(error: error))
+                }
                 return
             }
             guard let http = response as? HTTPURLResponse else {
                 print("[AuthService] Apple 로그인 응답이 HTTPURLResponse가 아님")
-                completion(.failure(error: AuthError.unknown))
+                DispatchQueue.main.async {
+                    completion(.failure(error: AuthError.unknown))
+                }
                 return
             }
             print("Status Code: \(http.statusCode)")
@@ -234,11 +252,15 @@ class AuthService: AuthServiceProtocol {
                 break  // 정상 처리
             case 401, 403:
                 print("[AuthService] Apple 로그인 정보 없음 (HTTP \(http.statusCode)): 토큰 초기화 및 재로그인 필요")
-                TokenManager.shared.clearTokens()
-                completion(.failure(error: AuthError.invalidCredentials))
+                DispatchQueue.main.async {
+                    TokenManager.shared.clearTokens()
+                    completion(.failure(error: AuthError.invalidCredentials))
+                }
                 return
             default:
-                completion(.failure(error: AuthError.unknown))
+                DispatchQueue.main.async {
+                    completion(.failure(error: AuthError.unknown))
+                }
                 return
             }
             guard let data = data,
@@ -247,12 +269,16 @@ class AuthService: AuthServiceProtocol {
                   let tokens = dataDict["tokens"] as? [String: Any],
                   let accessToken = tokens["accessToken"] as? String,
                   let refreshToken = tokens["refreshToken"] as? String else {
-                completion(.failure(error: AuthError.unknown))
+                DispatchQueue.main.async {
+                    completion(.failure(error: AuthError.unknown))
+                }
                 return
             }
-            // 토큰 저장
-            TokenManager.shared.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
-            completion(.success(token: accessToken))
+            // 메인 스레드에서 토큰 저장 및 콜백 호출
+            DispatchQueue.main.async {
+                TokenManager.shared.saveTokens(accessToken: accessToken, refreshToken: refreshToken)
+                completion(.success(token: accessToken))
+            }
         }.resume()
     }
     

@@ -35,11 +35,15 @@ final class TokenManager: ObservableObject {
     // MARK: - refreshToken으로 accessToken 갱신
     func refreshAccessToken(completion: @escaping (Bool) -> Void) {
         guard let refreshToken = getRefreshToken() else {
-            completion(false)
+            DispatchQueue.main.async {
+                completion(false)
+            }
             return
         }
         guard let url = URL(string: "https://api.mungcourse.online/v1/auth/refresh") else {
-            completion(false)
+            DispatchQueue.main.async {
+                completion(false)
+            }
             return
         }
         var request = URLRequest(url: url)
@@ -50,7 +54,9 @@ final class TokenManager: ObservableObject {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("토큰 갱신 통신 에러:", error)
-                completion(false)
+                DispatchQueue.main.async {
+                    completion(false)
+                }
                 return
             }
             if let response = response as? HTTPURLResponse {
@@ -65,12 +71,16 @@ final class TokenManager: ObservableObject {
                   let tokens = dataDict["tokens"] as? [String: Any],
                   let newAccessToken = tokens["accessToken"] as? String,
                   let newRefreshToken = tokens["refreshToken"] as? String else {
-                self.clearTokens()
-                completion(false)
+                DispatchQueue.main.async {
+                    self.clearTokens()
+                    completion(false)
+                }
                 return
             }
-            self.saveTokens(accessToken: newAccessToken, refreshToken: newRefreshToken)
-            completion(true)
+            DispatchQueue.main.async {
+                self.saveTokens(accessToken: newAccessToken, refreshToken: newRefreshToken)
+                completion(true)
+            }
         }.resume()
     }
 }
