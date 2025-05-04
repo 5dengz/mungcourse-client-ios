@@ -14,6 +14,16 @@ enum Gender: String, CaseIterable, Identifiable {
 struct RegisterDogError: Identifiable {
     let id = UUID()
     let message: String
+    
+    // ErrorResponse에서 변환하는 생성자
+    init(errorResponse: ErrorResponse) {
+        self.message = errorResponse.message
+    }
+    
+    // 문자열로 초기화하는 생성자
+    init(message: String) {
+        self.message = message
+    }
 }
 
 class RegisterDogViewModel: ObservableObject {
@@ -36,6 +46,11 @@ class RegisterDogViewModel: ObservableObject {
     // 서비스 의존성
     private let dogService: DogServiceProtocol
     private var cancellables = Set<AnyCancellable>()
+    
+    // API 기본 URL 설정
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
     
     // MARK: - 초기화
     init(dogService: DogServiceProtocol = DogService.shared) {
@@ -170,13 +185,14 @@ class RegisterDogViewModel: ObservableObject {
         
         // 토큰 확인
         guard let accessToken = TokenManager.shared.getAccessToken() else {
-            errorMessage = ErrorResponse(
+            let errorResponse = ErrorResponse(
                 statusCode: 401,
                 message: "인증이 필요합니다. 다시 로그인해주세요.",
                 error: "Unauthorized",
                 success: false,
                 timestamp: ""
             )
+            errorMessage = RegisterDogError(errorResponse: errorResponse)
             isLoading = false
             completion(false)
             return
@@ -184,13 +200,14 @@ class RegisterDogViewModel: ObservableObject {
         
         // API URL 구성
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/dogs/\(dogId)") else {
-            errorMessage = ErrorResponse(
+            let errorResponse = ErrorResponse(
                 statusCode: 400,
                 message: "잘못된 요청입니다.",
                 error: "Bad Request",
                 success: false,
                 timestamp: ""
             )
+            errorMessage = RegisterDogError(errorResponse: errorResponse)
             isLoading = false
             completion(false)
             return
@@ -208,26 +225,28 @@ class RegisterDogViewModel: ObservableObject {
                 
                 // 네트워크 에러 처리
                 if let error = error {
-                    self?.errorMessage = ErrorResponse(
+                    let errorResponse = ErrorResponse(
                         statusCode: 500,
                         message: "서버 연결 중 오류가 발생했습니다: \(error.localizedDescription)",
                         error: "Network Error",
                         success: false,
                         timestamp: ""
                     )
+                    self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
                     completion(false)
                     return
                 }
                 
                 // HTTP 응답 확인
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    self?.errorMessage = ErrorResponse(
+                    let errorResponse = ErrorResponse(
                         statusCode: 500,
                         message: "서버 응답을 확인할 수 없습니다.",
                         error: "Unknown Response",
                         success: false,
                         timestamp: ""
                     )
+                    self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
                     completion(false)
                     return
                 }
@@ -243,17 +262,18 @@ class RegisterDogViewModel: ObservableObject {
                 if let data = data {
                     do {
                         let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
-                        self?.errorMessage = errorResponse
+                        self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
                         print("API 에러: \(errorResponse.message)")
                     } catch {
                         print("에러 응답 파싱 실패: \(error)")
-                        self?.errorMessage = ErrorResponse(
+                        let errorResponse = ErrorResponse(
                             statusCode: httpResponse.statusCode,
                             message: "서버 오류가 발생했습니다.",
                             error: "Unknown Error",
                             success: false,
                             timestamp: ""
                         )
+                        self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
                     }
                 }
                 
@@ -273,13 +293,14 @@ class RegisterDogViewModel: ObservableObject {
                 print("강아지 등록 성공 (목업)")
                 self?.isRegistrationComplete = true
             } else {
-                self?.errorMessage = ErrorResponse(
+                let errorResponse = ErrorResponse(
                     statusCode: 500,
                     message: "서버 오류가 발생했습니다. 다시 시도해주세요.",
                     error: "Server Error",
                     success: false,
                     timestamp: ""
                 )
+                self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
             }
             
             self?.isLoading = false

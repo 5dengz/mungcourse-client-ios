@@ -281,13 +281,4 @@ class WalkCompleteViewModel: ObservableObject {
             zoomLevel = 12.0 // 매우 큰 경로
         }
     }
-}
-
-// MARK: - 데이터 모델
-
-struct WalkSessionData {
-    let distance: Double // km
-    let duration: Int // seconds
-    let date: Date
-    let coordinates: [NMGLatLng]
 } 

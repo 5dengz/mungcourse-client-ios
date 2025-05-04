@@ -1,5 +1,7 @@
 import SwiftUI
 import NMapsMap
+// Common 모듈에서 가져옴
+import Foundation
 
 struct StartWalkView: View {
     @StateObject private var viewModel = StartWalkViewModel()
@@ -117,13 +119,6 @@ struct StartWalkView: View {
     }
 }
 
-// WalkSessionData 구조체 추가 - WalkCompleteView로 데이터 전달용
-struct WalkSessionData {
-    let distance: Double
-    let duration: Int
-    let coordinates: [NMGLatLng]
-    let date: Date
-}
 
 // Extension for rounded corners on specific edges
 extension View {
