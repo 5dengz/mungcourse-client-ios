@@ -15,6 +15,7 @@ struct AccountDeletionView: View {
                 leftAction: { dismiss() },
                 title: "회원 탈퇴"
             )
+            .padding(.top, 16)
             .padding(.bottom, 28)
             
             VStack(spacing: 0) {
@@ -35,7 +36,7 @@ struct AccountDeletionView: View {
                         )
                     }
                 }
-                .padding(.horizontal, 16)
+                
                 
                 if selectedReasons.contains("기타") {
                     VStack(alignment: .leading) {

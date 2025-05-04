@@ -40,12 +40,12 @@ extension CommonHeaderView {
                     Image(leftIcon ?? "")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 24, height: 24)
+                        .frame(width: 18, height: 18)
                 }
                 Spacer()
                 rightContent()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
 
             Text(title)
                 .font(Font.custom("Pretendard-SemiBold", size: 20))
