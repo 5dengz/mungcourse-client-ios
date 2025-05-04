@@ -6,7 +6,13 @@ struct DogSelectionView: View {
     
     // 제목과 부제목
     var title: String = "반려견을 선택해주세요"
-    var subtitle: String = "프로필을 확인할 반려견을 선택해주세요"
+    var subtitle: String = "프로필을 확인할\n반려견을 선택해주세요"
+    
+    // UI 요소 표시 여부 제어
+    var showHeader: Bool = true
+    var showAddDogButton: Bool = true
+    var showCompleteButton: Bool = true
+    var immediateSelection: Bool = false
     
     // 반려견 추가 화면으로 이동하기 위한 상태 변수
     @State private var showAddDogView = false
@@ -21,12 +27,14 @@ struct DogSelectionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 상단 헤더
-            CommonHeaderView(
-                leftIcon: "arrow_back",
-                leftAction: { dismiss() },
-                title: "반려견 선택"
-            )
+            // 상단 헤더 (조건부 표시)
+            if showHeader {
+                CommonHeaderView(
+                    leftIcon: "arrow_back",
+                    leftAction: { dismiss() },
+                    title: "반려견 선택"
+                )
+            }
             
             // 콘텐츠 영역
             VStack(spacing: 20) {
@@ -34,6 +42,7 @@ struct DogSelectionView: View {
                 Text(title)
                     .font(.custom("Pretendard-SemiBold", size: 24))
                     .multilineTextAlignment(.center)
+                    .padding(.top, showHeader ? 0 : 20)
                 
                 // 부제목
                 Text(subtitle)
@@ -82,28 +91,35 @@ struct DogSelectionView: View {
                             .onTapGesture {
                                 dogVM.selectDog(dog)
                                 dogVM.mainDog = dog
+                                
+                                // 즉시 선택 모드인 경우 바로 dismiss 호출
+                                if immediateSelection {
+                                    dismiss()
+                                }
                             }
                         }
                         
-                        // 반려견 추가 버튼
-                        VStack(spacing: 11) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color("gray300"))
+                        // 반려견 추가 버튼 (조건부 표시)
+                        if showAddDogButton {
+                            VStack(spacing: 11) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color("gray300"))
+                                    
+                                    Image("icon_plus")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(Color("gray400"))
+                                }
+                                .frame(width: 135, height: 135)
                                 
-                                Image("icon_plus")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                                    .foregroundColor(Color("gray400"))
+                                Text("반려견 추가")
+                                    .font(.custom("Pretendard-Regular", size: 18))
+                                    .foregroundColor(Color("gray300"))
                             }
-                            .frame(width: 135, height: 135)
-                            
-                            Text("반려견 추가")
-                                .font(.custom("Pretendard-Regular", size: 18))
-                                .foregroundColor(Color("gray300"))
-                        }
-                        .onTapGesture {
-                            showAddDogView = true
+                            .onTapGesture {
+                                showAddDogView = true
+                            }
                         }
                     }
                     .padding(.top, 20)
@@ -113,17 +129,20 @@ struct DogSelectionView: View {
                 
                 Spacer()
                 
-                // 선택 완료 버튼
-                CommonFilledButton(title: "선택 완료", action: {
-                    dismiss()
-                    onComplete?()
-                })
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+                // 선택 완료 버튼 (조건부 표시)
+                if showCompleteButton {
+                    CommonFilledButton(title: "선택 완료", action: {
+                        dismiss()
+                        onComplete?()
+                    })
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                }
             }
             .padding(.top, 20)
         }
         .background(Color.white)
+        .ignoresSafeArea(edges: .bottom)
         .onAppear {
             dogVM.fetchDogs()
         }
@@ -138,4 +157,4 @@ struct DogSelectionView: View {
 #Preview {
     DogSelectionView()
         .environmentObject(DogViewModel())
-} 
+}
