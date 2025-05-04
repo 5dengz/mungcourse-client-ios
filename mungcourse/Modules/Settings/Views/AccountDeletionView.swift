@@ -54,7 +54,7 @@ struct AccountDeletionView: View {
         }
         .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
-        .sheet(isPresented: $showConfirmation) {
+        .fullScreenCover(isPresented: $showConfirmation) {
             AccountDeletionConfirmView(onDelete: {
                 // 실제 회원 탈퇴 처리 로직
                 dismiss() // 탈퇴 후 이전 화면으로 돌아가기

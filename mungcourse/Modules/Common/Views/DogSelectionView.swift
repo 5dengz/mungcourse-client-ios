@@ -199,7 +199,7 @@ struct DogSelectionView: View {
         .onAppear {
             dogVM.fetchDogs()
         }
-        .sheet(isPresented: $showAddDogView) {
+        .fullScreenCover(isPresented: $showAddDogView) {
             RegisterDogView(onComplete: {
                 dogVM.fetchDogs()
             }, showBackButton: true)

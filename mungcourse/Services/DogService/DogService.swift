@@ -147,6 +147,7 @@ class DogService: DogServiceProtocol {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         // Authorization 헤더 추가
         if let token = authToken, !token.isEmpty {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -210,17 +211,6 @@ class DogService: DogServiceProtocol {
         guard let url = URL(string: presignedUrl) else { throw NetworkError.invalidURL }
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
-        // Authorization 헤더 추가
-        if let token = authToken, !token.isEmpty {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        // Authorization-Refresh 헤더 추가
-        if let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty {
-            request.setValue("Bearer \(refresh)", forHTTPHeaderField: "Authorization-Refresh")
-        }
-        // ✅ public-read ACL만 있고
-        //    Content-Type: … 호출이 없습니다!
-        request.setValue("public-read", forHTTPHeaderField: "x-amz-acl")
         // 크기만 알려주는 건 OK
         request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
         request.httpBody = imageData

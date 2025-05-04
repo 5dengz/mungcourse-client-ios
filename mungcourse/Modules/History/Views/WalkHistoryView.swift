@@ -92,85 +92,104 @@ struct WalkHistoryView: View {
     @State private var navigateToDetail: Bool = false
     @State private var selectedDate: Date? = nil
     
+    // 가로 간격 7.5로 설정된 그리드 아이템 정의
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 7.5), count: 7)
+    
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // 헤더
-                CommonHeaderView(leftIcon: nil, title: "산책 기록")
-                    .font(.custom("Pretendard-SemiBold", size: 18))
-                    .background(Color.white)
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                    .frame(height: 75) // 높이를 75로 설정
+            ZStack {
+                // 배경색을 상단 SafeArea까지 확장
+                Color.white
+                    .ignoresSafeArea(edges: .top)
                 
-                // 년월 선택 및 좌우 이동 버튼
-                HStack {
-                    Button(action: {
-                        viewModel.gotoPreviousMonth()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(Color("gray400"))
-                    }
-                    
-                    Spacer()
-                    
-                    Text(viewModel.currentMonth.formatYearMonth())
-                        .font(.custom("Pretendard-SemiBold", size: 16))
-                        .foregroundColor(Color("gray900"))
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.gotoNextMonth()
-                    }) {
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(Color("gray400"))
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                
-                // 요일 헤더
-                HStack(spacing: 0) {
-                    ForEach(viewModel.weekdays, id: \.self) { weekday in
-                        Text(weekday)
-                            .font(.custom("Pretendard-Regular", size: 14))
-                            .foregroundColor(Color("gray400"))
+                VStack(spacing: 0) {
+                    // 자체 구현 헤더
+                    ZStack {
+                        Text("산책 기록")
+                            .font(.custom("Pretendard-SemiBold", size: 18))
+                            .foregroundColor(Color("gray900"))
                             .frame(maxWidth: .infinity)
+                            .multilineTextAlignment(.center)
                     }
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                
-                // 날짜 그리드
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
-                    // 첫번째 요일에 맞추어 빈 셀 추가
-                    ForEach(0..<viewModel.firstWeekdayOfMonth(), id: \.self) { _ in
-                        Text("")
-                            .frame(height: 40)
-                    }
+                    .frame(height: 85)
+                    .background(
+                        Rectangle()
+                            .fill(Color.white)
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    )
+                    .padding(.bottom, 5) // 하단 패딩만 적용
                     
-                    // 날짜들 표시
-                    ForEach(viewModel.daysInMonth(), id: \.self) { date in
+                    // 년월 선택 및 좌우 이동 버튼
+                    HStack {
                         Button(action: {
-                            selectedDate = date
-                            navigateToDetail = true
+                            viewModel.gotoPreviousMonth()
                         }) {
-                            Text(date.formatDay())
-                                .font(.custom("Pretendard-Regular", size: 14))
-                                .foregroundColor(date.isToday() ? .white : Color("gray400"))
-                                .frame(width: 40, height: 40)
-                                .background(
-                                    Circle()
-                                        .fill(date.isToday() ? Color("main") : Color("gray300"))
-                                )
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(Color("gray400"))
+                                .font(.system(size: 20)) // 화살표 크기 증가
+                        }
+                        
+                        Spacer()
+                        
+                        Text(viewModel.currentMonth.formatYearMonth())
+                            .font(.custom("Pretendard-SemiBold", size: 16))
+                            .foregroundColor(Color("gray900"))
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            viewModel.gotoNextMonth()
+                        }) {
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(Color("gray400"))
+                                .font(.system(size: 20)) // 화살표 크기 증가
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    
+                    // 요일 헤더
+                    HStack(spacing: 0) {
+                        ForEach(viewModel.weekdays, id: \.self) { weekday in
+                            Text(weekday)
+                                .font(.custom("Pretendard-Regular", size: 14))
+                                .foregroundColor(Color("gray400"))
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    
+                    // 날짜 그리드 - 가로 간격 7.5, 세로 간격 11.5로 설정
+                    LazyVGrid(columns: columns, spacing: 11.5) {
+                        // 첫번째 요일에 맞추어 빈 셀 추가
+                        ForEach(0..<viewModel.firstWeekdayOfMonth(), id: \.self) { _ in
+                            Text("")
+                                .frame(height: 40)
+                        }
+                        
+                        // 날짜들 표시
+                        ForEach(viewModel.daysInMonth(), id: \.self) { date in
+                            Button(action: {
+                                selectedDate = date
+                                navigateToDetail = true
+                            }) {
+                                Text(date.formatDay())
+                                    .font(.custom("Pretendard-Regular", size: 14))
+                                    .foregroundColor(date.isToday() ? .white : Color("gray400"))
+                                    .frame(width: 40, height: 40)
+                                    .background(
+                                        Circle()
+                                            .fill(date.isToday() ? Color("main") : Color("gray300"))
+                                    )
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    
+                    Spacer()
                 }
-                .padding(.horizontal, 10)
-                
-                Spacer()
             }
-            .background(Color.white)
             .navigationDestination(isPresented: $navigateToDetail) {
                 if let date = selectedDate {
                     WalkHistoryDetailView(date: date)
