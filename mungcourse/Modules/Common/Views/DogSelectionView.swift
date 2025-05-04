@@ -70,13 +70,19 @@ struct DogSelectionView: View {
                 Text(isWalkMode ? "함께하는 반려견이 있나요?" : title)
                     .font(.custom("Pretendard-SemiBold", size: 24))
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(nil)
                     .padding(.top, showHeader ? 0 : 20)
                 
-                // 부제목 (산책 모드인 경우 다른 부제목 사용)
-                Text(isWalkMode ? "산책 기록을 함께 저장할게요!" : subtitle)
-                    .font(.custom("Pretendard-Regular", size: 14))
-                    .foregroundColor(Color("gray600"))
-                    .multilineTextAlignment(.center)
+                // 부제목 (산책 모드인 경우에만 표시하거나, subtitle이 비어있지 않은 경우만 표시)
+                if isWalkMode || !subtitle.isEmpty {
+                    Text(isWalkMode ? "산책 기록을 함께 저장할게요!" : subtitle)
+                        .font(.custom("Pretendard-Regular", size: 14))
+                        .foregroundColor(Color("gray600"))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(nil)
+                }
                 
                 // 반려견 그리드
                 ScrollView(showsIndicators: false) {
@@ -146,7 +152,7 @@ struct DogSelectionView: View {
                                 
                                 Text("반려견 추가")
                                     .font(.custom("Pretendard-Regular", size: 18))
-                                    .foregroundColor(Color("gray300"))
+                                    .foregroundColor(Color("gray400"))
                             }
                             .onTapGesture {
                                 showAddDogView = true
