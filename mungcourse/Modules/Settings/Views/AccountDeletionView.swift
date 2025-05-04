@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AccountDeletionView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedReason: String?
+    @State private var selectedReasons: Set<String> = []
     @State private var reasonText: String = ""
     
     let reasons = ["기능이 다양하지 않아요", "배터리 소모가 너무 심해요", "추천 경로가 마음에 들지 않아요", "경로 측정이 잘 안 돼요", "기타"]
@@ -27,20 +27,22 @@ struct AccountDeletionView: View {
                     ForEach(reasons, id: \.self) { reason in
                         ReasonItemView(
                             text: reason,
-                            isSelected: selectedReason == reason,
+                            isSelected: selectedReasons.contains(reason),
                             onSelect: {
-                                selectedReason = reason
+                                toggleSelection(reason)
                             }
                         )
                     }
                 }
                 .padding(.horizontal, 16)
                 
-                if selectedReason == "기타" {
+                if selectedReasons.contains("기타") {
                     VStack(alignment: .leading) {
                         TextField("상세 이유를 적어주세요", text: $reasonText)
+                            .font(Font.custom("Pretendard", size: 14))
+                            .foregroundColor(.black)
                             .padding()
-                            .background(Color(UIColor.systemGray6))
+                            .background(Color("gray300"))
                             .cornerRadius(8)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 20)
@@ -51,20 +53,28 @@ struct AccountDeletionView: View {
                 Spacer()
                 
                 CommonFilledButton(
-                    title: "탈퇴하기",
+                    title: "계속하기",
                     action: {
                         // 탈퇴 처리 로직
                     },
-                    isEnabled: selectedReason != nil,
-                    backgroundColor: Color("pointRed"),
+                    isEnabled: !selectedReasons.isEmpty,
+                    backgroundColor: Color("main"),
                     cornerRadius: 8
                 )
                 .padding(.horizontal, 16)
-                .padding(.bottom, 30)
+                .padding(.bottom, 48)
             }
         }
         .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
+    }
+    
+    private func toggleSelection(_ reason: String) {
+        if selectedReasons.contains(reason) {
+            selectedReasons.remove(reason)
+        } else {
+            selectedReasons.insert(reason)
+        }
     }
 }
 
