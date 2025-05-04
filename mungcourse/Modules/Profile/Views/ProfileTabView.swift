@@ -108,7 +108,7 @@ struct ProfileTabView: View {
             VStack(spacing: 0) {
                 // 헤더
                 CommonHeaderView(
-                    leftIcon: "arrow_back",
+                    leftIcon: "",
                     leftAction: { /* 뒤로가기 액션 */ },
                     title: "프로필"
                 ) {

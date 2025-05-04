@@ -12,12 +12,12 @@ struct AddRoutineView: View {
     var body: some View {
         VStack(spacing: 0) {
             CommonHeaderView(
-                leftIcon: "arrow_back",
+                leftIcon: "",
                 leftAction: { presentationMode.wrappedValue.dismiss() },
                 title: "루틴 추가"
             )
             .padding(.bottom, 12)
-            .padding(.top, 8)
+            .padding(.top, 16)
             .padding(.horizontal, 20)
             
             VStack(spacing: 28) {

@@ -10,7 +10,10 @@ struct SettingsView: View {
                     leftAction: { dismiss() },
                     title: "설정"
                 )
-                .padding(.bottom, 28)
+                .padding(.top, 16)
+                .padding(.bottom, 16)
+                .padding(.horizontal, 16)
+
                 VStack(spacing: 0) {
                     NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {
                         HStack {
@@ -84,10 +87,9 @@ struct SettingsView: View {
                 .background(Color(UIColor.systemGroupedBackground))
                 Spacer()
             }
-            .navigationBarHidden(true)
             .padding(.horizontal, 16)
+            .navigationBarHidden(true)
         }
-        .padding(.top, 16)
         .ignoresSafeArea(edges: .bottom)
     }
 }
