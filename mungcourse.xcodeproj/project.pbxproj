@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		567B69392DC7D473001B684A /* NaverMap-iOS-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 567B69382DC7D473001B684A /* NaverMap-iOS-SPM */; };
 		56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 56BAE79D2DBF93F000243818 /* KeychainAccess */; };
-		56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 56F78F012DAD051800B3CC88 /* NMapsMap */; };
 		56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242A2DBF6BE9008B375A /* GoogleSignIn */; };
 		56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
@@ -75,8 +75,8 @@
 			files = (
 				56BAE79E2DBF93F000243818 /* KeychainAccess in Frameworks */,
 				56FC242D2DBF6BE9008B375A /* GoogleSignInSwift in Frameworks */,
-				56F78F022DAD051800B3CC88 /* NMapsMap in Frameworks */,
 				56FC242B2DBF6BE9008B375A /* GoogleSignIn in Frameworks */,
+				567B69392DC7D473001B684A /* NaverMap-iOS-SPM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,10 +146,10 @@
 			);
 			name = mungcourse;
 			packageProductDependencies = (
-				56F78F012DAD051800B3CC88 /* NMapsMap */,
 				56FC242A2DBF6BE9008B375A /* GoogleSignIn */,
 				56FC242C2DBF6BE9008B375A /* GoogleSignInSwift */,
 				56BAE79D2DBF93F000243818 /* KeychainAccess */,
+				567B69382DC7D473001B684A /* NaverMap-iOS-SPM */,
 			);
 			productName = mungcourse;
 			productReference = 56F1230C2DA2C33500632733 /* mungcourse.app */;
@@ -235,9 +235,9 @@
 			mainGroup = 56F123032DA2C33500632733;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				56FC24292DBF6BE9008B375A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				567B69372DC7D473001B684A /* XCRemoteSwiftPackageReference "NaverMap-iOS-SPM" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56F1230D2DA2C33500632733 /* Products */;
@@ -618,12 +618,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
+		567B69372DC7D473001B684A /* XCRemoteSwiftPackageReference "NaverMap-iOS-SPM" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
+			repositoryURL = "https://github.com/maehwasoo/NaverMap-iOS-SPM.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.21.0;
+				branch = main;
+				kind = branch;
 			};
 		};
 		56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
@@ -645,15 +645,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		567B69382DC7D473001B684A /* NaverMap-iOS-SPM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 567B69372DC7D473001B684A /* XCRemoteSwiftPackageReference "NaverMap-iOS-SPM" */;
+			productName = "NaverMap-iOS-SPM";
+		};
 		56BAE79D2DBF93F000243818 /* KeychainAccess */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 56BAE79C2DBF93F000243818 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
-		};
-		56F78F012DAD051800B3CC88 /* NMapsMap */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 56B7EA812DACF63200167604 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
-			productName = NMapsMap;
 		};
 		56FC242A2DBF6BE9008B375A /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
