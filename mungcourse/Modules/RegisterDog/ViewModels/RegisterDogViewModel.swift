@@ -198,6 +198,35 @@ class RegisterDogViewModel: ObservableObject {
             return
         }
         
+        // 강아지 목록을 가져와서 삭제 가능 여부 확인
+        dogService.fetchDogs()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in  // completion을 result로 변경
+                if case .failure(let error) = result {  // 여기도 수정
+                    print("강아지 목록 조회 실패: \(error)")
+                    self?.isLoading = false
+                    self?.errorMessage = RegisterDogError(message: "강아지 정보를 조회하는 중 오류가 발생했습니다.")
+                    completion(false)  // 이제 외부 클로저를 호출할 수 있음
+                }
+            } receiveValue: { [weak self] dogs in
+                guard let self = self else { return }
+                
+                // 강아지가 한 마리만 있을 경우 삭제 제한
+                if dogs.count <= 1 {
+                    self.isLoading = false
+                    self.errorMessage = RegisterDogError(message: "최소 한 마리 이상의 반려견 정보가 필요합니다.\n다른 반려견을 먼저 등록해주세요.")
+                    completion(false)
+                    return
+                }
+                
+                // 강아지가 두 마리 이상인 경우 삭제 진행
+                self.performDeleteDogAPI(dogId: dogId, accessToken: accessToken, completion: completion)
+            }
+            .store(in: &cancellables)
+    }
+    
+    // 실제 강아지 삭제 API 호출 메서드
+    private func performDeleteDogAPI(dogId: Int, accessToken: String, completion: @escaping (Bool) -> Void) {
         // API URL 구성
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/dogs/\(dogId)") else {
             let errorResponse = ErrorResponse(
