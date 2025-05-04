@@ -147,7 +147,14 @@ class DogService: DogServiceProtocol {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(authToken ?? "")", forHTTPHeaderField: "Authorization")
+        // Authorization 헤더 추가
+        if let token = authToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        // Authorization-Refresh 헤더 추가
+        if let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty {
+            request.setValue("Bearer \(refresh)", forHTTPHeaderField: "Authorization-Refresh")
+        }
 
         let cleanExt = fileExtension.hasPrefix(".")
             ? String(fileExtension.dropFirst())
@@ -199,7 +206,14 @@ class DogService: DogServiceProtocol {
         guard let url = URL(string: presignedUrl) else { throw NetworkError.invalidURL }
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
-
+        // Authorization 헤더 추가
+        if let token = authToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        // Authorization-Refresh 헤더 추가
+        if let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty {
+            request.setValue("Bearer \(refresh)", forHTTPHeaderField: "Authorization-Refresh")
+        }
         // ✅ 백엔드 요구: public-read ACL 헤더
         request.setValue("public-read", forHTTPHeaderField: "x-amz-acl")
         // ✅ 헤더에 Content-Type 이나 다른 건 절대 붙이지 않음!
