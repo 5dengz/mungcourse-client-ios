@@ -18,6 +18,7 @@ struct RecommendCourseView: View {
             ZStack {
                 // 지도 뷰
                 AdvancedNaverMapView(
+                    dangerCoordinates: $viewModel.dangerCoordinates,
                     centerCoordinate: $viewModel.centerCoordinate,
                     zoomLevel: $viewModel.zoomLevel,
                     pathCoordinates: $viewModel.pathCoordinates,
@@ -158,6 +159,7 @@ class RecommendCourseViewModel: ObservableObject {
     @Published var pathCoordinates: [NMGLatLng] = []
     @Published var hasRecommendation = false
     @Published var recommendedRoute: RouteOption? = nil
+    @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역(흡연구역) 좌표 추가
     
     // 알림 상태
     @Published var showAlert = false
@@ -346,4 +348,4 @@ class RecommendCourseViewModel: ObservableObject {
 
 #Preview {
     RecommendCourseView(onBack: {})
-} 
+}
