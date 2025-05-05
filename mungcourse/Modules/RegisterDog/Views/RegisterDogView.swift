@@ -120,6 +120,11 @@ struct RegisterDogView: View {
                         onComplete?()
                     }
                 }
+                .alert("삭제 불가", isPresented: $showLastDogAlert) {
+                    Button("확인") { }
+                } message: {
+                    Text("마지막 남은 반려견 정보는 삭제할 수 없습니다.\n다른 반려견을 먼저 등록해주세요.")
+                }
 
                 // 삭제 확인 모달 추가
                 if showDeleteConfirmation {
@@ -136,12 +141,6 @@ struct RegisterDogView: View {
                             showDeleteConfirmation = false
                         }
                     )
-                }
-                // 마지막 강아지 알림 추가
-                .alert("삭제 불가", isPresented: $showLastDogAlert) {
-                    Button("확인") { }
-                } message: {
-                    Text("마지막 남은 반려견 정보는 삭제할 수 없습니다.\n다른 반려견을 먼저 등록해주세요.")
                 }
             }
         }
