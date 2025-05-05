@@ -69,29 +69,13 @@ struct WalkCompleteView: View {
 
             // 홈으로 이동 버튼
             CommonFilledButton(title: "홈으로 이동", action: {
-                // 피드백 모달 표시
-                viewModel.showFeedbackModal()
+                // 바로 홈으로 이동
+                dismiss()
             })
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
         .background(Color("white").ignoresSafeArea())
-        .sheet(isPresented: $viewModel.isFeedbackModalPresented) {
-            WalkCompleteFeedbackModal(
-                isPresented: $viewModel.isFeedbackModalPresented,
-                selectedRating: $viewModel.feedbackRating,
-                onComplete: {
-                    viewModel.submitFeedback()
-                    dismiss() // 피드백 제출 후 화면 닫기
-                }
-            )
-        }
-        .onChange(of: viewModel.isFeedbackSubmitted) { _, isSubmitted in
-            if isSubmitted {
-                // 피드백 제출 완료 후 홈으로 이동
-                dismiss()
-            }
-        }
     }
     
     // 사용자 정의 이니셜라이저로 ViewModel 초기화 가능

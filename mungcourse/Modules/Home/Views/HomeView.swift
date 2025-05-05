@@ -158,16 +158,13 @@ struct ButtonArea: View {
     
     var body: some View {
         HStack(spacing: 9) {
-            NavigationLink(destination: StartWalkView().environmentObject(DogViewModel())) {
-                Image(systemName: "figure.walk")
-                    .font(.system(size: 24))
-                    .foregroundColor(.white)
-                    .padding(16)
-                    .background(Circle().fill(Color("main")))
-                    .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .padding(.bottom, 20)
+            MainButton(
+                title: "산책 시작",
+                imageName: "start_walk",
+                backgroundColor: Color("main"),
+                foregroundColor: Color("pointwhite"),
+                action: onStartWalk
+            )
             
             MainButton(
                 title: "코스 선택",

@@ -156,10 +156,10 @@ struct RoutineSettingsView: View {
             VStack(spacing: 0) {
                 // 공통 헤더 (요일 선택 포함)
                 CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
-                    Image("icon_calendar")
-                        .onTapGesture {
-                            showDatePicker = true
-                        }
+                    //Image("icon_calendar")
+                    //    .onTapGesture {
+                    //        showDatePicker = true
+                    //    }
                 }
                 .padding(.top, 16)
                 

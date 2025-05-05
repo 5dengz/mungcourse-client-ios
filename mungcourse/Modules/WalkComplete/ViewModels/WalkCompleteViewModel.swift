@@ -4,24 +4,17 @@ import SwiftUI
 import NMapsMap
 
 class WalkCompleteViewModel: ObservableObject {
-    // MARK: - Published 속성
-    
-    // 산책 결과 데이터
+    // 산책 데이터
     @Published var distance: String = "0.0"
-    @Published var duration: String = "00:00:00"
+    @Published var duration: String = "00:00"
     @Published var calories: String = "0"
     @Published var walkDate: Date = Date()
     
-    // 맵 관련 데이터
+    // 지도 관련 데이터
     @Published var pathCoordinates: [NMGLatLng] = []
-    @Published var centerCoordinate: NMGLatLng = NMGLatLng(lat: 37.5665, lng: 126.9780)
-    @Published var zoomLevel: Double = 16.0
-    @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역(흡연구역) 좌표 추가
-    
-    // 피드백 관련 상태
-    @Published var feedbackRating: Int = 0
-    @Published var isFeedbackModalPresented = false
-    @Published var isFeedbackSubmitted = false
+    @Published var centerCoordinate: NMGLatLng = NMGLatLng(lat: 37.5666, lng: 126.9780)
+    @Published var zoomLevel: Double = 15.0
+    @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역 좌표 리스트
     
     // 로딩 및 오류 상태
     @Published var isLoading = false
@@ -82,112 +75,6 @@ class WalkCompleteViewModel: ObservableObject {
         centerCoordinate = calculateCenterCoordinate(coordinates: pathCoordinates)
     }
     
-    // 피드백 모달 표시
-    func showFeedbackModal() {
-        isFeedbackModalPresented = true
-    }
-    
-    // 피드백 모달 닫기
-    func closeFeedbackModal() {
-        isFeedbackModalPresented = false
-    }
-    
-    // 피드백 등급 설정
-    func setFeedbackRating(_ rating: Int) {
-        feedbackRating = rating
-    }
-    
-    // 피드백 제출
-    func submitFeedback() {
-        guard feedbackRating > 0 else { return }
-        
-        isLoading = true
-        
-        // API를 통해 피드백 등급 업데이트
-        updateWalkRating(rating: feedbackRating) { [weak self] success in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                self.isLoading = false
-                
-                if success {
-                    print("✅ 산책 평가 업데이트 성공: \(self.feedbackRating)점")
-                    self.isFeedbackSubmitted = true
-                } else {
-                    print("❌ 산책 평가 업데이트 실패")
-                    self.errorMessage = "산책 평가 업데이트에 실패했습니다. 다시 시도해주세요."
-                }
-                
-                self.closeFeedbackModal()
-            }
-        }
-    }
-    
-    // 산책 평가 업데이트 API 호출
-    private func updateWalkRating(rating: Int, completion: @escaping (Bool) -> Void) {
-        // TODO: 실제 산책 ID를 사용해야 함 (현재는 임시 구현)
-        // API 엔드포인트: PATCH /v1/walks/{walkId}/rating
-        
-        // 현재는 간단히 네트워크 요청을 시뮬레이션
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            // 성공 시뮬레이션
-            completion(true)
-        }
-        
-        // 실제 구현 예시:
-        /*
-        guard let walkId = walkId else {
-            print("❌ 산책 ID가 없어 평가 업데이트 불가")
-            completion(false)
-            return
-        }
-        
-        guard let url = URL(string: "\(Self.apiBaseURL)/v1/walks/\(walkId)/rating") else {
-            print("❌ 산책 평가 업데이트 실패: 잘못된 URL")
-            completion(false)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let body: [String: Any] = ["rating": rating]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        } catch {
-            print("❌ 산책 평가 JSON 변환 실패: \(error)")
-            completion(false)
-            return
-        }
-        
-        NetworkManager.shared.performAPIRequest(request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("❌ 산책 평가 업데이트 실패: \(error)")
-                    completion(false)
-                    return
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    print("❌ 산책 평가 업데이트 실패: 응답 없음")
-                    completion(false)
-                    return
-                }
-                
-                if httpResponse.statusCode == 200 {
-                    print("✅ 산책 평가 업데이트 성공: \(rating)점")
-                    completion(true)
-                } else {
-                    print("❌ 산책 평가 업데이트 실패: 상태 코드 \(httpResponse.statusCode)")
-                    completion(false)
-                }
-            }
-        }
-        */
-    }
-    
     // 홈으로 이동 액션을 ViewModel에서 관리
     func navigateToHome() {
         // 여기서는 간단한 로그만 출력
@@ -200,37 +87,32 @@ class WalkCompleteViewModel: ObservableObject {
         Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
     }
     
-    // MARK: - 헬퍼 메서드
+    // MARK: - 포맷팅 헬퍼 메서드
     
-    // 거리 포맷팅
-    private func formatDistance(_ distanceInKm: Double) -> String {
-        return String(format: "%.1f", distanceInKm)
+    private func formatDistance(_ distance: Double) -> String {
+        return String(format: "%.1f", distance)
     }
     
-    // 지속 시간 포맷팅
     private func formatDuration(_ seconds: Int) -> String {
-        let hours = seconds / 3600
-        let minutes = (seconds % 3600) / 60
-        let secs = seconds % 60
-        return String(format: "%02d:%02d:%02d", hours, minutes, secs)
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        return String(format: "%02d:%02d", minutes, remainingSeconds)
     }
     
-    // 칼로리 계산 (간단한 예시)
-    private func calculateCalories(distance: Double, duration: Int) -> Int {
-        // 간단한 칼로리 계산식 (실제는 더 복잡할 수 있음)
-        // 예: 1km당 100칼로리 소모
-        return Int(distance * 100)
+    private func formatCalories(_ calories: Double) -> String {
+        return String(format: "%.0f", calories)
     }
     
-    // 칼로리 포맷팅
-    private func formatCalories(_ calories: Int) -> String {
-        return "\(calories)"
+    private func calculateCalories(distance: Double, duration: Int) -> Double {
+        // 간단한 계산식: 1km당 약 50kcal 소비 가정 (70kg 성인)
+        return distance * 50
     }
     
-    // 좌표 중심점 계산
+    // MARK: - 지도 관련 헬퍼 메서드
+    
     private func calculateCenterCoordinate(coordinates: [NMGLatLng]) -> NMGLatLng {
         guard !coordinates.isEmpty else {
-            return NMGLatLng(lat: 37.5665, lng: 126.9780) // 서울 시청 (기본값)
+            return NMGLatLng(lat: 37.5666, lng: 126.9780) // 서울 시청 좌표 기본값
         }
         
         var sumLat: Double = 0
@@ -247,18 +129,17 @@ class WalkCompleteViewModel: ObservableObject {
         )
     }
     
-    // 적절한 줌 레벨 계산
     private func calculateZoomLevel(coordinates: [NMGLatLng]) {
-        guard coordinates.count >= 2 else {
-            zoomLevel = 16.0 // 기본 줌 레벨
+        guard coordinates.count > 1 else {
+            zoomLevel = 15.0
             return
         }
         
-        // 경로의 경계 박스 계산
-        var minLat = coordinates[0].lat
-        var maxLat = coordinates[0].lat
-        var minLng = coordinates[0].lng
-        var maxLng = coordinates[0].lng
+        // 좌표 범위 계산
+        var minLat = Double.greatestFiniteMagnitude
+        var maxLat = -Double.greatestFiniteMagnitude
+        var minLng = Double.greatestFiniteMagnitude
+        var maxLng = -Double.greatestFiniteMagnitude
         
         for coord in coordinates {
             minLat = min(minLat, coord.lat)
