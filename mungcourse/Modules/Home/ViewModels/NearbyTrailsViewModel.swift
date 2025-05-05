@@ -10,16 +10,9 @@ class NearbyTrailsViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    // 자동 위치 업데이트 구독 제거
     init() {
-        // 위치가 바뀔 때마다 자동으로 fetch
-        GlobalLocationManager.shared.$lastLocation
-            .compactMap { $0 }
-            .removeDuplicates { $0.coordinate.latitude == $1.coordinate.latitude && $0.coordinate.longitude == $1.coordinate.longitude }
-            .sink { [weak self] location in
-                print("[NearbyTrailsViewModel] 위치 변경 감지: lat=\(location.coordinate.latitude), lng=\(location.coordinate.longitude)")
-                self?.fetchNearbyDogPlaces()
-            }
-            .store(in: &cancellables)
+        // 위치 변경 자동 구독 제거
     }
 
     func fetchNearbyDogPlaces(category: String? = nil) {

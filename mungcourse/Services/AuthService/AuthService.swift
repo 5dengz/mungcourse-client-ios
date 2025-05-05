@@ -325,8 +325,9 @@ class AuthService: AuthServiceProtocol {
                 
                 switch http.statusCode {
                 case 200...299:
-                    // 성공 시 토큰 삭제
+                    // 성공 시 토큰 삭제 및 전체 데이터 초기화
                     DispatchQueue.main.async {
+                        self.performFullAppDataReset()
                         TokenManager.shared.clearTokens()
                         promise(.success(true))
                     }
@@ -344,9 +345,31 @@ class AuthService: AuthServiceProtocol {
         }.eraseToAnyPublisher()
     }
     
+    /// 앱 전체 데이터 초기화 (UserDefaults, Keychain, URLCache, 싱글턴 등)
+    private func performFullAppDataReset() {
+        // UserDefaults 전체 삭제
+        if let bundleID = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: bundleID)
+        }
+        // Keychain 전체 삭제
+        do {
+            let keychain = Keychain(service: "com.mungcourse.app")
+            try keychain.removeAll()
+        } catch {
+            print("[AuthService] Keychain 전체 삭제 실패: \(error)")
+        }
+        // URLCache 전체 삭제
+        URLCache.shared.removeAllCachedResponses()
+        // 쿠키 전체 삭제
+        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
+        // 싱글턴/뷰모델 등 메모리 정보 초기화 (App에서 인스턴스 전달 필요)
+        NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+    }
+    
     // 로그아웃 메소드
     func logout() {
         print("로그아웃 처리")
+        performFullAppDataReset()
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/logout") else {
             TokenManager.shared.clearTokens()
             return

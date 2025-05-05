@@ -14,6 +14,9 @@ class DogViewModel: ObservableObject {
 
     init() {
         fetchDogs()
+        NotificationCenter.default.addObserver(forName: .appDataDidReset, object: nil, queue: .main) { [weak self] _ in
+            self?.reset()
+        }
     }
 
     func fetchDogs() {
@@ -61,4 +64,18 @@ class DogViewModel: ObservableObject {
             print("[DogViewModel] fetchWalkRecords error: \(error)")
         }
     }
+
+    /// 모든 상태를 초기화 (로그아웃/탈퇴 시 호출)
+    func reset() {
+        dogs = []
+        mainDog = nil
+        selectedDog = nil
+        selectedDogName = ""
+        dogDetail = nil
+        walkRecords = []
+    }
+}
+
+extension Notification.Name {
+    static let appDataDidReset = Notification.Name("appDataDidReset")
 } 

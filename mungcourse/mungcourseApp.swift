@@ -45,6 +45,15 @@ struct mungcourseApp: App {
             // 디버깅용 로그
             print("[DEBUG] UserDefaults 변경 감지: hasCompletedOnboarding =", UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"))
         }
+        // 앱 데이터 리셋(로그아웃/탈퇴) 시 싱글턴/뷰모델 초기화
+        NotificationCenter.default.addObserver(
+            forName: .appDataDidReset,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.dogVM.reset()
+            self?.forceUpdate.toggle()
+        }
     }
 
     var body: some Scene {
