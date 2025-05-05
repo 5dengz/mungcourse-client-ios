@@ -363,4 +363,41 @@ class DogService: DogServiceProtocol {
         let apiResponse = try decoder.decode(ServiceAPIResponse<[WalkRecordData]>.self, from: data)
         return apiResponse.data
     }
+
+    // 강아지 정보 수정
+    func updateDog(dogId: Int, dogData: DogRegistrationData) async throws -> DogRegistrationResponseData {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let token = authToken, !token.isEmpty else {
+            print("❌ Error: Auth token is missing for /v1/dogs/{dogId} request.")
+            throw NetworkError.missingToken
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        do {
+            let encoder = JSONEncoder()
+            request.httpBody = try encoder.encode(dogData)
+            print("➡️ Updating dog: \(endpoint) with token: \(token.prefix(10))")
+        } catch {
+            print("❌ Error encoding dog update request body: \(error)")
+            throw NetworkError.encodingError(error)
+        }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Error: Dog update failed with status: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            if let errorBody = String(data: data, encoding: .utf8) { print("   Error body: \(errorBody)") }
+            throw NetworkError.httpError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1, data: data)
+        }
+        do {
+            let decoder = JSONDecoder()
+            let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
+            let updated = apiResponse.data
+            print("✅ Dog updated successfully: \(updated.name)")
+            return updated
+        } catch {
+            print("❌ Error decoding dog update response: \(error)")
+            throw NetworkError.decodingError(error)
+        }
+    }
 }

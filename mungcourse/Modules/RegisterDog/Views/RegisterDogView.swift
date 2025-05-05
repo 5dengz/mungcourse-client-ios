@@ -138,7 +138,11 @@ struct RegisterDogView: View {
 
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
-        viewModel.registerDog()
+        if isEditing, let detail = initialDetail, let id = detail.id {
+            viewModel.updateDog(dogId: id)
+        } else {
+            viewModel.registerDog()
+        }
     }
     
     // 반려견 삭제 메서드

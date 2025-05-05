@@ -163,6 +163,82 @@ class RegisterDogViewModel: ObservableObject {
         }
     }
     
+    // 반려견 수정 (이미지 포함)
+    func updateDog(dogId: Int) {
+        guard isFormValid else {
+            if name.isEmpty {
+                errorMessage = RegisterDogError(message: "이름을 입력해주세요.")
+            } else if gender == nil {
+                errorMessage = RegisterDogError(message: "성별을 선택해주세요.")
+            } else if breed.isEmpty {
+                errorMessage = RegisterDogError(message: "견종을 선택해주세요.")
+            } else if weight.isEmpty || Double(weight) == nil {
+                errorMessage = RegisterDogError(message: "유효한 몸무게를 입력해주세요.")
+            }
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        // 날짜 형식 변환
+        let birthDateFormatter = DateFormatter()
+        birthDateFormatter.dateFormat = "yyyy-MM-dd"
+        let birthDateString = birthDateFormatter.string(from: dateOfBirth)
+        // 옵셔널 Bool 처리
+        let neuteredStatus = isNeutered ?? false
+        let arthritisStatus = hasPatellarLuxationSurgery ?? false
+        // 몸무게 변환
+        guard let weightDouble = Double(weight) else {
+            isLoading = false
+            errorMessage = RegisterDogError(message: "유효한 몸무게를 입력해주세요.")
+            return
+        }
+        // 등록 데이터 준비
+        let genderString = gender?.rawValue ?? ""
+        let postedAtFormatter = DateFormatter()
+        postedAtFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let postedAtString = postedAtFormatter.string(from: Date())
+        Task {
+            do {
+                var finalImageUrl: String? = nil
+                // 이미지 업로드 (있는 경우)
+                if let imageData = selectedImageData {
+                    let fileName = UUID().uuidString
+                    let fileExtension = ".jpg"
+                    print("S3 Presigned URL 요청 중...")
+                    let s3Info = try await dogService.getS3PresignedUrl(fileName: fileName, fileExtension: fileExtension)
+                    print("이미지 업로드 중...")
+                    try await dogService.uploadImageToS3(presignedUrl: s3Info.data.preSignedUrl, imageData: imageData)
+                    finalImageUrl = s3Info.data.url
+                    print("이미지 업로드 완료: \(finalImageUrl ?? "")")
+                }
+                let dogData = DogRegistrationData(
+                    name: name,
+                    gender: genderString,
+                    breed: breed,
+                    birthDate: birthDateString,
+                    weight: weightDouble,
+                    postedAt: postedAtString,
+                    hasArthritis: arthritisStatus,
+                    neutered: neuteredStatus,
+                    dogImgUrl: finalImageUrl
+                )
+                print("반려견 정보 수정 중...")
+                let updatedDog = try await dogService.updateDog(dogId: dogId, dogData: dogData)
+                print("반려견 수정 완료: \(updatedDog.name)")
+                await MainActor.run {
+                    isLoading = false
+                    isRegistrationComplete = true
+                }
+            } catch {
+                print("반려견 수정 오류: \(error.localizedDescription)")
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = RegisterDogError(message: "반려견 수정 중 오류가 발생했습니다: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
     // 입력 필드 초기화
     func resetForm() {
         name = ""
