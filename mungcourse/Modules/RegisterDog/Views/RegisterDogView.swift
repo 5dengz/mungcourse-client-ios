@@ -192,9 +192,15 @@ struct RegisterDogView: View {
             viewModel.isLoading = false
             
             if success {
-                // 삭제 성공 시 화면 닫기
-                dismiss()
-                onComplete?()
+                // 삭제 성공 시 DogViewModel 업데이트 후 화면 닫기
+                DispatchQueue.main.async {
+                    // DogViewModel의 dogs 배열을 업데이트하기 위해 fetchDogs 호출
+                    self.dogVM.fetchDogs()
+                    // 화면 닫기
+                    self.dismiss()
+                    // 완료 콜백 호출
+                    self.onComplete?()
+                }
             } else {
                 // 삭제 실패 시 에러 메시지 표시
                 let errorResponse = ErrorResponse(

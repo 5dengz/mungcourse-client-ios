@@ -122,8 +122,8 @@ struct ButtonArea: View {
             MainButton(
                 title: "산책 시작",
                 imageName: "start_walk",
-                backgroundColor: Color("AccentColor"),
-                foregroundColor: Color("white"),
+                backgroundColor: Color("main"),
+                foregroundColor: Color("pointwhite"),
                 action: {
                     isStartWalkOverlayPresented = true
                 }
@@ -131,7 +131,7 @@ struct ButtonArea: View {
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course",
-                backgroundColor: Color("white"),
+                backgroundColor: Color("pointwhite"),
                 foregroundColor: Color("main"),
                 action: {
                     onSelectCourse()

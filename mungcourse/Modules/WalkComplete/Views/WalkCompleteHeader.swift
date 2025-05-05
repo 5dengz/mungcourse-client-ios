@@ -16,10 +16,10 @@ struct WalkCompleteHeader: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(formattedDate)
                     .font(.custom("Pretendard", size: 16).weight(.semibold))
-                    .foregroundColor(Color("black"))
+                    .foregroundColor(Color("pointblack"))
                 Text("오늘도 무사히")
                     .font(.custom("Pretendard", size: 24))
-                    .foregroundColor(Color("black"))
+                    .foregroundColor(Color("pointblack"))
                 Text("산책 완료!")
                     .font(.custom("Pretendard", size: 24).weight(.semibold))
                     .foregroundColor(Color("main"))

@@ -21,7 +21,7 @@ struct OpeningHoursView: View {
         .padding(.vertical, 5)
         .background(
             Capsule()
-                .fill(Color("white"))
+                .fill(Color("pointwhite"))
         )
     }
     // 요일과 시간 분리 함수 (예: "월~금 09:00~18:00" → ("월~금", "09:00~18:00"))
