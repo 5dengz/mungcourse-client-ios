@@ -16,6 +16,7 @@ class WalkCompleteViewModel: ObservableObject {
     @Published var pathCoordinates: [NMGLatLng] = []
     @Published var centerCoordinate: NMGLatLng = NMGLatLng(lat: 37.5665, lng: 126.9780)
     @Published var zoomLevel: Double = 16.0
+    @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역(흡연구역) 좌표 추가
     
     // 피드백 관련 상태
     @Published var feedbackRating: Int = 0
@@ -281,4 +282,4 @@ class WalkCompleteViewModel: ObservableObject {
             zoomLevel = 12.0 // 매우 큰 경로
         }
     }
-} 
+}

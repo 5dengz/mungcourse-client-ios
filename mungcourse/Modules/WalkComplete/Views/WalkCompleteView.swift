@@ -28,6 +28,7 @@ struct WalkCompleteView: View {
                         )
                         // 네이버 지도 (경로 표시)
                         AdvancedNaverMapView(
+                            dangerCoordinates: .constant(viewModel.dangerCoordinates),
                             centerCoordinate: .constant(viewModel.centerCoordinate),
                             zoomLevel: .constant(viewModel.zoomLevel),
                             pathCoordinates: .constant(viewModel.pathCoordinates),
