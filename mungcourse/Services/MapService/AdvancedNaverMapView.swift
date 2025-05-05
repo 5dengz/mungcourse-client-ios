@@ -3,6 +3,8 @@ import NMapsMap
 import QuartzCore
 
 struct AdvancedNaverMapView: UIViewRepresentable {
+    @Binding var dangerCoordinates: [NMGLatLng]
+    private var dangerMarkers: [NMFMarker] = []
     @Binding var centerCoordinate: NMGLatLng
     @Binding var zoomLevel: Double
     @Binding var pathCoordinates: [NMGLatLng]
@@ -15,6 +17,17 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     var trackingMode: NMFMyPositionMode = .direction
     
     func makeUIView(context: Context) -> NMFNaverMapView {
+        // ... 기존 코드 ...
+        // danger 마커 표시
+        for coord in dangerCoordinates {
+            let marker = NMFMarker(position: coord)
+            marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
+            marker.width = 32
+            marker.height = 32
+            marker.zIndex = 100
+            marker.mapView = mapView.mapView
+            context.coordinator.dangerMarkers.append(marker)
+        }
         print("[디버그] makeUIView 호출")
         let mapView = NMFNaverMapView()
         
@@ -122,6 +135,22 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: NMFNaverMapView, context: Context) {
+        // danger 마커 업데이트
+        // 기존 dangerMarkers 제거
+        for marker in context.coordinator.dangerMarkers {
+            marker.mapView = nil
+        }
+        context.coordinator.dangerMarkers.removeAll()
+        // dangerCoordinates 기준 danger 마커 다시 추가
+        for coord in dangerCoordinates {
+            let marker = NMFMarker(position: coord)
+            marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
+            marker.width = 32
+            marker.height = 32
+            marker.zIndex = 100
+            marker.mapView = mapView.mapView
+            context.coordinator.dangerMarkers.append(marker)
+        }
         print("[디버그] updateUIView 호출")
         print("[디버그] updateUIView - centerCoordinate: \(centerCoordinate), zoomLevel: \(zoomLevel)")
         print("[디버그] updateUIView - pathCoordinates: count=\(pathCoordinates.count), 값=\(pathCoordinates)")
@@ -155,6 +184,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     }
     
     class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
+        var dangerMarkers: [NMFMarker] = []
         let parent: AdvancedNaverMapView
         weak var pathOverlay: NMFPath?
         var pawMarker: NMFMarker?

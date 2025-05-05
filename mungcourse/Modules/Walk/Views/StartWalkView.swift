@@ -29,6 +29,7 @@ struct StartWalkView: View {
                 // Map View
                 ZStack {
                     AdvancedNaverMapView(
+    dangerCoordinates: $viewModel.smokingZones,
                         centerCoordinate: $viewModel.centerCoordinate,
                         zoomLevel: $viewModel.zoomLevel,
                         pathCoordinates: $viewModel.pathCoordinates,

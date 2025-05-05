@@ -128,9 +128,6 @@ struct WalkHistoryDetailView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("선택하신 날짜의 산책 기록입니다.")
-                            .font(.custom("Pretendard-Regular", size: 16))
-                            .padding(.top, 30)
                         
                         // 산책 정보 카드 (거리, 시간, 칼로리)
                         HStack(spacing: 12) {
@@ -138,7 +135,7 @@ struct WalkHistoryDetailView: View {
                             InfoCard(title: "산책 시간", value: "45 분", iconName: "clock")
                             InfoCard(title: "소모 칼로리", value: "150 kcal", iconName: "flame.fill")
                         }
-                        .padding(.top, 10)
+                        .padding(.top, 20)
                         
                         // 주간 산책 거리 차트 섹션 - 별도 뷰로 분리
                         VStack(alignment: .leading, spacing: 15) {
@@ -178,7 +175,7 @@ struct WalkHistoryDetailView: View {
                                 .fill(Color.white)
                                 .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                         )
-                        .padding(.top, 16)
+                        .padding(.vertical, 16)
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 30)

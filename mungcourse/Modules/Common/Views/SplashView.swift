@@ -4,6 +4,7 @@ import Combine
 
 struct SplashView: View {
     @EnvironmentObject var dogVM: DogViewModel
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var animateSmall = false
     @State private var animateMedium = false
     @State private var animateLarge = false
@@ -12,6 +13,7 @@ struct SplashView: View {
     @State private var shouldShowRegisterDog = false
     @State private var splashStartTime: Date? = nil
     @State private var isNavigated = false
+    @State private var showOnboarding = false
 
     var body: some View {
         ZStack {
@@ -55,10 +57,23 @@ struct SplashView: View {
             splashStartTime = Date()
             animateSequence()
             dogVM.fetchDogs()
-            checkTokenAndNavigate()
+            // 온보딩 완료 여부 체크
+            if !hasCompletedOnboarding {
+                showOnboarding = true
+            } else {
+                checkTokenAndNavigate()
+            }
         }
         .onChange(of: dogVM.dogs) { _ in
+            if hasCompletedOnboarding {
+                checkTokenAndNavigate()
+            }
+        }
+        .fullScreenCover(isPresented: $showOnboarding, onDismiss: {
+            // 온보딩이 끝나면 기존 분기 로직 실행
             checkTokenAndNavigate()
+        }) {
+            OnboardingView()
         }
         .fullScreenCover(isPresented: $shouldShowLogin) {
             LoginView()

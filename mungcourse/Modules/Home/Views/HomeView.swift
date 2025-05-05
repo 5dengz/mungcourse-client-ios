@@ -31,6 +31,12 @@ struct HomeView: View {
         }
         .navigationTitle("홈")
         .dogSelectionSheet(isPresented: $showingDogSelection)
+        .fullScreenCover(isPresented: $showingDogSelection) {
+            RegisterDogView(onComplete: {
+                dogVM.fetchDogs()
+            }, showBackButton: true)
+            .environmentObject(dogVM)
+        }
     }
 }
 

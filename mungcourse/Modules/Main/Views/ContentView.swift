@@ -171,6 +171,6 @@ struct ContentView: View {
                     .environmentObject(dogVM)
             }
         }
-        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogVM.selectedDog, dogs: dogVM.dogs)
+        .dogSelectionSheet(isPresented: $showingDogSelection)
     }
 }
