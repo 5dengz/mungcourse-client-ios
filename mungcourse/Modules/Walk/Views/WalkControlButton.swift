@@ -56,7 +56,7 @@ struct WalkControlButton: View {
                     .frame(width: 16, height: 16)
             }
             .frame(width: 54, height: 54)
-            .background(Color("white"))
+            .background(Color("pointwhite"))
             .clipShape(Circle())
             .shadow(color: Color("pointblack").opacity(0.13), radius: 12, x: 2, y: 2)
         }

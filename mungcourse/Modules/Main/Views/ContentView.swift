@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Combine
+import NMapsMap
 
 struct ContentView: View {
     enum Tab: Int, CaseIterable {
@@ -41,6 +43,9 @@ struct ContentView: View {
     enum WalkStartType { case direct, recommend }
     @State private var walkStartType: WalkStartType = .direct
     @EnvironmentObject var dogVM: DogViewModel
+    @State private var userLocation: NMGLatLng? = nil
+    @State private var selectedWaypoints: [DogPlace] = []
+    @State private var cancellables = Set<AnyCancellable>()
 
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
@@ -157,17 +162,25 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $showSelectWaypoint) {
             NavigationStack {
-                SelectWaypointView(onBack: {
-                    showSelectWaypoint = false
-                })
+                SelectWaypointView(
+                    onBack: { showSelectWaypoint = false },
+                    onSelect: { waypoints in
+                        selectedWaypoints = waypoints
+                        showSelectWaypoint = false
+                    }
+                )
             }
         }
         .fullScreenCover(isPresented: $showRecommendCourse) {
             NavigationStack {
-                RecommendCourseView(onBack: {
-                    showRecommendCourse = false
-                    isStartWalkOverlayPresented = true
-                })
+                RecommendCourseView(
+                    onBack: {
+                        showRecommendCourse = false
+                        isStartWalkOverlayPresented = true
+                    },
+                    startLocation: userLocation ?? NMGLatLng(lat: 37.5666, lng: 126.9780),
+                    waypoints: selectedWaypoints
+                )
             }
         }
         .fullScreenCover(isPresented: $showStartWalk) {

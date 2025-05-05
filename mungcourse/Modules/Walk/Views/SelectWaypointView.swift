@@ -3,6 +3,7 @@ import NMapsMap
 
 struct SelectWaypointView: View {
     let onBack: () -> Void
+    let onSelect: ([DogPlace]) -> Void
     @StateObject private var viewModel = SelectWaypointViewModel()
     @State private var showRouteSelection = false
     @State private var showRecommendFlow = false
@@ -72,6 +73,7 @@ struct SelectWaypointView: View {
                     title: "선택 완료",
                     action: {
                         selectedWaypoints = viewModel.getSelectedPlaces()
+                        onSelect(selectedWaypoints)
                         showRecommendFlow = true
                     },
                     isEnabled: viewModel.isCompleteButtonEnabled,
@@ -172,7 +174,7 @@ struct EmptyResultView: View {
 }
 
 #Preview {
-    SelectWaypointView(onBack: { })
+    SelectWaypointView(onBack: { }, onSelect: { _ in })
 }
 
 // CLLocationCoordinate2D → NMGLatLng 변환 확장

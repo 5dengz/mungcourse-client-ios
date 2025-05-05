@@ -18,7 +18,7 @@ struct StartWalkTabView: View {
                 action: {
                     onSelectWaypoint()
                 },
-                backgroundColor: .white,
+                backgroundColor: Color("pointwhite"),
                 foregroundColor: Color("main"),
                 cornerRadius: 12
             )
@@ -35,7 +35,7 @@ struct StartWalkTabView: View {
                     onRecommendCourse()
                 },
                 backgroundColor: Color("main"),
-                foregroundColor: .white,
+                foregroundColor: Color("pointwhite"),
                 cornerRadius: 12
             )
             .font(.custom("Pretendard-SemiBold", size: 18))

@@ -122,7 +122,7 @@ struct RegisterDogView: View {
                         onComplete?()
                     }
                 }
-                .ignoredSafeArea() // 기타 설정
+                .ignoresSafeArea() // 기타 설정
             }
         }
     }

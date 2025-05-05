@@ -20,7 +20,13 @@ struct HomeView: View {
                     dogs: dogVM.dogs
                 )
                 ButtonArea(
-                    onStartWalk: { showStartWalk = true },
+                    onStartWalk: {
+                        if dogVM.selectedDog == nil {
+                            showingDogSelection = true
+                        } else {
+                            showStartWalk = true
+                        }
+                    },
                     onSelectRoute: { showSelectRoute = true }
                 )
                 NearbyTrailsView()
@@ -41,12 +47,21 @@ struct HomeView: View {
         }
         .navigationTitle("홈")
         .dogSelectionSheet(isPresented: $showingDogSelection)
+        .onChange(of: showingDogSelection) { newValue in
+            // 강아지 선택 시트가 닫히고 강아지가 선택되어 있으면 산책 시작 화면으로 이동
+            if newValue == false && dogVM.selectedDog != nil && showStartWalk == false {
+                showStartWalk = true
+            }
+        }
         .fullScreenCover(isPresented: $showWalkHistoryDetail) {
             if let date = walkHistoryDate {
                 WalkHistoryDetailView(viewModel: WalkHistoryViewModel(selectedDate: date))
             }
         }
-        .fullScreenCover(isPresented: $showStartWalk) {
+        .fullScreenCover(isPresented: $showStartWalk, onDismiss: {
+            // 산책 화면 닫힐 때 강아지 선택 초기화
+            dogVM.selectedDog = nil
+        }) {
             NavigationStack {
                 StartWalkView()
                     .environmentObject(dogVM)
@@ -54,7 +69,7 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $showSelectRoute) {
             NavigationStack {
-                SelectWaypointView(onBack: { showSelectRoute = false })
+                SelectWaypointView(onBack: { showSelectRoute = false }, onSelect: { _ in showSelectRoute = false })
             }
         }
         .overlay(

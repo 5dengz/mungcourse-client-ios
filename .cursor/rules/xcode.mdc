@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: false
----
-- use XcodeBuild MCP when writing swift code
