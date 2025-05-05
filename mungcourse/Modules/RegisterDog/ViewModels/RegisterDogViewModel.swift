@@ -91,6 +91,23 @@ class RegisterDogViewModel: ObservableObject {
         Double(weight) != nil
     }
     
+    var initialDetail: DogRegistrationResponseData? = nil
+
+    var isModified: Bool {
+        guard let initial = initialDetail else { return false }
+        if name != initial.name { return true }
+        if breed != initial.breed { return true }
+        if gender?.rawValue != initial.gender { return true }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        if formatter.string(from: dateOfBirth) != initial.birthDate { return true }
+        if weight != String(initial.weight) { return true }
+        if isNeutered != initial.neutered { return true }
+        if hasPatellarLuxationSurgery != initial.hasArthritis { return true }
+        // 프로필 이미지 변경 감지 필요시 추가
+        return false
+    }
+    
     // MARK: - 메서드
     
     // 반려견 등록 (이미지 포함)

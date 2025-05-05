@@ -98,7 +98,7 @@ struct BreedResultRow: View {
             // 견종명
             Text(breed)
                 .font(Font.custom("Pretendard-Regular", size: 16))
-                .foregroundColor(.black)
+                .foregroundColor(Color("pointblack"))
             
             Spacer()
             

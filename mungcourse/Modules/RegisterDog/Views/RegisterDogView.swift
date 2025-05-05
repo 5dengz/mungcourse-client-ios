@@ -115,7 +115,8 @@ struct RegisterDogView: View {
                             if let u = URL(string: url) { return u.path.dropFirst() }
                             return nil
                         }) : nil).map(String.init),
-                        viewModel: viewModel
+                        viewModel: viewModel,
+                        buttonTitle: (isEditing && viewModel.isModified) ? "수정하기" : "완료"
                     )
                     .padding(.horizontal, 20)
                     // Remove navigation modifiers from here
@@ -170,7 +171,11 @@ struct RegisterDogView: View {
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
         if isEditing, let detail = initialDetail, let id = detail.id {
-            viewModel.updateDog(dogId: id)
+            if viewModel.isModified {
+                viewModel.updateDog(dogId: id)
+            } else {
+                dismiss()
+            }
         } else {
             viewModel.registerDog()
         }

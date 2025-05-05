@@ -12,7 +12,7 @@ struct RequiredPickerField: View {
             HStack {
                 Text(selection.isEmpty ? placeholder : selection)
                     .font(.custom("Pretendard-Regular", size: 14))
-                    .foregroundColor(selection.isEmpty ? Color("gray500") : Color("black"))
+                    .foregroundColor(selection.isEmpty ? Color("gray500") : Color("pointblack"))
                 Spacer()
                 Image("icon_search")
                     .foregroundColor(Color("gray500"))

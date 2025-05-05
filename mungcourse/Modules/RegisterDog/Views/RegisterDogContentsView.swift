@@ -23,7 +23,8 @@ struct RegisterDogContentsView: View {
     // 추가: S3 objectKey와 viewModel
     let objectKey: String?
     let viewModel: RegisterDogViewModel
-    
+    let buttonTitle: String // 추가
+
     // TODO: Define actions passed from the parent if needed
     // var addAnotherDogAction: () -> Void
     
@@ -64,7 +65,7 @@ struct RegisterDogContentsView: View {
                 }
                 
                 CommonFilledButton(
-                    title: "완료",
+                    title: buttonTitle,
                     action: registerAction,
                     isEnabled: isFormValid && !isLoading
                 )

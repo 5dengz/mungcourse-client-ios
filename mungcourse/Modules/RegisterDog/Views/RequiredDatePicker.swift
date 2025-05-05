@@ -17,7 +17,7 @@ struct RequiredDatePicker: View {
             HStack {
                 Text(dateFormatter.string(from: selection))
                     .font(.custom("Pretendard-Regular", size: 14))
-                    .foregroundColor(Color("black"))
+                    .foregroundColor(Color("pointblack"))
                 
                 Spacer() // Pushes content to the left and right edges
                 

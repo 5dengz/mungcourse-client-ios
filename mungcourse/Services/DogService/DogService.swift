@@ -186,6 +186,54 @@ class DogService: DogServiceProtocol {
     
     private var cancellables = Set<AnyCancellable>()
     
+    // 메인 반려견 조회 Publisher 구현 (프로토콜 준수)
+    func fetchMainDog() -> AnyPublisher<Dog, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/main")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        if let token = authToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        return Future<Dog, Error> { promise in
+            URLSession.shared.dataTaskPublisher(for: request)
+                .tryMap { output -> Data in
+                    guard let httpResponse = output.response as? HTTPURLResponse else {
+                        throw NetworkError.invalidResponse
+                    }
+                    let data = output.data
+                    switch httpResponse.statusCode {
+                    case 200...299:
+                        return data
+                    case 404:
+                        print("[DogService.fetchMainDog] 메인 반려견 없음 (404)")
+                        throw NetworkError.httpError(statusCode: 404, data: data)
+                    default:
+                        throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
+                    }
+                }
+                .tryMap { data -> Dog in
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("[DogService.fetchMainDog] 서버 응답: \(jsonString)")
+                    }
+                    let responseWrapper = try JSONDecoder().decode(DogDataResponse.self, from: data)
+                    return responseWrapper.data
+                }
+                .sink(
+                    receiveCompletion: { completion in
+                        if case .failure(let error) = completion {
+                            print("[DogService.fetchMainDog] 오류: \(error.localizedDescription)")
+                            promise(.failure(error))
+                        }
+                    },
+                    receiveValue: { dog in
+                        promise(.success(dog))
+                    }
+                )
+                .store(in: &self.cancellables)
+        }
+        .eraseToAnyPublisher()
+    }
+
     // MARK: - Async/Await 기반 구현
 
     // getS3PresignedUrl 함수 NetworkManager 적용
