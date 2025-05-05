@@ -16,6 +16,27 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     var showUserLocation: Bool = true
     var trackingMode: NMFMyPositionMode = .direction
     
+    // 명시적인 public initializer 추가
+    init(dangerCoordinates: Binding<[NMGLatLng]>,
+         centerCoordinate: Binding<NMGLatLng>,
+         zoomLevel: Binding<Double>,
+         pathCoordinates: Binding<[NMGLatLng]>,
+         userLocation: Binding<NMGLatLng?>,
+         onMapTapped: ((NMGLatLng) -> Void)? = nil,
+         onUserLocationUpdated: ((NMGLatLng) -> Void)? = nil,
+         showUserLocation: Bool = true,
+         trackingMode: NMFMyPositionMode = .direction) {
+        self._dangerCoordinates = dangerCoordinates
+        self._centerCoordinate = centerCoordinate
+        self._zoomLevel = zoomLevel
+        self._pathCoordinates = pathCoordinates
+        self._userLocation = userLocation
+        self.onMapTapped = onMapTapped
+        self.onUserLocationUpdated = onUserLocationUpdated
+        self.showUserLocation = showUserLocation
+        self.trackingMode = trackingMode
+    }
+    
     func makeUIView(context: Context) -> NMFNaverMapView {
         print("[디버그] makeUIView 호출")
         
