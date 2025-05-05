@@ -61,7 +61,7 @@ struct RegisterDogContentsView: View {
             }
             .padding(.bottom)
         }
-        .scrollDismissesKeyboard(.interactive) // 스크롤 시 키보드 내림
+        .scrollDismissesKeyboard(.interactively) // 스크롤 시 키보드 내림
         .scrollIndicators(.hidden) // 스크롤바 숨김 처리
     }
 }

@@ -4,6 +4,8 @@ import Combine
 
 struct RecommendCourseView: View {
     let onBack: () -> Void
+    let startLocation: NMGLatLng
+    let waypoints: [DogPlace]
     @EnvironmentObject var dogVM: DogViewModel
     @State private var showStartWalk = false
     @StateObject private var viewModel = RecommendCourseViewModel()
@@ -116,9 +118,10 @@ struct RecommendCourseView: View {
                         )
                         MainButton(
                             title: "자유 산책",
-                            action: { showStartWalk = true },
+                            imageName: "walk", // 실제 프로젝트 내 존재하는 asset 이름으로 교체 필요
                             backgroundColor: Color("pointwhite"),
-                            foregroundColor: Color("main")
+                            foregroundColor: Color("main"),
+                            action: { showStartWalk = true }
                         )
                     }
                     .padding(.horizontal, 20)
@@ -355,5 +358,5 @@ class RecommendCourseViewModel: ObservableObject {
 }
 
 #Preview {
-    RecommendCourseView(onBack: {})
+    RecommendCourseView(onBack: {}, startLocation: NMGLatLng(lat: 37.5666, lng: 126.9780), waypoints: [])
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import NMapsMap
 
 struct SelectWaypointView: View {
     let onBack: () -> Void
@@ -90,7 +91,7 @@ struct SelectWaypointView: View {
                 NavigationStack {
                     RecommendCourseView(
                         onBack: { showRecommendFlow = false },
-                        startLocation: currentLocation,
+                        startLocation: currentLocation.toNMGLatLng(),
                         waypoints: selectedWaypoints
                     )
                     .environmentObject(dogVM)
@@ -172,4 +173,14 @@ struct EmptyResultView: View {
 
 #Preview {
     SelectWaypointView(onBack: { })
-} 
+}
+
+// CLLocationCoordinate2D → NMGLatLng 변환 확장
+import NMapsMap
+import CoreLocation
+
+extension CLLocationCoordinate2D {
+    func toNMGLatLng() -> NMGLatLng {
+        NMGLatLng(lat: self.latitude, lng: self.longitude)
+    }
+}
