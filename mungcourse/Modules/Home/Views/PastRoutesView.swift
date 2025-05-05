@@ -37,12 +37,6 @@ struct PastRoutesView: View {
                 }
                 .frame(height: 180)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                
-                // 산책 정보 표시 (데이터가 있을 경우만)
-                if let walk = viewModel.recentWalk {
-                    walkInfoView(walk)
-                        .padding(8)
-                }
             }
         }
         .cornerRadius(10)
