@@ -46,7 +46,19 @@ class WalkService {
                 
                 do {
                     let walkResponse = try JSONDecoder().decode(WalkResponse.self, from: data)
-                    promise(.success(walkResponse.data))
+                    
+                    // data가 null인 경우 처리
+                    guard let walkData = walkResponse.data else {
+                        let noDataError = NSError(
+                            domain: "com.mungcourse.error",
+                            code: 404,
+                            userInfo: [NSLocalizedDescriptionKey: "산책 기록이 없습니다"]
+                        )
+                        promise(.failure(noDataError))
+                        return
+                    }
+                    
+                    promise(.success(walkData))
                 } catch {
                     print("JSON 디코딩 오류: \(error)")
                     promise(.failure(error))

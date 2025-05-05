@@ -5,7 +5,7 @@ struct WalkResponse: Codable {
     let timestamp: String
     let statusCode: Int
     let message: String
-    let data: Walk
+    let data: Walk?  // null 값 처리를 위해 옵셔널로 변경
     let success: Bool
 }
 
