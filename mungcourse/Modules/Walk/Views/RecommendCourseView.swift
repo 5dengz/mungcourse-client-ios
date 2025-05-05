@@ -116,13 +116,19 @@ struct RecommendCourseView: View {
                             action: { viewModel.requestRecommendation() },
                             backgroundColor: Color("main")
                         )
-                        MainButton(
-                            title: "자유 산책",
-                            imageName: "walk", // 실제 프로젝트 내 존재하는 asset 이름으로 교체 필요
-                            backgroundColor: Color("pointwhite"),
-                            foregroundColor: Color("main"),
-                            action: { showStartWalk = true }
-                        )
+                        NavigationLink(destination: StartWalkView().environmentObject(dogVM)) {
+                            Text("자유 산책")
+                                .font(.custom("Pretendard-SemiBold", size: 16))
+                                .foregroundColor(Color("main"))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color("pointwhite"))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color("main"), lineWidth: 1)
+                                )
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
@@ -143,12 +149,6 @@ struct RecommendCourseView: View {
                 NavigationStack {
                     RouteWalkView(route: route)
                 }
-            }
-        }
-        .fullScreenCover(isPresented: $showStartWalk) {
-            NavigationStack {
-                StartWalkView()
-                    .environmentObject(dogVM)
             }
         }
         .alert(isPresented: $viewModel.showAlert) {

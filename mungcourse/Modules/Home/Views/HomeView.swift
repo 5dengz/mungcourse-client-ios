@@ -7,7 +7,6 @@ struct HomeView: View {
     @State private var showWalkHistoryDetail: Bool = false
     @State private var walkHistoryDate: Date? = nil
     @State private var showNoRecordToast = false
-    @State private var showStartWalk = false
     @State private var showSelectRoute = false
 
     var body: some View {
@@ -23,8 +22,6 @@ struct HomeView: View {
                     onStartWalk: {
                         if dogVM.selectedDog == nil {
                             showingDogSelection = true
-                        } else {
-                            showStartWalk = true
                         }
                     },
                     onSelectRoute: { showSelectRoute = true }
@@ -49,22 +46,13 @@ struct HomeView: View {
         .dogSelectionSheet(isPresented: $showingDogSelection)
         .onChange(of: showingDogSelection) { newValue in
             // 강아지 선택 시트가 닫히고 강아지가 선택되어 있으면 산책 시작 화면으로 이동
-            if newValue == false && dogVM.selectedDog != nil && showStartWalk == false {
-                showStartWalk = true
+            if newValue == false && dogVM.selectedDog != nil {
+                // Do nothing
             }
         }
         .fullScreenCover(isPresented: $showWalkHistoryDetail) {
             if let date = walkHistoryDate {
                 WalkHistoryDetailView(viewModel: WalkHistoryViewModel(selectedDate: date))
-            }
-        }
-        .fullScreenCover(isPresented: $showStartWalk, onDismiss: {
-            // 산책 화면 닫힐 때 강아지 선택 초기화
-            dogVM.selectedDog = nil
-        }) {
-            NavigationStack {
-                StartWalkView()
-                    .environmentObject(dogVM)
             }
         }
         .fullScreenCover(isPresented: $showSelectRoute) {
@@ -170,13 +158,17 @@ struct ButtonArea: View {
     
     var body: some View {
         HStack(spacing: 9) {
-            MainButton(
-                title: "산책 시작",
-                imageName: "start_walk",
-                backgroundColor: Color("main"),
-                foregroundColor: Color("pointwhite"),
-                action: onStartWalk
-            )
+            NavigationLink(destination: StartWalkView().environmentObject(DogViewModel())) {
+                Image(systemName: "figure.walk")
+                    .font(.system(size: 24))
+                    .foregroundColor(.white)
+                    .padding(16)
+                    .background(Circle().fill(Color("main")))
+                    .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 2)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.bottom, 20)
+            
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course",

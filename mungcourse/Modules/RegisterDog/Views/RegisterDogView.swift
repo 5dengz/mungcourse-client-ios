@@ -151,7 +151,7 @@ struct RegisterDogView: View {
 }
 
 // 키보드 해제용 Extension
-private extension UIApplication {
+extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
