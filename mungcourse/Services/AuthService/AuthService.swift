@@ -347,9 +347,11 @@ class AuthService: AuthServiceProtocol {
     
     /// 앱 전체 데이터 초기화 (UserDefaults, Keychain, URLCache, 싱글턴 등)
     private func performFullAppDataReset() {
-        // UserDefaults 전체 삭제
+        // UserDefaults 전체 삭제 (온보딩 데이터 유지)
         if let bundleID = Bundle.main.bundleIdentifier {
+            let hasOnboarded = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
             UserDefaults.standard.removePersistentDomain(forName: bundleID)
+            UserDefaults.standard.set(hasOnboarded, forKey: "hasCompletedOnboarding")
         }
         // Keychain 전체 삭제
         do {

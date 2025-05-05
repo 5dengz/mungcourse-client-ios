@@ -73,7 +73,6 @@ extension View {
     func dogSelectionSheet(isPresented: Binding<Bool>) -> some View {
         self.sheet(isPresented: isPresented) {
             DogSelectionSheet(isPresented: isPresented)
-                .environmentObject(DogViewModel()) // 실제 사용 시 상위에서 주입
         }
     }
 }
