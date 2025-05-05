@@ -4,7 +4,6 @@ struct NearbyTrailsView: View {
     @StateObject private var viewModel = NearbyTrailsViewModel()
     @State private var showNearbyTrailsListView = false
     @State private var selectedPlace: DogPlace? = nil
-    @State private var showDetail = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -41,7 +40,6 @@ struct NearbyTrailsView: View {
                             )
                             .onTapGesture {
                                 selectedPlace = place
-                                showDetail = true
                             }
                         }
                     }
@@ -56,10 +54,8 @@ struct NearbyTrailsView: View {
         .fullScreenCover(isPresented: $showNearbyTrailsListView) {
             NearbyTrailsListView()
         }
-        .fullScreenCover(isPresented: $showDetail) {
-            if let place = selectedPlace {
-                NearbyTrailMapDetailView(place: place)
-            }
+        .fullScreenCover(item: $selectedPlace) { place in
+            NearbyTrailMapDetailView(place: place)
         }
     }
 }

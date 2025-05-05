@@ -18,7 +18,7 @@ struct EmptyRoutineView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 20)
+        .padding(.top, 48)
         .frame(maxWidth: .infinity, alignment: .center)
     }
 } 

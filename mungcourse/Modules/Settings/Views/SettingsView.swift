@@ -16,20 +16,20 @@ struct SettingsView: View {
                 .padding(.horizontal, 12)
 
                 VStack(spacing: 0) {
-                    NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {
-                        HStack {
-                            Text("알림 및 기능")
-                                .font(.custom("Pretendard-Regular", size: 16))
-                                .foregroundColor(.black)
-                            Spacer()
-                            Image("arrow_right")
-                                .renderingMode(.template)
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.horizontal, 16)
-                        .background(Color.white)
-                        .padding(.bottom, 35)
-                    }
+                    //NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {
+                    //    HStack {
+                    //        Text("알림 및 기능")
+                    //            .font(.custom("Pretendard-Regular", size: 16))
+                    //            .foregroundColor(.black)
+                    //        Spacer()
+                    //        Image("arrow_right")
+                    //            .renderingMode(.template)
+                    //            .foregroundColor(.gray)
+                    //    }
+                    //    .padding(.horizontal, 16)
+                    //    .background(Color.white)
+                    //    .padding(.bottom, 35)
+                    //}
                     Button(action: {
                         if let url = URL(string: "https://coral-writer-5f2.notion.site/1e9f1b75a64e80ecb128e4ffb351fdcf?pvs=4") {
                             openURL(url)
@@ -93,6 +93,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .background(Color.white)
                     }
+                }
                 .background(Color(UIColor.systemGroupedBackground))
                 Spacer()
             }
