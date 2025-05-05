@@ -32,12 +32,6 @@ struct OnboardingPageView: View {
             }
             .padding(.horizontal)
             .padding(.bottom, 44) // 인디케이터로부터 44만큼 위에 위치
-            .background(
-                Rectangle()
-                    .fill(Color.white.opacity(0.7))
-                    .cornerRadius(12)
-                    .blur(radius: 3)
-            )
             .padding(.horizontal, 20)
             .frame(maxHeight: .infinity, alignment: .bottom) // 텍스트는 여전히 하단에 위치
         }

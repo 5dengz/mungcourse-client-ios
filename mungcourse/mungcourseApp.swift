@@ -50,9 +50,9 @@ struct mungcourseApp: App {
             forName: .appDataDidReset,
             object: nil,
             queue: .main
-        ) { [weak self] _ in
-            self?.dogVM.reset()
-            self?.forceUpdate.toggle()
+        ) { _ in
+            dogVM.reset()
+            forceUpdate.toggle()
         }
     }
 
