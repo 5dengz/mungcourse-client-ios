@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import NMapsMap
 
 // 산책 데이터 모델 정의
 struct WalkData: Identifiable, Equatable {
@@ -79,10 +80,19 @@ struct WeeklyWalkChartView: View {
     }
 }
 
+// Identifiable을 준수하는 Int 래퍼 구조체
+struct IdentifiableInt: Identifiable {
+    let id: Int
+    
+    init(_ value: Int) {
+        self.id = value
+    }
+}
+
 struct WalkHistoryDetailView: View {
     @ObservedObject var viewModel: WalkHistoryViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedWalkId: Int? = nil
+    @State private var selectedWalkId: IdentifiableInt? = nil
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -143,7 +153,7 @@ struct WalkHistoryDetailView: View {
                             ForEach(viewModel.walkRecords) { record in
                                 WalkRecordCard(record: record)
                                     .onTapGesture {
-                                        selectedWalkId = record.id
+                                        selectedWalkId = IdentifiableInt(record.id)
                                         viewModel.loadWalkDetail(walkId: record.id)
                                     }
                             }
@@ -156,7 +166,7 @@ struct WalkHistoryDetailView: View {
             }
         }
         .navigationBarHidden(true)
-        .sheet(item: $selectedWalkId) { _ in
+        .sheet(item: $selectedWalkId) { walkIdWrapper in
             if let detail = viewModel.selectedWalkDetail {
                 WalkDetailSheet(walkDetail: detail, dismiss: {
                     selectedWalkId = nil
@@ -170,8 +180,8 @@ struct WalkHistoryDetailView: View {
         }
     }
     
-    private var selectedWalkId: Binding<Int?> {
-        Binding<Int?>(
+    private var selectedWalkIdBinding: Binding<IdentifiableInt?> {
+        Binding<IdentifiableInt?>(
             get: { self._selectedWalkId.wrappedValue },
             set: { self._selectedWalkId.wrappedValue = $0 }
         )

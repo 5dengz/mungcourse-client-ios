@@ -58,7 +58,9 @@ struct mungcourseApp: App {
             object: nil,
             queue: .main
         ) { [weak dogVMCopy] _ in
-            dogVMCopy?.reset()
+            Task { @MainActor in
+                dogVMCopy?.reset()
+            }
             // forceUpdate.toggle() 대신 알림 발행
             NotificationCenter.default.post(name: .forceViewUpdate, object: nil)
         }

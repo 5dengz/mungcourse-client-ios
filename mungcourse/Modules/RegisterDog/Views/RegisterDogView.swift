@@ -45,11 +45,21 @@ struct RegisterDogView: View {
             vm.isNeutered = detail.neutered
             vm.hasPatellarLuxationSurgery = detail.hasArthritis
             if let urlString = detail.dogImgUrl,
-               let url = URL(string: urlString),
-               let data = try? Data(contentsOf: url),
-               let uiImage = UIImage(data: data) {
-                vm.profileImage = Image(uiImage: uiImage)
-                vm.selectedImageData = data
+               let url = URL(string: urlString) {
+                // 동기 → 비동기 이미지 로딩
+                Task {
+                    do {
+                        let (data, _) = try await URLSession.shared.data(from: url)
+                        if let uiImage = UIImage(data: data) {
+                            await MainActor.run {
+                                vm.profileImage = Image(uiImage: uiImage)
+                                vm.selectedImageData = data
+                            }
+                        }
+                    } catch {
+                        print("[RegisterDogView] 이미지 비동기 로딩 실패: \(error)")
+                    }
+                }
             }
         }
         _viewModel = StateObject(wrappedValue: vm)
