@@ -30,6 +30,7 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
+            Color("gray100").ignoresSafeArea()
             // 메인 콘텐츠
             VStack {
                 Spacer()
@@ -85,6 +86,7 @@ struct OnboardingView: View {
             }
             .zIndex(100) // z-인덱스를 높여서 항상 최상단에 표시
         }
+        
     }
     
     // 온보딩 완료 처리를 위한 함수

@@ -1,13 +1,18 @@
 import SwiftUI
 import NMapsMap
 
-struct NaverMapView: UIViewRepresentable {
+struct SimpleNaverMapView: UIViewRepresentable {
     var coordinates: [NMGLatLng]
     var boundingBox: NMGLatLngBounds?
     var pathColor: UIColor = .systemBlue
     var pathWidth: CGFloat = 5.0
     
-    // UIView 생성
+    class OverlayHolder {
+        var pathOverlay: NMFPath?
+        var startMarker: NMFMarker?
+        var endMarker: NMFMarker?
+    }
+    
     func makeUIView(context: Context) -> NMFMapView {
         let mapView = NMFMapView()
         mapView.positionMode = .direction
@@ -16,24 +21,34 @@ struct NaverMapView: UIViewRepresentable {
         // UI 설정
         mapView.isRotateGestureEnabled = false // 회전 제스처 비활성화
         mapView.isZoomGestureEnabled = true // 줌 제스처 활성화
-        mapView.isPanGestureEnabled = true // 이동 제스처 활성화
+        mapView.isScrollGestureEnabled = true // Pan 제스처 활성화
+        
+        // 오버레이 추적 객체 저장
+        let holder = OverlayHolder()
+        context.coordinator.overlayHolder = holder
         
         return mapView
     }
     
-    // UIView 업데이트
     func updateUIView(_ mapView: NMFMapView, context: Context) {
-        // 이전에 그린 경로 제거
-        if let overlays = mapView.overlays {
-            for overlay in overlays {
-                overlay.mapView = nil
-            }
+        // 기존 오버레이 제거
+        if let path = context.coordinator.overlayHolder?.pathOverlay {
+            path.mapView = nil
+            context.coordinator.overlayHolder?.pathOverlay = nil
+        }
+        if let start = context.coordinator.overlayHolder?.startMarker {
+            start.mapView = nil
+            context.coordinator.overlayHolder?.startMarker = nil
+        }
+        if let end = context.coordinator.overlayHolder?.endMarker {
+            end.mapView = nil
+            context.coordinator.overlayHolder?.endMarker = nil
         }
         
         // 좌표가 있을 때만 경로 표시
         if !coordinates.isEmpty {
-            drawPath(on: mapView)
-            addMarkers(on: mapView)
+            drawPath(on: mapView, context: context)
+            addMarkers(on: mapView, context: context)
             
             // 경로에 맞게 지도 영역 조정
             if let bounds = boundingBox {
@@ -45,8 +60,16 @@ struct NaverMapView: UIViewRepresentable {
         }
     }
     
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator {
+        var overlayHolder: OverlayHolder?
+    }
+    
     // 경로 그리기
-    private func drawPath(on mapView: NMFMapView) {
+    private func drawPath(on mapView: NMFMapView, context: Context) {
         let path = NMFPath()
         path.path = NMGLineString(points: coordinates)
         path.color = pathColor
@@ -54,14 +77,14 @@ struct NaverMapView: UIViewRepresentable {
         path.outlineColor = UIColor.white.withAlphaComponent(0.5)
         path.outlineWidth = 2
         path.mapView = mapView
+        context.coordinator.overlayHolder?.pathOverlay = path
     }
     
     // 시작점과 종료점 마커 추가
-    private func addMarkers(on mapView: NMFMapView) {
+    private func addMarkers(on mapView: NMFMapView, context: Context) {
         guard let start = coordinates.first, let end = coordinates.last else {
             return
         }
-        
         // 시작 마커
         let startMarker = NMFMarker()
         startMarker.position = start
@@ -70,7 +93,7 @@ struct NaverMapView: UIViewRepresentable {
         startMarker.captionText = "시작"
         startMarker.captionColor = .systemGreen
         startMarker.mapView = mapView
-        
+        context.coordinator.overlayHolder?.startMarker = startMarker
         // 종료 마커 (시작점과 종료점이 다를 경우에만)
         if start.lat != end.lat || start.lng != end.lng {
             let endMarker = NMFMarker()
@@ -80,6 +103,7 @@ struct NaverMapView: UIViewRepresentable {
             endMarker.captionText = "종료"
             endMarker.captionColor = .systemRed
             endMarker.mapView = mapView
+            context.coordinator.overlayHolder?.endMarker = endMarker
         }
     }
 }

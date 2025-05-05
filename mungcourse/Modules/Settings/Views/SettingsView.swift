@@ -93,15 +93,15 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .background(Color.white)
                     }
-                }
                 .background(Color(UIColor.systemGroupedBackground))
                 Spacer()
             }
             .padding(.horizontal, 16)
             .navigationBarHidden(true)
+            }
             .ignoresSafeArea(edges: .bottom)
+        }
     }
-}
 
 #if DEBUG
 struct SettingsView_Previews: PreviewProvider {

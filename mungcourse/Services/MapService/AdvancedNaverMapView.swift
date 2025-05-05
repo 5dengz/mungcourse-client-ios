@@ -2,7 +2,7 @@ import SwiftUI
 import NMapsMap
 import QuartzCore
 
-struct NaverMapView: UIViewRepresentable {
+struct AdvancedNaverMapView: UIViewRepresentable {
     @Binding var centerCoordinate: NMGLatLng
     @Binding var zoomLevel: Double
     @Binding var pathCoordinates: [NMGLatLng]
@@ -155,12 +155,12 @@ struct NaverMapView: UIViewRepresentable {
     }
     
     class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
-        let parent: NaverMapView
+        let parent: AdvancedNaverMapView
         weak var pathOverlay: NMFPath?
         var pawMarker: NMFMarker?
         var effectMarker: NMFMarker?
         
-        init(_ parent: NaverMapView) {
+        init(_ parent: AdvancedNaverMapView) {
             self.parent = parent
         }
         

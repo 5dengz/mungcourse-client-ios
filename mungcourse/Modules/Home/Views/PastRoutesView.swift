@@ -1,8 +1,11 @@
 import SwiftUI
+import NMapsGeometry
 
-struct PastRoutesView: View { // <- 이름 변경
+struct PastRoutesView: View {
+    @StateObject private var viewModel = PastRoutesViewModel()
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) { // 전체 VStack, 정렬 및 간격 설정
+        VStack(alignment: .leading, spacing: 10) {
             // 상단 영역: 제목과 더보기 버튼
             HStack {
                 Text("지난 경로") 
@@ -12,30 +15,146 @@ struct PastRoutesView: View { // <- 이름 변경
                     // TODO: 더보기 액션 구현
                     print("과거 산책 기록 더보기 탭됨")
                 }
-                .font(.custom("Pretendard-Regular", size: 14)) // 더보기 버튼 폰트 크기 조절
+                .font(.custom("Pretendard-Regular", size: 14))
                 .fontWeight(.light)
-                .foregroundColor(.gray800)
+                .foregroundColor(Color("gray800"))
             }
             .padding(.bottom, 5)
 
-            // 콘텐츠 영역 (지도 표시 영역으로 변경)
-            ZStack(alignment: .topLeading) { // 지도 배경과 시간 뷰를 겹치기 위한 ZStack
-                // 지도 API 연동 전 임시 배경 (둥근 모서리 사각형)
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.gray.opacity(0.2)) // 연한 회색 배경
-                    .frame(height: 150) // 임시 높이 설정
-
-                // 왕복 시간 뷰 추가 (임시 데이터)
-                OpeningHoursView(openingHours: "월~금 09:00~18:00")
-                    .padding(8) // 가장자리로부터 여백
+            // 콘텐츠 영역 (지도와 산책 정보)
+            ZStack(alignment: .topLeading) {
+                // 상태에 따른 뷰
+                Group {
+                    if viewModel.isLoading {
+                        loadingView
+                    } else if let errorMessage = viewModel.errorMessage {
+                        errorView(message: errorMessage)
+                    } else if viewModel.recentWalk == nil {
+                        noDataView
+                    } else {
+                        mapContentView
+                    }
+                }
+                .frame(height: 180)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                
+                // 산책 정보 표시 (데이터가 있을 경우만)
+                if let walk = viewModel.recentWalk {
+                    walkInfoView(walk)
+                        .padding(8)
+                }
+            }
+            
+            // 새로고침 버튼
+            Button(action: {
+                viewModel.loadRecentWalk()
+            }) {
+                HStack {
+                    Image(systemName: "arrow.clockwise")
+                    Text("새로 고침")
+                        .font(.custom("Pretendard-Regular", size: 12))
+                }
+                .foregroundColor(Color("gray600"))
+                .padding(.top, 5)
             }
         }
-        //.padding() // 전체 영역 패딩 제거됨
         .cornerRadius(10)
+    }
+    
+    // MARK: - 서브뷰
+    
+    // 로딩 뷰
+    private var loadingView: some View {
+        ZStack {
+            Color("gray200")
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle())
+                .scaleEffect(1.2)
+        }
+    }
+    
+    // 에러 뷰
+    private func errorView(message: String) -> some View {
+        ZStack {
+            Color("gray200")
+            VStack {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 24))
+                    .foregroundColor(.orange)
+                Text("산책 기록을 불러올 수 없습니다")
+                    .font(.custom("Pretendard-Medium", size: 16))
+                    .padding(.top, 4)
+                Text(message)
+                    .font(.custom("Pretendard-Regular", size: 12))
+                    .foregroundColor(Color("gray600"))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+        }
+    }
+    
+    // 데이터 없음 뷰
+    private var noDataView: some View {
+        ZStack {
+            Color("gray200")
+            VStack {
+                Image(systemName: "figure.walk")
+                    .font(.system(size: 24))
+                    .foregroundColor(Color("gray600"))
+                Text("최근 산책 기록이 없습니다")
+                    .font(.custom("Pretendard-Medium", size: 16))
+                    .padding(.top, 4)
+                Text("산책을 시작해보세요!")
+                    .font(.custom("Pretendard-Regular", size: 14))
+                    .foregroundColor(Color("gray600"))
+            }
+        }
+    }
+    
+    // 지도 콘텐츠 뷰
+    private var mapContentView: some View {
+        SimpleNaverMapView(
+            coordinates: viewModel.getNaverMapCoordinates(),
+            boundingBox: viewModel.calculateMapBounds(),
+            pathColor: .systemBlue,
+            pathWidth: 5.0
+        )
+    }
+    
+    // 산책 정보 뷰
+    private func walkInfoView(_ walk: Walk) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(walk.formattedDate)
+                .font(.custom("Pretendard-Medium", size: 12))
+                .foregroundColor(.white)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(Color.black.opacity(0.6))
+                .cornerRadius(4)
+            
+            HStack(spacing: 8) {
+                Label(walk.formattedDistance, systemImage: "figure.walk")
+                    .font(.custom("Pretendard-Regular", size: 12))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 2)
+                    .padding(.horizontal, 6)
+                    .background(Color.blue.opacity(0.7))
+                    .cornerRadius(4)
+                
+                Label(walk.formattedDuration, systemImage: "clock")
+                    .font(.custom("Pretendard-Regular", size: 12))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 2)
+                    .padding(.horizontal, 6)
+                    .background(Color.green.opacity(0.7))
+                    .cornerRadius(4)
+            }
+        }
+        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
     }
 }
 
 #Preview {
-    PastRoutesView() // <- 이름 변경
-        .padding() // 미리보기에서도 패딩 적용
+    PastRoutesView()
+        .padding()
 }

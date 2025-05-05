@@ -17,7 +17,7 @@ struct RouteWalkView: View {
             // 컨텐츠 영역
             VStack(spacing: 0) {
                 // 네이버 지도
-                NaverMapView(
+                AdvancedNaverMapView(
                     centerCoordinate: $viewModel.centerCoordinate,
                     zoomLevel: $viewModel.zoomLevel,
                     pathCoordinates: $viewModel.pathCoordinates,

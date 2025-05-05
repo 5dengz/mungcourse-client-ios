@@ -23,7 +23,7 @@ struct RouteSelectionView: View {
             
             ZStack {
                 // 지도 뷰
-                NaverMapView(
+                AdvancedNaverMapView(
                     centerCoordinate: $viewModel.centerCoordinate,
                     zoomLevel: $viewModel.zoomLevel,
                     pathCoordinates: $viewModel.pathCoordinates,

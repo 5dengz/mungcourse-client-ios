@@ -28,7 +28,7 @@ struct StartWalkView: View {
             VStack(spacing: 0) {
                 // Map View
                 ZStack {
-                    NaverMapView(
+                    AdvancedNaverMapView(
                         centerCoordinate: $viewModel.centerCoordinate,
                         zoomLevel: $viewModel.zoomLevel,
                         pathCoordinates: $viewModel.pathCoordinates,
