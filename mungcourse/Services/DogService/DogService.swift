@@ -400,4 +400,39 @@ class DogService: DogServiceProtocol {
             throw NetworkError.decodingError(error)
         }
     }
+
+    // 강아지 정보 삭제
+    func deleteDog(dogId: Int) async throws {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        // 토큰 추가
+        guard let token = authToken, !token.isEmpty else {
+            print("❌ Error: Auth token is missing for DELETE /v1/dogs/{dogId} request.")
+            throw NetworkError.missingToken
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        print("➡️ Deleting dog: \(endpoint) with token: \(token.prefix(10))")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("❌ Error: Invalid HTTP response received for dog deletion.")
+            throw NetworkError.invalidResponse
+        }
+
+        // 성공 응답 확인 (일반적으로 200 OK 또는 204 No Content)
+        guard (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Error: Dog deletion failed with status: \(httpResponse.statusCode)")
+            if let errorBody = String(data: data, encoding: .utf8), !errorBody.isEmpty {
+                print("   Error body: \(errorBody)")
+            }
+            // 실패 시 구체적인 에러 처리를 위해 data를 전달할 수 있습니다.
+            throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
+        }
+
+        print("✅ Dog with ID \(dogId) deleted successfully.")
+        // 성공 시 별도의 반환값 없음
+    }
 }

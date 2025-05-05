@@ -239,6 +239,46 @@ class RegisterDogViewModel: ObservableObject {
         }
     }
     
+    // MARK: - Delete Dog API
+    func deleteDog(dogId: Int, completion: @escaping (Bool) -> Void) {
+        isLoading = true
+        errorMessage = nil
+
+        Task {
+            do {
+                print("➡️ ViewModel: Calling dogService.deleteDog(dogId: \(dogId))")
+                try await dogService.deleteDog(dogId: dogId)
+                print("✅ ViewModel: Dog deletion successful for ID \(dogId)")
+                await MainActor.run {
+                    isLoading = false
+                    completion(true) // 성공 시 true 반환
+                }
+            } catch {
+                print("❌ ViewModel: Error deleting dog ID \(dogId): \(error.localizedDescription)")
+                // NetworkError를 구체적으로 처리하여 사용자에게 더 나은 메시지 제공 가능
+                let message: String
+                if let networkError = error as? NetworkError {
+                    switch networkError {
+                    case .missingToken:
+                        message = "인증 토큰이 없습니다. 다시 로그인 해주세요."
+                    case .httpError(let statusCode, _):
+                        message = "삭제 중 오류가 발생했습니다 (코드: \(statusCode))."
+                    default:
+                        message = "삭제 중 오류가 발생했습니다: \(error.localizedDescription)"
+                    }
+                } else {
+                    message = "알 수 없는 오류로 삭제에 실패했습니다: \(error.localizedDescription)"
+                }
+                
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = RegisterDogError(message: message)
+                    completion(false) // 실패 시 false 반환
+                }
+            }
+        }
+    }
+    
     // 입력 필드 초기화
     func resetForm() {
         name = ""
@@ -251,139 +291,6 @@ class RegisterDogViewModel: ObservableObject {
         profileImage = nil
         selectedImageData = nil
         errorMessage = nil
-    }
-    
-    // MARK: - Delete Dog API
-    func deleteDog(dogId: Int, completion: @escaping (Bool) -> Void) {
-        isLoading = true
-        errorMessage = nil
-        
-        // 토큰 확인
-        guard let accessToken = TokenManager.shared.getAccessToken() else {
-            let errorResponse = ErrorResponse(
-                statusCode: 401,
-                message: "인증이 필요합니다. 다시 로그인해주세요.",
-                error: "Unauthorized",
-                success: false,
-                timestamp: ""
-            )
-            errorMessage = RegisterDogError(errorResponse: errorResponse)
-            isLoading = false
-            completion(false)
-            return
-        }
-        
-        // 강아지 목록을 가져와서 삭제 가능 여부 확인
-        dogService.fetchDogs()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in  // completion을 result로 변경
-                if case .failure(let error) = result {  // 여기도 수정
-                    print("강아지 목록 조회 실패: \(error)")
-                    self?.isLoading = false
-                    self?.errorMessage = RegisterDogError(message: "강아지 정보를 조회하는 중 오류가 발생했습니다.")
-                    completion(false)  // 이제 외부 클로저를 호출할 수 있음
-                }
-            } receiveValue: { [weak self] dogs in
-                guard let self = self else { return }
-                
-                // 강아지가 한 마리만 있을 경우 삭제 제한
-                if dogs.count <= 1 {
-                    self.isLoading = false
-                    self.errorMessage = RegisterDogError(message: "최소 한 마리 이상의 반려견 정보가 필요합니다.\n다른 반려견을 먼저 등록해주세요.")
-                    completion(false)
-                    return
-                }
-                
-                // 강아지가 두 마리 이상인 경우 삭제 진행
-                self.performDeleteDogAPI(dogId: dogId, accessToken: accessToken, completion: completion)
-            }
-            .store(in: &cancellables)
-    }
-    
-    // 실제 강아지 삭제 API 호출 메서드
-    private func performDeleteDogAPI(dogId: Int, accessToken: String, completion: @escaping (Bool) -> Void) {
-        // API URL 구성
-        guard let url = URL(string: "\(Self.apiBaseURL)/v1/dogs/\(dogId)") else {
-            let errorResponse = ErrorResponse(
-                statusCode: 400,
-                message: "잘못된 요청입니다.",
-                error: "Bad Request",
-                success: false,
-                timestamp: ""
-            )
-            errorMessage = RegisterDogError(errorResponse: errorResponse)
-            isLoading = false
-            completion(false)
-            return
-        }
-        
-        // HTTP 요청 구성
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        
-        // API 요청 실행
-        NetworkManager.shared.performAPIRequest(request) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                
-                // 네트워크 에러 처리
-                if let error = error {
-                    let errorResponse = ErrorResponse(
-                        statusCode: 500,
-                        message: "서버 연결 중 오류가 발생했습니다: \(error.localizedDescription)",
-                        error: "Network Error",
-                        success: false,
-                        timestamp: ""
-                    )
-                    self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
-                    completion(false)
-                    return
-                }
-                
-                // HTTP 응답 확인
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    let errorResponse = ErrorResponse(
-                        statusCode: 500,
-                        message: "서버 응답을 확인할 수 없습니다.",
-                        error: "Unknown Response",
-                        success: false,
-                        timestamp: ""
-                    )
-                    self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
-                    completion(false)
-                    return
-                }
-                
-                // 성공 응답 처리 (2xx)
-                if (200...299).contains(httpResponse.statusCode) {
-                    print("반려견 ID \(dogId) 삭제 성공")
-                    completion(true)
-                    return
-                }
-                
-                // 에러 응답 파싱 및 처리
-                if let data = data {
-                    do {
-                        let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
-                        self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
-                        print("API 에러: \(errorResponse.message)")
-                    } catch {
-                        print("에러 응답 파싱 실패: \(error)")
-                        let errorResponse = ErrorResponse(
-                            statusCode: httpResponse.statusCode,
-                            message: "서버 오류가 발생했습니다.",
-                            error: "Unknown Error",
-                            success: false,
-                            timestamp: ""
-                        )
-                        self?.errorMessage = RegisterDogError(errorResponse: errorResponse)
-                    }
-                }
-                
-                completion(false)
-            }
-        }
     }
     
     // MARK: - Mock API Implementation (for development)

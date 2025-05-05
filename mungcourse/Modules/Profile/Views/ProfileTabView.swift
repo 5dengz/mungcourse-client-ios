@@ -162,11 +162,37 @@ struct ProfileTabView: View {
             // 프로필 편집 (현재 강아지 정보로 초기화)
             if let detail = dogVM.dogDetail {
                 RegisterDogView(initialDetail: detail, onComplete: {
-                    // 완료 후 필요한 작업 (ex: refetch)
+                    // 완료 후 강아지 목록 새로고침 및 메인 강아지 재설정
+                    Task {
+                        await dogVM.fetchDogs()
+                        // 삭제 후 남은 강아지가 있으면 첫 번째 강아지를 메인으로 설정
+                        if let firstDog = dogVM.dogs.first {
+                            await MainActor.run {
+                                dogVM.mainDog = firstDog
+                            }
+                        } else {
+                            // 모든 강아지가 삭제된 경우 (이론상 RegisterDogView에서 막지만 방어 코드)
+                            // 필요하다면 사용자에게 알리거나 다른 처리
+                            print("모든 강아지가 삭제되었습니다.")
+                            await MainActor.run {
+                                dogVM.mainDog = nil
+                            }
+                        }
+                    }
                 }, showBackButton: true)
                     .environmentObject(dogVM)
             } else {
-                RegisterDogView(onComplete: {}, showBackButton: true)
+                RegisterDogView(onComplete: {
+                    // 신규 등록 후에도 목록 새로고침 및 메인 설정 (필요시)
+                    Task {
+                        await dogVM.fetchDogs()
+                        if let firstDog = dogVM.dogs.first, dogVM.mainDog == nil {
+                           await MainActor.run {
+                                dogVM.mainDog = firstDog
+                            }
+                        }
+                    }
+                }, showBackButton: true)
                     .environmentObject(dogVM)
             }
         }

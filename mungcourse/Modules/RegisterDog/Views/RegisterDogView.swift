@@ -7,6 +7,7 @@ import UIKit
 struct RegisterDogView: View {
     var initialDetail: DogRegistrationResponseData?  // 편집용 초기 데이터
     @StateObject private var viewModel: RegisterDogViewModel
+    @EnvironmentObject var dogVM: DogViewModel // DogViewModel 추가
     @Environment(\.dismiss) private var dismiss
     // 완료 후 처리 클로저 (기본 nil)
     var onComplete: (() -> Void)? = nil
@@ -14,6 +15,8 @@ struct RegisterDogView: View {
     var showBackButton: Bool = true
     // 삭제 확인 팝업 표시 상태
     @State private var showDeleteConfirmation = false
+    // 마지막 강아지 삭제 시도 알림 표시 상태
+    @State private var showLastDogAlert = false
     
     // 수정 모드 여부 계산
     private var isEditing: Bool {
@@ -66,7 +69,14 @@ struct RegisterDogView: View {
                     ) {
                         // 수정 모드일 때만 삭제 버튼 표시
                         if isEditing {
-                            Button(action: { showDeleteConfirmation = true }) {
+                            Button(action: { 
+                                // 삭제 전 강아지 수 확인
+                                if dogVM.dogs.count <= 1 {
+                                    showLastDogAlert = true // 마지막 강아지 알림 표시
+                                } else {
+                                    showDeleteConfirmation = true // 삭제 확인 팝업 표시
+                                }
+                            }) {
                                 Text("삭제")
                                     .font(.custom("Pretendard-Regular", size: 16))
                                     .foregroundColor(Color("gray300"))
@@ -126,6 +136,12 @@ struct RegisterDogView: View {
                             showDeleteConfirmation = false
                         }
                     )
+                }
+                // 마지막 강아지 알림 추가
+                .alert("삭제 불가", isPresented: $showLastDogAlert) {
+                    Button("확인") { }
+                } message: {
+                    Text("마지막 남은 반려견 정보는 삭제할 수 없습니다.\n다른 반려견을 먼저 등록해주세요.")
                 }
             }
         }
@@ -188,4 +204,5 @@ struct RegisterDogView: View {
 // MARK: - Preview
 #Preview {
     RegisterDogView()
+        .environmentObject(DogViewModel()) // Preview에 DogViewModel 추가
 }
