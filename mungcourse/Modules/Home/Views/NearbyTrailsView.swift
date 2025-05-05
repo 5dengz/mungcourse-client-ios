@@ -2,6 +2,7 @@ import SwiftUI
 
 struct NearbyTrailsView: View {
     @StateObject private var viewModel = NearbyTrailsViewModel()
+    @State private var showNearbyTrailsListView = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -11,8 +12,7 @@ struct NearbyTrailsView: View {
                     .font(.custom("Pretendard-SemiBold", size: 18))
                 Spacer()
                 Button("더보기") {
-                    // TODO: 더보기 액션 구현
-                    print("주변 산책로 더보기 탭됨")
+                    showNearbyTrailsListView = true
                 }
                 .font(.custom("Pretendard-Regular", size: 14))
                 .foregroundColor(Color("gray800"))
@@ -46,6 +46,9 @@ struct NearbyTrailsView: View {
         .cornerRadius(10)
         .onAppear {
             viewModel.fetchNearbyDogPlaces()
+        }
+        .fullScreenCover(isPresented: $showNearbyTrailsListView) {
+            NearbyTrailsListView()
         }
     }
 }

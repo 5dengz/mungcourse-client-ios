@@ -63,8 +63,8 @@ struct TrailItemView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .frame(width: 210, height: 66)
+            .background(Color.white) // 정보영역에만 배경 적용
         }
-        .background(Color.white)
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
