@@ -9,6 +9,7 @@ class RouteWalkViewModel: ObservableObject {
     @Published var zoomLevel: Double = 15.0
     @Published var pathCoordinates: [NMGLatLng]
     @Published var userLocation: NMGLatLng?
+    @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역(흡연구역) 좌표 배열
     
     // 산책 상태 관련
     @Published var isWalking: Bool = false
@@ -285,4 +286,4 @@ class RouteWalkViewModel: ObservableObject {
         stopTimer()
         cancellables.forEach { $0.cancel() }
     }
-} 
+}

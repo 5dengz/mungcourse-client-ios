@@ -24,6 +24,7 @@ struct RouteSelectionView: View {
             ZStack {
                 // 지도 뷰
                 AdvancedNaverMapView(
+                    dangerCoordinates: $viewModel.dangerCoordinates,
                     centerCoordinate: $viewModel.centerCoordinate,
                     zoomLevel: $viewModel.zoomLevel,
                     pathCoordinates: $viewModel.pathCoordinates,
@@ -198,4 +199,4 @@ struct RouteOptionCard: View {
         onBack: {},
         onSelectRoute: { _ in }
     )
-} 
+}

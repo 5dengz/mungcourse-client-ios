@@ -18,6 +18,7 @@ struct RouteWalkView: View {
             VStack(spacing: 0) {
                 // 네이버 지도
                 AdvancedNaverMapView(
+                    dangerCoordinates: $viewModel.dangerCoordinates,
                     centerCoordinate: $viewModel.centerCoordinate,
                     zoomLevel: $viewModel.zoomLevel,
                     pathCoordinates: $viewModel.pathCoordinates,
@@ -142,4 +143,4 @@ struct RouteWalkView: View {
     return NavigationStack {
         RouteWalkView(route: dummyRoute)
     }
-} 
+}

@@ -13,6 +13,7 @@ class RouteSelectionViewModel: ObservableObject {
     @Published var zoomLevel: Double = 14.0
     @Published var pathCoordinates: [NMGLatLng] = []
     @Published var userLocation: NMGLatLng?
+    @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역(흡연구역) 좌표 배열
     
     private var startLocation: CLLocationCoordinate2D
     private var waypoints: [DogPlace]
@@ -267,4 +268,4 @@ class RouteSelectionViewModel: ObservableObject {
             zoomLevel = 15.0
         }
     }
-} 
+}
