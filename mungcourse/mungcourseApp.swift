@@ -9,6 +9,12 @@ import SwiftUI
 import NMapsMap // 네이버 지도 SDK 임포트 (SwiftData 제거)
 import GoogleSignIn
 
+// 알림 이름 확장
+extension Notification.Name {
+    static let appDataDidReset = Notification.Name("appDataDidReset") // 기존 알림명이 상수로 선언되지 않았다면 추가
+    static let forceViewUpdate = Notification.Name("forceViewUpdate") // 새로운 알림 이름 추가
+}
+
 @main
 struct mungcourseApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
@@ -46,13 +52,15 @@ struct mungcourseApp: App {
             print("[DEBUG] UserDefaults 변경 감지: hasCompletedOnboarding =", UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"))
         }
         // 앱 데이터 리셋(로그아웃/탈퇴) 시 싱글턴/뷰모델 초기화
+        let dogVMCopy = dogVM // 로컬 상수에 저장
         NotificationCenter.default.addObserver(
             forName: .appDataDidReset,
             object: nil,
             queue: .main
-        ) { _ in
-            dogVM.reset()
-            forceUpdate.toggle()
+        ) { [weak dogVMCopy] _ in
+            dogVMCopy?.reset()
+            // forceUpdate.toggle() 대신 알림 발행
+            NotificationCenter.default.post(name: .forceViewUpdate, object: nil)
         }
     }
 
@@ -86,6 +94,10 @@ struct mungcourseApp: App {
                 }
             }
             .id(forceUpdate) // 상태가 변경될 때마다 View를 강제로 다시 그림
+            // forceViewUpdate 알림을 감지하여 forceUpdate 상태 변경
+            .onReceive(NotificationCenter.default.publisher(for: .forceViewUpdate)) { _ in
+                forceUpdate.toggle()
+            }
         }
     }
 }

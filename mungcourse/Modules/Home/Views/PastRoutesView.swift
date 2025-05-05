@@ -26,7 +26,7 @@ struct PastRoutesView: View { // <- 이름 변경
                     .frame(height: 150) // 임시 높이 설정
 
                 // 왕복 시간 뷰 추가 (임시 데이터)
-                RoundTripTimeView(timeString: "약 1시간 5분")
+                OpeningHoursView(openingHours: "월~금 09:00~18:00")
                     .padding(8) // 가장자리로부터 여백
             }
         }

@@ -33,9 +33,8 @@ struct TrailItemView: View {
                 }
 
                 // 왕복 시간 뷰 복원
-                if !roundTripTime.isEmpty { // 시간이 비어있지 않을 때만 표시
-                    RoundTripTimeView(timeString: roundTripTime)
-                        .padding(8)
+                if !roundTripTime.isEmpty {
+                    OpeningHoursView(openingHours: roundTripTime)
                 }
             }
 

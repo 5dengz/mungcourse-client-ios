@@ -15,7 +15,9 @@ class DogViewModel: ObservableObject {
     init() {
         fetchDogs()
         NotificationCenter.default.addObserver(forName: .appDataDidReset, object: nil, queue: .main) { [weak self] _ in
-            self?.reset()
+            Task { @MainActor in
+                self?.reset()
+            }
         }
     }
 
@@ -75,7 +77,3 @@ class DogViewModel: ObservableObject {
         walkRecords = []
     }
 }
-
-extension Notification.Name {
-    static let appDataDidReset = Notification.Name("appDataDidReset")
-} 
