@@ -34,11 +34,11 @@ struct TrailItemView: View {
                         Color.gray.opacity(0.3)
                     }
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 210, height: 146)
+                    .frame(width: infoWidth, height: infoWidth * 146 / 210)
                 } else {
                     Rectangle()
                         .fill(Color("gray300"))
-                        .frame(width: 210, height: 146)
+                        .frame(width: infoWidth, height: infoWidth * 146 / 210)
                         .overlay(
                             Image(systemName: "photo")
                                 .foregroundColor(Color("gray500"))

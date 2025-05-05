@@ -3,6 +3,8 @@ import SwiftUI
 struct NearbyTrailsView: View {
     @StateObject private var viewModel = NearbyTrailsViewModel()
     @State private var showNearbyTrailsListView = false
+    @State private var selectedPlace: DogPlace? = nil
+    @State private var showDetail = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -37,6 +39,10 @@ struct NearbyTrailsView: View {
                                 roundTripTime: place.openingHours ?? "",
                                 category: place.category
                             )
+                            .onTapGesture {
+                                selectedPlace = place
+                                showDetail = true
+                            }
                         }
                     }
                     .padding(.vertical, 5)
@@ -49,6 +55,11 @@ struct NearbyTrailsView: View {
         }
         .fullScreenCover(isPresented: $showNearbyTrailsListView) {
             NearbyTrailsListView()
+        }
+        .fullScreenCover(isPresented: $showDetail) {
+            if let place = selectedPlace {
+                NearbyTrailMapDetailView(place: place)
+            }
         }
     }
 }

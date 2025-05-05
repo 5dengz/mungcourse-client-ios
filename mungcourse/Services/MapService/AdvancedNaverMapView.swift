@@ -53,7 +53,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         for coord in dangerCoordinates {
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
-            marker.width = 32
+            marker.width = 25
             marker.height = 32
             marker.zIndex = 100
             marker.mapView = mapView.mapView
