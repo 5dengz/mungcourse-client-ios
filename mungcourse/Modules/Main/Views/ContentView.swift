@@ -58,8 +58,8 @@ struct ContentView: View {
                     HomeView(
                         selectedTab: $selectedTab,
                         showingDogSelection: $showingDogSelection,
-                        dogName: $dogVM.selectedDogName,
-                        availableDogs: dogVM.dogNames,
+                        selectedDog: $dogVM.selectedDog,
+                        dogs: dogVM.dogs,
                         isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
                         onSelectCourse: {
                             showSelectWaypoint = true
@@ -69,8 +69,8 @@ struct ContentView: View {
                     HomeView(
                         selectedTab: $selectedTab,
                         showingDogSelection: $showingDogSelection,
-                        dogName: $dogVM.selectedDogName,
-                        availableDogs: dogVM.dogNames,
+                        selectedDog: $dogVM.selectedDog,
+                        dogs: dogVM.dogs,
                         isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
                         onSelectCourse: {
                             showSelectWaypoint = true
@@ -177,6 +177,6 @@ struct ContentView: View {
                     .environmentObject(dogVM)
             }
         }
-        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogVM.selectedDogName, dogs: dogVM.dogNames)
+        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogVM.selectedDog, dogs: dogVM.dogs)
     }
 }

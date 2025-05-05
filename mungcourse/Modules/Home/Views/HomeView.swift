@@ -3,8 +3,8 @@ import SwiftUI
 struct HomeView: View {
     @Binding var selectedTab: ContentView.Tab
     @Binding var showingDogSelection: Bool
-    @Binding var dogName: String
-    let availableDogs: [String]
+    @Binding var selectedDog: Dog?
+    let dogs: [Dog]
     @Binding var isStartWalkOverlayPresented: Bool
     var onSelectCourse: () -> Void
 
@@ -14,8 +14,8 @@ struct HomeView: View {
                 ProfileArea(
                     selectedTab: $selectedTab,
                     showingDogSelection: $showingDogSelection,
-                    dogName: $dogName,
-                    availableDogs: availableDogs
+                    selectedDog: $selectedDog,
+                    dogs: dogs
                 )
                 ButtonArea(
                     isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
@@ -30,15 +30,15 @@ struct HomeView: View {
             .padding(.top, 20)
         }
         .navigationTitle("홈")
-        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $dogName, dogs: availableDogs)
+        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $selectedDog, dogs: dogs)
     }
 }
 
 struct ProfileArea: View {
     @Binding var selectedTab: ContentView.Tab
     @Binding var showingDogSelection: Bool
-    @Binding var dogName: String
-    let availableDogs: [String]
+    @Binding var selectedDog: Dog?
+    let dogs: [Dog]
 
     var body: some View {
         HStack(alignment: .top, spacing: 15) {
@@ -52,7 +52,7 @@ struct ProfileArea: View {
                         print("강아지 이름 변경 버튼 탭됨.")
                     }) {
                         HStack(spacing: 4) {
-                            Text(dogName)
+                            Text(selectedDog?.name ?? "")
                                 .font(.custom("Pretendard-SemiBold", size: 24))
                                 .foregroundColor(Color("AccentColor"))
                             Image("arrow_down")

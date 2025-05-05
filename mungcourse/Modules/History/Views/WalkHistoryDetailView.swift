@@ -95,78 +95,96 @@ struct WalkHistoryDetailView: View {
     ]
     
     var body: some View {
-        ScrollView {
+        ZStack(alignment: .top) {
+            // 배경색을 상단 SafeArea까지 확장
+            Color.white
+                .ignoresSafeArea()
+            
             VStack(spacing: 0) {
-                // 헤더 - 타이틀 문자열 미리 계산
-                let headerTitle = "\(formatDate(date: date)) 산책 기록"
-                CommonHeaderView(
-                    leftIcon: "arrow_back",
-                    leftAction: { dismiss() },
-                    title: headerTitle
-                )
-                .font(.custom("Pretendard-SemiBold", size: 18))
-                .background(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                
-                // 산책 정보
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("선택하신 날짜의 산책 기록입니다.")
-                        .font(.custom("Pretendard-Regular", size: 16))
-                        .padding(.top, 30)
+                // 자체 구현 헤더 (흰색 배경과 하단 그림자 적용)
+                ZStack {
+                    Text("\(formatDate(date: date)) 산책 기록")
+                        .font(.custom("Pretendard-SemiBold", size: 20))
+                        .foregroundColor(Color("gray900"))
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
                     
-                    // 산책 정보 카드 (거리, 시간, 칼로리)
-                    HStack(spacing: 12) {
-                        InfoCard(title: "산책 거리", value: "2.5 km", iconName: "location")
-                        InfoCard(title: "산책 시간", value: "45 분", iconName: "clock")
-                        InfoCard(title: "소모 칼로리", value: "150 kcal", iconName: "flame.fill")
+                    // 뒤로 가기 버튼
+                    HStack {
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Image(systemName: "arrow.left")
+                                .font(.system(size: 20))
+                                .foregroundColor(Color("gray900"))
+                        }
+                        Spacer()
                     }
-                    .padding(.top, 10)
-                    
-                    // 주간 산책 거리 차트 섹션 - 별도 뷰로 분리
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("주간 산책 기록")
-                            .font(.custom("Pretendard-SemiBold", size: 18))
-                            .foregroundColor(Color("gray900"))
-                        
-                        // 분리된 차트 컴포넌트 사용
-                        WeeklyWalkChartView(walkData: weeklyWalkData)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
-                    )
-                    .padding(.top, 25)
-                    
-                    // 산책 경로 지도 섹션
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("산책 경로")
-                            .font(.custom("Pretendard-SemiBold", size: 18))
-                            .foregroundColor(Color("gray900"))
-                        
-                        // 산책 경로 지도가 표시될 영역 (임시)
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color("gray300"))
-                            .frame(height: 250)
-                            .overlay(
-                                Text("산책 경로 지도")
-                                    .foregroundColor(Color("gray600"))
-                            )
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
-                    )
-                    .padding(.top, 16)
+                    .padding(.leading, 20)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 30)
+                .frame(height: 85)
+                .background(Color.white) // 명시적으로 흰색 배경 지정
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("선택하신 날짜의 산책 기록입니다.")
+                            .font(.custom("Pretendard-Regular", size: 16))
+                            .padding(.top, 30)
+                        
+                        // 산책 정보 카드 (거리, 시간, 칼로리)
+                        HStack(spacing: 12) {
+                            InfoCard(title: "산책 거리", value: "2.5 km", iconName: "location")
+                            InfoCard(title: "산책 시간", value: "45 분", iconName: "clock")
+                            InfoCard(title: "소모 칼로리", value: "150 kcal", iconName: "flame.fill")
+                        }
+                        .padding(.top, 10)
+                        
+                        // 주간 산책 거리 차트 섹션 - 별도 뷰로 분리
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("주간 산책 기록")
+                                .font(.custom("Pretendard-SemiBold", size: 18))
+                                .foregroundColor(Color("gray900"))
+                            
+                            // 분리된 차트 컴포넌트 사용
+                            WeeklyWalkChartView(walkData: weeklyWalkData)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+                        )
+                        .padding(.top, 25)
+                        
+                        // 산책 경로 지도 섹션
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("산책 경로")
+                                .font(.custom("Pretendard-SemiBold", size: 18))
+                                .foregroundColor(Color("gray900"))
+                            
+                            // 산책 경로 지도가 표시될 영역 (임시)
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color("gray300"))
+                                .frame(height: 250)
+                                .overlay(
+                                    Text("산책 경로 지도")
+                                        .foregroundColor(Color("gray600"))
+                                )
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+                        )
+                        .padding(.top, 16)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 30)
+                }
             }
         }
-        .background(Color.white)
         .navigationBarHidden(true)
     }
     

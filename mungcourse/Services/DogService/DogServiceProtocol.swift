@@ -78,4 +78,6 @@ protocol DogServiceProtocol {
     func fetchDogDetail(dogId: Int) async throws -> DogRegistrationResponseData
     // GET /v1/dogs/{dogId}/walks 강아지 산책 기록 조회
     func fetchWalkRecords(dogId: Int) async throws -> [WalkRecordData]
+    // 강아지 정보 수정
+    func updateDog(dogId: Int, dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
 }
