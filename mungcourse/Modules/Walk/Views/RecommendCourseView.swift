@@ -91,16 +91,21 @@ struct RecommendCourseView: View {
                     }
                     .padding(.horizontal, 20)
                     
-                    CommonFilledButton(
-                        title: "이 코스로 산책하기",
-                        action: {
-                            if let route = viewModel.recommendedRoute {
-                                selectedRoute = route
-                                showRouteWalk = true
-                            }
-                        },
-                        backgroundColor: Color("main")
-                    )
+                    NavigationLink(
+                        destination: RoutePreviewView(
+                            coordinates: viewModel.recommendedRoute?.coordinates ?? [],
+                            distance: viewModel.recommendedRoute?.totalDistance ?? 0,
+                            estimatedTime: viewModel.recommendedRoute?.estimatedTime ?? 0,
+                            waypoints: waypoints
+                        ),
+                        isActive: $showStartWalk
+                    ) {
+                        CommonFilledButton(
+                            title: "이 코스로 산책하기",
+                            action: { showStartWalk = true },
+                            backgroundColor: Color("main")
+                        )
+                    }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
                 } else {
@@ -113,7 +118,7 @@ struct RecommendCourseView: View {
                     HStack(spacing: 12) {
                         CommonFilledButton(
                             title: "코스 추천 받기",
-                            action: { viewModel.requestRecommendation() },
+                            action: { viewModel.requestRecommendation(waypoints: waypoints) },
                             backgroundColor: Color("main")
                         )
                         NavigationLink(destination: StartWalkView().environmentObject(dogVM)) {
@@ -198,40 +203,66 @@ class RecommendCourseViewModel: ObservableObject {
     }
     
     // 코스 추천 요청
-    func requestRecommendation() {
+    func requestRecommendation(waypoints: [DogPlace]) {
         guard let userLocation = userLocation else {
             showAlert(title: "위치 오류", message: "현재 위치를 가져올 수 없습니다. 위치 서비스가 활성화되어 있는지 확인해주세요.")
             return
         }
-        
         isLoading = true
-        
-        // API 호출 시뮬레이션 (실제로는 서버에 요청)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            guard let self = self else { return }
-            
-            // 임시 경로 생성 (실제로는 API 응답에서 받은 경로)
-            let coordinates = self.generateRandomPath(around: userLocation, pointCount: 8, radiusKm: 0.5)
-            self.pathCoordinates = coordinates
-            
-            // 추천 경로 생성
-            let totalDistance = self.calculateTotalDistance(coordinates)
-            let estimatedTime = self.calculateEstimatedTime(totalDistance)
-            
-            self.recommendedRoute = RouteOption(
-                type: .recommended,
-                totalDistance: totalDistance,
-                estimatedTime: estimatedTime,
-                waypoints: [],
-                coordinates: coordinates
-            )
-            
-            self.hasRecommendation = true
-            self.isLoading = false
-            
-            // 지도 중심과 줌 레벨 조정
-            self.adjustMapView(for: coordinates)
+        let urlString = "\(Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? "")/v1/walks/recommend"
+        guard let url = URL(string: urlString) else {
+            showAlert(title: "URL 오류", message: "API URL이 잘못되었습니다.")
+            isLoading = false
+            return
         }
+        let dogPlaceIds = waypoints.map { $0.id }
+        let body: [String: Any] = [
+            "currentLat": userLocation.lat,
+            "currentLng": userLocation.lng,
+            "dogPlaceIds": dogPlaceIds
+        ]
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.isLoading = false
+                if let error = error {
+                    self.showAlert(title: "네트워크 오류", message: error.localizedDescription)
+                    return
+                }
+                guard let data = data else {
+                    self.showAlert(title: "데이터 오류", message: "서버 응답이 없습니다.")
+                    return
+                }
+                do {
+                    // 서버에서 coordinates: [[Double]] (lat, lng), totalDistance, estimatedTime 반환한다고 가정
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let coordsArr = json["coordinates"] as? [[Double]],
+                       let totalDistance = json["totalDistance"] as? Double,
+                       let estimatedTime = json["estimatedTime"] as? Int {
+                        let coordinates = coordsArr.map { NMGLatLng(lat: $0[0], lng: $0[1]) }
+                        self.pathCoordinates = coordinates
+                        self.recommendedRoute = RouteOption(
+                            type: .recommended,
+                            totalDistance: totalDistance,
+                            estimatedTime: estimatedTime,
+                            waypoints: waypoints,
+                            coordinates: coordinates
+                        )
+                        self.hasRecommendation = true
+                        self.adjustMapView(for: coordinates)
+                    } else {
+                        self.showAlert(title: "파싱 오류", message: "추천 경로 데이터를 읽을 수 없습니다.")
+                    }
+                } catch {
+                    self.showAlert(title: "파싱 오류", message: error.localizedDescription)
+                }
+            }
+        }.resume()
+    }
     }
     
     // 추천 결과 초기화

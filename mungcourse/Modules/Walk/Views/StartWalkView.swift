@@ -4,16 +4,22 @@ import NMapsMap
 import Foundation
 
 struct StartWalkView: View {
+    let routeOption: RouteOption?
     @StateObject private var viewModel = StartWalkViewModel()
+
     @Environment(\.dismiss) private var dismiss
     @State private var showCompleteAlert = false
-    @State private var showCompleteView = false // WalkComplete 화면 표시 상태
     @State private var completedSession: WalkSession? = nil
+    @State private var isCompleteActive = false // WalkCompleteView로 이동 네비게이션링크 State
     @State private var effectScale: CGFloat = 0.5
     @State private var effectOpacity: Double = 1.0
     @EnvironmentObject var dogVM: DogViewModel // 강아지 뷰모델 주입
+    @State private var didInitRoute: Bool = false
     
     var body: some View {
+        // 추천 경로가 있으면 초기화
+        useRouteOptionIfNeeded()
+
         ZStack(alignment: .bottom) {
             // Debug: view appear
             Color.clear
@@ -29,7 +35,8 @@ struct StartWalkView: View {
                 // Map View
                 ZStack {
                     AdvancedNaverMapView(
-    dangerCoordinates: $viewModel.smokingZones,
+                        dangerCoordinates: $viewModel.smokingZones,
+                        dogPlaceCoordinates: viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
                         centerCoordinate: $viewModel.centerCoordinate,
                         zoomLevel: $viewModel.zoomLevel,
                         pathCoordinates: $viewModel.pathCoordinates,
@@ -66,19 +73,17 @@ struct StartWalkView: View {
                     print("[디버그] WalkControllerView onEnd pressed")
                     completedSession = viewModel.endWalk()
                     if let session = completedSession {
-                        // 선택된 강아지 ID 가져오기
-                        let dogIds = dogVM.selectedDog != nil ? [dogVM.selectedDog!.id] : []
-                        
-                        // API 업로드 및 WalkCompleteView로 이동
-                        viewModel.uploadWalkSession(session, dogIds: dogIds) { success in
-                            if success {
-                                print("✅ 산책 데이터 업로드 성공")
-                                // 산책 완료 화면으로 이동
-                                showCompleteView = true
-                            } else {
-                                print("❌ 산책 데이터 업로드 실패")
-                                // 실패 시에도 일단 산책 완료 화면으로 이동
-                                showCompleteView = true
+                        // 메인 강아지 id 자동 fetch
+                        fetchMainDogId { mainDogId in
+                            let dogIds = mainDogId != nil ? [mainDogId!] : []
+                            viewModel.uploadWalkSession(session, dogIds: dogIds) { success in
+                                if success {
+                                    print("✅ 산책 데이터 업로드 성공")
+                                    isCompleteActive = true
+                                } else {
+                                    print("❌ 산책 데이터 업로드 실패")
+                                    isCompleteActive = true
+                                }
                             }
                         }
                     }
@@ -91,20 +96,26 @@ struct StartWalkView: View {
             WalkHeaderView(onBack: { dismiss() }),
             alignment: .top
         )
-        // 산책 완료 화면 표시
-        .fullScreenCover(isPresented: $showCompleteView) {
-            if let session = completedSession {
-                let walkData = WalkSessionData(
-                    distance: session.distance,
-                    duration: Int(session.duration),
-                    date: session.endTime,
-                    coordinates: session.path
-                )
-                NavigationStack {
+        // 산책 완료 화면 네비게이션
+        NavigationLink(
+            destination: {
+                if let session = completedSession {
+                    let walkData = WalkSessionData(
+                        distance: session.distance,
+                        duration: Int(session.duration),
+                        date: session.endTime,
+                        coordinates: session.path
+                    )
                     WalkCompleteView(walkData: walkData)
+                } else {
+                    EmptyView()
                 }
-            }
+            }(),
+            isActive: $isCompleteActive
+        ) {
+            EmptyView()
         }
+        .hidden()
         .alert("위치 권한 필요", isPresented: $viewModel.showPermissionAlert) {
             Button("설정으로 이동") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {

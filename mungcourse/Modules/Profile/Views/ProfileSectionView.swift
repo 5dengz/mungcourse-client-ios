@@ -17,14 +17,12 @@ struct ProfileSectionView: View {
                 }
                 .frame(width: 127, height: 127)
                 .clipShape(Circle())
-                .onTapGesture { onTapImage?() }
             } else {
                 Image("profile_empty")
                     .resizable()
                     .scaledToFill()
                     .frame(width: 127, height: 127)
                     .clipShape(Circle())
-                    .onTapGesture { onTapImage?() }
             }
             Spacer().frame(height: 16)
             Text(nickname ?? "강아지 이름")

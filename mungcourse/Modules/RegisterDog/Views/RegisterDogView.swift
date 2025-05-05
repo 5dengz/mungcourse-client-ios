@@ -137,6 +137,16 @@ struct RegisterDogView: View {
         if isEditing, let id = initialDetail?.id {
             print("[RegisterDogView] 디버그: 수정 모드, updateDog 호출 id=\(id)")
             viewModel.updateDog(dogId: id)
+        } else if isEditing {
+            print("[RegisterDogView] 에러: 수정 모드인데 ID가 없음")
+            // ID가 없는 경우에도 로그만 남기고 수정 로직 실행 (예외 처리)
+            if let dogId = dogVM.mainDog?.id {
+                print("[RegisterDogView] 대체 ID 사용: \(dogId)")
+                viewModel.updateDog(dogId: dogId)
+            } else {
+                print("[RegisterDogView] 메인 반려견 ID도 없어 신규 등록으로 처리")
+                viewModel.registerDog()
+            }
         } else {
             print("[RegisterDogView] 디버그: 신규 등록 모드, registerDog 호출")
             viewModel.registerDog()

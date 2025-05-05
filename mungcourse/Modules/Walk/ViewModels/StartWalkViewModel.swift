@@ -5,6 +5,7 @@ import Combine
 
 class StartWalkViewModel: ObservableObject {
     @Published var smokingZones: [NMGLatLng] = []
+    @Published var dogPlaces: [DogPlace] = [] // 2km 반경 장소
     // Map state
     @Published var centerCoordinate: NMGLatLng
     @Published var zoomLevel: Double = 16.0
@@ -91,9 +92,10 @@ class StartWalkViewModel: ObservableObject {
     }
     
     func startWalk() {
-        // 산책 시작 위치 기준 흡연구역 조회
+        // 산책 시작 위치 기준 흡연구역/장소 조회
         if let startLocation = userLocation {
             fetchSmokingZones(center: startLocation)
+            fetchDogPlaces(center: startLocation)
         }
 
         print("[StartWalkViewModel] startWalk() 호출")
@@ -144,6 +146,52 @@ class StartWalkViewModel: ObservableObject {
     
     // MARK: - 흡연구역 조회 (2km 반경)
     func fetchSmokingZones(center: NMGLatLng) {
+        let urlString = "\(Self.apiBaseURL)/v1/walks/smokingzone?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
+        guard let url = URL(string: urlString) else { return }
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self, let data = data, error == nil else { return }
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Double]]
+                let zones = json?.compactMap { dict -> NMGLatLng? in
+                    guard let lat = dict["lat"], let lng = dict["lng"] else { return nil }
+                    return NMGLatLng(lat: lat, lng: lng)
+                } ?? []
+                DispatchQueue.main.async {
+                    self.smokingZones = zones
+                }
+            } catch {
+                print("흡연구역 파싱 실패: \(error)")
+            }
+        }.resume()
+    }
+
+    // MARK: - 2km 반경 dogPlaces 조회
+    func fetchDogPlaces(center: NMGLatLng) {
+        let urlString = "\(Self.apiBaseURL)/v1/dogPlaces?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
+        guard let url = URL(string: urlString) else { return }
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self, let data = data, error == nil else { return }
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]]
+                let places = json?.compactMap { dict -> DogPlace? in
+                    guard let id = dict["id"] as? Int,
+                          let name = dict["name"] as? String,
+                          let lat = dict["lat"] as? Double,
+                          let lng = dict["lng"] as? Double else { return nil }
+                    let distance = dict["distance"] as? Int ?? 0
+                    let category = dict["category"] as? String ?? ""
+                    let openingHours = dict["openingHours"] as? String ?? ""
+                    let imgUrl = dict["dogPlaceImgUrl"] as? String
+                    return DogPlace(id: id, name: name, dogPlaceImgUrl: imgUrl, distance: distance, category: category, openingHours: openingHours, lat: lat, lng: lng)
+                } ?? []
+                DispatchQueue.main.async {
+                    self.dogPlaces = places
+                }
+            } catch {
+                print("dogPlaces 파싱 실패: \(error)")
+            }
+        }.resume()
+    }
         let urlString = "\(Self.apiBaseURL)/v1/walks/smokingzone?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
         guard let url = URL(string: urlString) else { return }
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in

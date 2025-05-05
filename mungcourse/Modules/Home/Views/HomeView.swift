@@ -153,19 +153,32 @@ struct ProfileArea: View {
 }
 
 struct ButtonArea: View {
-    var onStartWalk: () -> Void
+    @EnvironmentObject var dogVM: DogViewModel
+    @State private var isStartWalkActive = false
     var onSelectRoute: () -> Void
-    
+
     var body: some View {
         HStack(spacing: 9) {
-            MainButton(
-                title: "산책 시작",
-                imageName: "start_walk",
-                backgroundColor: Color("main"),
-                foregroundColor: Color("pointwhite"),
-                action: onStartWalk
-            )
-            
+            NavigationLink(
+                destination: StartWalkView().environmentObject(dogVM),
+                isActive: $isStartWalkActive
+            ) {
+                MainButton(
+                    title: "산책 시작",
+                    imageName: "start_walk",
+                    backgroundColor: Color("main"),
+                    foregroundColor: Color("pointwhite"),
+                    action: {
+                        if dogVM.selectedDog == nil {
+                            // 강아지 선택 시트 띄우는 로직 필요시 여기에 추가
+                        } else {
+                            isStartWalkActive = true
+                        }
+                    }
+                )
+            }
+            .buttonStyle(.plain)
+
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course",

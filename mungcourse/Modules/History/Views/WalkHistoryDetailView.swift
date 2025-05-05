@@ -93,6 +93,33 @@ struct WalkHistoryDetailView: View {
     @ObservedObject var viewModel: WalkHistoryViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var selectedWalkId: IdentifiableInt? = nil
+
+    // 하루 총합 산책 통계 계산
+    private var totalDistance: String {
+        let sum = viewModel.walkRecords.reduce(0.0) { $0 + $1.distanceKm }
+        return String(format: "%.2f", sum)
+    }
+    private var totalDuration: String {
+        let totalSec = viewModel.walkRecords.reduce(0) { $0 + $1.durationSec }
+        let h = totalSec / 3600
+        let m = (totalSec % 3600) / 60
+        return String(format: "%02d:%02d", h, m)
+    }
+    private var totalCalories: String {
+        let sum = viewModel.walkRecords.reduce(0) { $0 + $1.calories }
+        return String(sum)
+    }
+    // 시간대별 산책 분 계산 (0~23시)
+    private var hourlyMinutes: [Int] {
+        var arr = Array(repeating: 0, count: 24)
+        for record in viewModel.walkRecords {
+            if let date = ISO8601DateFormatter().date(from: record.startedAt),
+               let hour = Calendar.current.dateComponents([.hour], from: date).hour {
+                arr[hour] += record.durationSec / 60
+            }
+        }
+        return arr
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -139,7 +166,6 @@ struct WalkHistoryDetailView: View {
                                 .font(.system(size: 50))
                                 .foregroundColor(Color("gray300"))
                                 .padding(.top, 50)
-                            
                             Text("산책 기록이 없습니다")
                                 .font(.custom("Pretendard-Regular", size: 18))
                                 .foregroundColor(Color("gray500"))
@@ -147,16 +173,55 @@ struct WalkHistoryDetailView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.top, 100)
                     } else {
-                        // 산책 기록 목록 표시
-                        VStack(alignment: .leading, spacing: 16) {
-                            // 산책 목록 표시
-                            ForEach(viewModel.walkRecords) { record in
-                                WalkRecordCard(record: record)
-                                    .onTapGesture {
-                                        selectedWalkId = IdentifiableInt(record.id)
-                                        viewModel.loadWalkDetail(walkId: record.id)
-                                    }
+                        VStack(alignment: .leading, spacing: 32) {
+                            // 하루 총 산책 섹션
+                            Text("하루 총 산책")
+                                .font(.custom("Pretendard-SemiBold", size: 18))
+                                .foregroundColor(Color("gray900"))
+                                .padding(.top, 8)
+                                .padding(.leading, 2)
+
+                            // 하루 총합 통계 바
+                            WalkStatsBar(
+                                distance: totalDistance,
+                                duration: totalDuration,
+                                calories: totalCalories,
+                                isActive: true
+                            )
+
+                            // 시간대별 산책 분 그래프
+                            WalkTimeChartView(hourlyMinutes: hourlyMinutes)
+                                .frame(height: 180)
+                                .padding(.top, 8)
+
+                            // 산책 요약 섹션
+                            Text("산책 요약")
+                                .font(.custom("Pretendard-SemiBold", size: 18))
+                                .foregroundColor(Color("gray900"))
+                                .padding(.top, 16)
+                                .padding(.leading, 2)
+
+                            VStack(spacing: 20) {
+                                ForEach(viewModel.walkRecords) { record in
+                                    WalkRouteSummaryView(
+                                        coordinates: record.gpsData.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                                        distance: String(format: "%.2f", record.distanceKm),
+                                        duration: record.formattedDuration,
+                                        calories: String(record.calories),
+                                        isLoading: false,
+                                        errorMessage: nil,
+                                        emptyMessage: "저장된 경로 정보가 없습니다",
+                                        boundingBox: nil,
+                                        mapHeight: 180
+                                    )
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(Color.white)
+                                            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+                                    )
+                                }
                             }
+                            .padding(.top, 4)
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 20)
@@ -333,6 +398,37 @@ struct InfoCard: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
         )
+    }
+}
+
+// 시간대별 산책 분 그래프 뷰
+struct WalkTimeChartView: View {
+    let hourlyMinutes: [Int] // 0~23시, 각 시간대별 산책 분
+    var body: some View {
+        Chart {
+            ForEach(0..<hourlyMinutes.count, id: \.self) { hour in
+                BarMark(
+                    x: .value("시간", hour),
+                    y: .value("산책 분", hourlyMinutes[hour])
+                )
+                .foregroundStyle(Color("main"))
+            }
+        }
+        .chartXAxis {
+            AxisMarks(values: .stride(by: 2)) { value in
+                AxisValueLabel {
+                    if let hour = value.as(Int.self) {
+                        Text(String(format: "%02d시", hour))
+                            .font(.system(size: 10))
+                    }
+                }
+            }
+        }
+        .chartYAxis {
+            AxisMarks() { value in
+                AxisValueLabel()
+            }
+        }
     }
 }
 

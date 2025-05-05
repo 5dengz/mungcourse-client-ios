@@ -4,7 +4,9 @@ import QuartzCore
 
 struct AdvancedNaverMapView: UIViewRepresentable {
     @Binding var dangerCoordinates: [NMGLatLng]
+    var dogPlaceCoordinates: [NMGLatLng] = []
     private var dangerMarkers: [NMFMarker] = []
+    private var dogPlaceMarkers: [NMFMarker] = []
     @Binding var centerCoordinate: NMGLatLng
     @Binding var zoomLevel: Double
     @Binding var pathCoordinates: [NMGLatLng]
@@ -18,6 +20,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     
     // 명시적인 public initializer 추가
     init(dangerCoordinates: Binding<[NMGLatLng]>,
+         dogPlaceCoordinates: [NMGLatLng] = [],
          centerCoordinate: Binding<NMGLatLng>,
          zoomLevel: Binding<Double>,
          pathCoordinates: Binding<[NMGLatLng]>,
@@ -27,6 +30,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
          showUserLocation: Bool = true,
          trackingMode: NMFMyPositionMode = .direction) {
         self._dangerCoordinates = dangerCoordinates
+        self.dogPlaceCoordinates = dogPlaceCoordinates
         self._centerCoordinate = centerCoordinate
         self._zoomLevel = zoomLevel
         self._pathCoordinates = pathCoordinates
@@ -58,6 +62,16 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             marker.zIndex = 100
             marker.mapView = mapView.mapView
             context.coordinator.dangerMarkers.append(marker)
+        }
+        // dogPlaces 마커 표시
+        for coord in dogPlaceCoordinates {
+            let marker = NMFMarker(position: coord)
+            marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
+            marker.width = 31
+            marker.height = 39
+            marker.zIndex = 99
+            marker.mapView = mapView.mapView
+            context.coordinator.dogPlaceMarkers.append(marker)
         }
         
         // 현위치 버튼 위치 조정(상단 우측, 여백 80, 16)
@@ -165,6 +179,31 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             marker.mapView = nil
         }
         context.coordinator.dangerMarkers.removeAll()
+        // 기존 dogPlaces 마커 제거
+        for marker in context.coordinator.dogPlaceMarkers {
+            marker.mapView = nil
+        }
+        context.coordinator.dogPlaceMarkers.removeAll()
+        // danger 마커 다시 추가
+        for coord in parent.dangerCoordinates {
+            let marker = NMFMarker(position: coord)
+            marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
+            marker.width = 25
+            marker.height = 32
+            marker.zIndex = 100
+            marker.mapView = mapView.mapView
+            context.coordinator.dangerMarkers.append(marker)
+        }
+        // dogPlaces 마커 다시 추가
+        for coord in parent.dogPlaceCoordinates {
+            let marker = NMFMarker(position: coord)
+            marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
+            marker.width = 31
+            marker.height = 39
+            marker.zIndex = 99
+            marker.mapView = mapView.mapView
+            context.coordinator.dogPlaceMarkers.append(marker)
+        }
         // dangerCoordinates 기준 danger 마커 다시 추가
         for coord in dangerCoordinates {
             let marker = NMFMarker(position: coord)
@@ -209,6 +248,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     
     class Coordinator: NSObject, NMFMapViewTouchDelegate, NMFMapViewCameraDelegate {
         var dangerMarkers: [NMFMarker] = []
+        var dogPlaceMarkers: [NMFMarker] = []
         let parent: AdvancedNaverMapView
         weak var pathOverlay: NMFPath?
         var pawMarker: NMFMarker?

@@ -59,6 +59,7 @@ struct WalkRecord: Codable, Identifiable {
     let endedAt: String
     let routeRating: Double?
     let dogIds: [Int]
+    let gpsData: [GpsPoint]
     
     // 날짜 및 시간 표시용 계산 속성
     var formattedStartTime: String {

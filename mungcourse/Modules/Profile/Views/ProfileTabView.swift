@@ -154,8 +154,7 @@ struct ProfileTabView: View {
                             }
                             showEditDog = true
                         }
-                    },
-                    onTapImage: { showSelectDog = true }
+                    }
                 )
                 .padding(.bottom, 24)
                 // 탭 선택자

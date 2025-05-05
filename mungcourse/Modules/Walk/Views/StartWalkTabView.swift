@@ -17,7 +17,7 @@ struct StartWalkTabView: View {
                 
                 NavigationLink(destination: StartWalkView().environmentObject(dogVM)) {
                     HStack {
-                        Text("산책 바로 시작")
+                        Text("산책 시작")
                             .font(.custom("Pretendard-SemiBold", size: 18))
                             .foregroundColor(Color("main"))
                             .frame(maxWidth: .infinity)
@@ -33,7 +33,7 @@ struct StartWalkTabView: View {
                 .padding(.horizontal, 29)
                 
                 CommonFilledButton(
-                    title: "코스 추천",
+                    title: "코스 선택",
                     action: {
                         onRecommendCourse()
                     },
