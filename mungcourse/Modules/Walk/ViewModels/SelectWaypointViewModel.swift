@@ -71,6 +71,8 @@ class SelectWaypointViewModel: ObservableObject {
         searchText = ""
         dogPlaces = []
         errorMessage = nil
+        // 검색 초기화 시 선택 상태도 초기화
+        selectedPlaceIds.removeAll()
     }
     
     func toggleSelection(for placeId: Int) {
@@ -103,4 +105,4 @@ class SelectWaypointViewModel: ObservableObject {
         // 기본 좌표 (서울 시청)
         return CLLocationCoordinate2D(latitude: 37.5666103, longitude: 126.9783882)
     }
-} 
+}
