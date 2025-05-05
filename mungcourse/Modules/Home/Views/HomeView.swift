@@ -85,11 +85,28 @@ struct ProfileArea: View {
             Button(action: {
                 selectedTab = .profile
             }) {
-                Image("profile_empty")
-                    .resizable()
-                    .scaledToFit()
+                if let urlString = selectedDog?.dogImgUrl, let url = URL(string: urlString), !urlString.isEmpty {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFill()
+                        case .failure(_):
+                            Image("profile_empty").resizable().scaledToFill()
+                        case .empty:
+                            ProgressView()
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
                     .frame(width: 60, height: 60)
-                    .foregroundColor(.gray)
+                    .clipShape(Circle())
+                } else {
+                    Image("profile_empty")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(Circle())
+                }
             }
         }
         .padding(.vertical)

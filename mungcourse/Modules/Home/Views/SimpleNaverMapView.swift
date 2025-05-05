@@ -18,6 +18,9 @@ struct SimpleNaverMapView: UIViewRepresentable {
         mapView.positionMode = .direction
         mapView.zoomLevel = 15 // 초기 줌 레벨
         
+        // 현재 위치 표시 제거
+        mapView.locationOverlay.hidden = true
+        
         // 네이버 로고 숨기기
         mapView.logoAlign = .leftTop
         mapView.logoMargin = UIEdgeInsets(top: -100, left: -100, bottom: 0, right: 0)
