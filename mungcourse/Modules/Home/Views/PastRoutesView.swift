@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import NMapsGeometry
 
 struct PastRoutesView: View {
@@ -97,7 +98,7 @@ struct PastRoutesView: View {
         SimpleNaverMapView(
             coordinates: viewModel.getNaverMapCoordinates(),
             boundingBox: viewModel.calculateMapBounds(),
-            pathColor: Color("main"),
+            pathColor: UIColor(named: "main")!,
             pathWidth: 5.0
         )
     }

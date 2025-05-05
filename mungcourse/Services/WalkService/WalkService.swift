@@ -155,4 +155,80 @@ class WalkService {
         }
         .eraseToAnyPublisher()
     }
+    
+    // MARK: - History 관련 API
+    
+    // 특정 연도와 월의 산책 날짜 조회 (달력 표시용)
+    func fetchWalkDates(year: Int, month: Int) -> AnyPublisher<[WalkDateResponse], Error> {
+        let yearMonth = String(format: "%04d-%02d", year, month)
+        guard let url = URL(string: "\(baseURL)/v1/walks/calender?yearAndMonth=\(yearMonth)") else {
+            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        return NetworkManager.shared.requestWithTokenPublisher(request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode) else {
+                    throw URLError(.badServerResponse)
+                }
+                return data
+            }
+            .decode(type: WalkDatesResponse.self, decoder: JSONDecoder())
+            .map { $0.data ?? [] }
+            .eraseToAnyPublisher()
+    }
+    
+    // 특정 날짜의 산책 기록 목록 조회
+    func fetchWalkRecords(date: Date) -> AnyPublisher<[WalkRecord], Error> {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let dateString = dateFormatter.string(from: date)
+        
+        guard let url = URL(string: "\(baseURL)/v1/walks?date=\(dateString)") else {
+            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        return NetworkManager.shared.requestWithTokenPublisher(request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode) else {
+                    throw URLError(.badServerResponse)
+                }
+                return data
+            }
+            .decode(type: WalkRecordsResponse.self, decoder: JSONDecoder())
+            .map { $0.data ?? [] }
+            .eraseToAnyPublisher()
+    }
+    
+    // 산책 기록 상세 조회
+    func fetchWalkDetail(walkId: Int) -> AnyPublisher<WalkDetail, Error> {
+        guard let url = URL(string: "\(baseURL)/v1/walks/\(walkId)") else {
+            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        return NetworkManager.shared.requestWithTokenPublisher(request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode) else {
+                    throw URLError(.badServerResponse)
+                }
+                return data
+            }
+            .decode(type: WalkDetailResponse.self, decoder: JSONDecoder())
+            .compactMap { $0.data }
+            .eraseToAnyPublisher()
+    }
 }
