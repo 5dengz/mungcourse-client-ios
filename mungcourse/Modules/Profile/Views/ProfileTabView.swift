@@ -165,8 +165,13 @@ struct ProfileTabView: View {
                 ProfileInfoSectionView(selectedTab: selectedTab)
                 Spacer()
             }
-            // 삭제 확인 팝업
-            if showDeleteConfirmation {
+        }
+        // mainDog 변경 시 뷰 리셋
+        .id(dogVM.mainDog?.id)
+        // 삭제 확인 풀스크린 커버 (TabBar까지 dim 처리)
+        .fullScreenCover(isPresented: $showDeleteConfirmation) {
+            ZStack {
+                Color.black.opacity(0.4).ignoresSafeArea()
                 CommonPopupModal(
                     title: "반려견 정보 삭제",
                     message: "정보 삭제 시 반려견 정보 및 산책 기록은 모두 삭제되어 복구할 수 없습니다.\n\n정말 삭제하시겠어요?",
@@ -186,6 +191,15 @@ struct ProfileTabView: View {
         } message: {
             Text("유일한 프로필은 삭제할 수 없습니다.")
         }
+        .onChange(of: dogVM.mainDog) { oldValue, newMain in
+            print("[ProfileTabView] mainDog changed: \(oldValue?.id ?? -1) -> \(newMain?.id ?? -1)")
+            if let id = newMain?.id {
+                Task {
+                    await dogVM.fetchDogDetail(id)
+                    await dogVM.fetchWalkRecords(id)
+                }
+            }
+        }
         .onAppear {
             viewModel.fetchUserInfo()
             Task {
@@ -196,19 +210,6 @@ struct ProfileTabView: View {
                 }
             }
         }
-        // 메인 반려견이 변경될 때마다 상세 정보 및 산책 기록 재요청
-        .onChange(of: dogVM.mainDog) { oldValue, newMain in
-            if let id = newMain?.id {
-                Task {
-                    await dogVM.fetchDogDetail(id)
-                    await dogVM.fetchWalkRecords(id)
-                }
-            }
-        }
-        // 설정 화면
-        .fullScreenCover(isPresented: $showSettings) {
-            SettingsView()
-        }
         // 반려견 추가 화면
         .fullScreenCover(isPresented: $showAddDog) {
             RegisterDogView(onComplete: {
@@ -218,16 +219,12 @@ struct ProfileTabView: View {
         }
         // 반려견 편집 화면
         .fullScreenCover(isPresented: $showEditDog) {
-            if let detail = dogVM.dogDetail {
-                RegisterDogView(initialDetail: detail, onComplete: {
-                    dogVM.fetchDogs()
-                }, showBackButton: true)
-                .environmentObject(dogVM)
-            } else {
-                ProgressView()
-            }
+            RegisterDogView(initialDetail: dogVM.dogDetail, onComplete: {
+                dogVM.fetchDogs()
+            }, showBackButton: true)
+            .environmentObject(dogVM)
         }
-        // 반려견 선택 화면
+        // 프로필 사진 탭 시 강아지 선택 화면
         .fullScreenCover(isPresented: $showSelectDog) {
             DogSelectionView(
                 showHeader: false,
@@ -235,7 +232,11 @@ struct ProfileTabView: View {
                 showCompleteButton: false,
                 immediateSelection: true
             )
-                .environmentObject(dogVM)
+            .environmentObject(dogVM)
+        }
+        // 설정 화면
+        .fullScreenCover(isPresented: $showSettings) {
+            SettingsView()
         }
     }
     

@@ -2,14 +2,41 @@ import SwiftUI
 import NMapsMap
 import Combine
 
+// AI 추천 경로 API 응답 모델
+struct RecommendRouteResponse: Codable {
+    let timestamp: String
+    let statusCode: Int
+    let message: String
+    let data: [RecommendRouteData]
+    let success: Bool
+}
+
+struct RecommendRouteData: Codable {
+    let route: [GPSCoordinate]
+    let routeLength: Double
+    enum CodingKeys: String, CodingKey {
+        case route
+        case routeLength = "route_length"
+    }
+}
+
 struct RecommendCourseView: View {
     let onBack: () -> Void
+    let startLocation: NMGLatLng
+    let waypoints: [DogPlace]
     @EnvironmentObject var dogVM: DogViewModel
     @State private var showStartWalk = false
-    @StateObject private var viewModel = RecommendCourseViewModel()
+    @StateObject private var viewModel: RecommendCourseViewModel
     @State private var showRouteWalk = false
     @State private var selectedRoute: RouteOption? = nil
-    
+
+    init(onBack: @escaping () -> Void, startLocation: NMGLatLng, waypoints: [DogPlace]) {
+        self.onBack = onBack
+        self.startLocation = startLocation
+        self.waypoints = waypoints
+        self._viewModel = StateObject(wrappedValue: RecommendCourseViewModel(startLocation: startLocation, waypoints: waypoints))
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // 헤더
@@ -116,9 +143,10 @@ struct RecommendCourseView: View {
                         )
                         MainButton(
                             title: "자유 산책",
-                            action: { showStartWalk = true },
+                            imageName: "start_walk",
                             backgroundColor: Color("pointwhite"),
-                            foregroundColor: Color("main")
+                            foregroundColor: Color("main"),
+                            action: { showStartWalk = true }
                         )
                     }
                     .padding(.horizontal, 20)
@@ -131,10 +159,6 @@ struct RecommendCourseView: View {
             .frame(height: viewModel.hasRecommendation ? 190 : 180)
         }
         .navigationBarHidden(true)
-        .onAppear {
-            // 위치 업데이트 시작
-            viewModel.startUpdatingLocation()
-        }
         .fullScreenCover(isPresented: $showRouteWalk) {
             if let route = selectedRoute {
                 NavigationStack {
@@ -161,73 +185,87 @@ struct RecommendCourseView: View {
 // RecommendCourseViewModel
 class RecommendCourseViewModel: ObservableObject {
     @Published var isLoading = false
-    @Published var centerCoordinate = NMGLatLng(lat: 37.5666, lng: 126.9780) // 기본 서울 좌표
+    @Published var centerCoordinate: NMGLatLng
+    @Published var userLocation: NMGLatLng?  // 사용자의 현위치 표시용
     @Published var zoomLevel: Double = 15.0
-    @Published var userLocation: NMGLatLng? = nil
     @Published var pathCoordinates: [NMGLatLng] = []
     @Published var hasRecommendation = false
     @Published var recommendedRoute: RouteOption? = nil
     @Published var dangerCoordinates: [NMGLatLng] = [] // 위험 지역(흡연구역) 좌표 추가
+    
+    // 요청 파라미터
+    private let startLocation: NMGLatLng
+    private let waypoints: [DogPlace]
     
     // 알림 상태
     @Published var showAlert = false
     @Published var alertTitle = ""
     @Published var alertMessage = ""
     
-    private var cancellables = Set<AnyCancellable>()
-    
-    // 위치 업데이트 시작
-    func startUpdatingLocation() {
-        GlobalLocationManager.shared.startUpdatingLocation()
-        GlobalLocationManager.shared.$lastLocation
-            .compactMap { $0 }
-            .sink { [weak self] location in
-                guard let self = self else { return }
-                let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
-                self.userLocation = coord
-                
-                // 초기에는 사용자 위치로 지도 중심 이동
-                if self.centerCoordinate.lat == 37.5666 && self.centerCoordinate.lng == 126.9780 {
-                    self.centerCoordinate = coord
-                }
-            }
-            .store(in: &cancellables)
+    // 초기화
+    init(startLocation: NMGLatLng, waypoints: [DogPlace]) {
+        self.startLocation = startLocation
+        self.waypoints = waypoints
+        // 초기 중심 좌표 및 사용자 위치 설정
+        self.centerCoordinate = startLocation
+        self.userLocation = startLocation
     }
     
-    // 코스 추천 요청
+    // 코스 추천 요청 (서버 API 호출)
     func requestRecommendation() {
-        guard let userLocation = userLocation else {
-            showAlert(title: "위치 오류", message: "현재 위치를 가져올 수 없습니다. 위치 서비스가 활성화되어 있는지 확인해주세요.")
+        isLoading = true
+        let lat = startLocation.lat
+        let lng = startLocation.lng
+        let placeIds = waypoints.map { $0.id }
+        let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+        guard let url = URL(string: "\(apiBaseURL)/v1/walks/recommend") else {
+            displayAlert(title: "오류", message: "URL 생성 실패")
+            isLoading = false
             return
         }
-        
-        isLoading = true
-        
-        // API 호출 시뮬레이션 (실제로는 서버에 요청)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            guard let self = self else { return }
-            
-            // 임시 경로 생성 (실제로는 API 응답에서 받은 경로)
-            let coordinates = self.generateRandomPath(around: userLocation, pointCount: 8, radiusKm: 0.5)
-            self.pathCoordinates = coordinates
-            
-            // 추천 경로 생성
-            let totalDistance = self.calculateTotalDistance(coordinates)
-            let estimatedTime = self.calculateEstimatedTime(totalDistance)
-            
-            self.recommendedRoute = RouteOption(
-                type: .recommended,
-                totalDistance: totalDistance,
-                estimatedTime: estimatedTime,
-                waypoints: [],
-                coordinates: coordinates
-            )
-            
-            self.hasRecommendation = true
-            self.isLoading = false
-            
-            // 지도 중심과 줌 레벨 조정
-            self.adjustMapView(for: coordinates)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = ["currentLat": lat, "currentLng": lng, "dogPlaceIds": placeIds]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            displayAlert(title: "오류", message: "요청 바디 생성 실패")
+            isLoading = false
+            return
+        }
+        NetworkManager.shared.performAPIRequest(request) { data, response, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if let error = error {
+                    self.displayAlert(title: "오류", message: error.localizedDescription)
+                    return
+                }
+                guard let data = data,
+                      let http = response as? HTTPURLResponse,
+                      (200...299).contains(http.statusCode) else {
+                    self.displayAlert(title: "오류", message: "서버 오류")
+                    return
+                }
+                do {
+                    let recommendResponse = try JSONDecoder().decode(RecommendRouteResponse.self, from: data)
+                    guard let routeData = recommendResponse.data.first else {
+                        self.displayAlert(title: "알림", message: "추천 경로가 없습니다.")
+                        return
+                    }
+                    let coords = routeData.route.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
+                    self.pathCoordinates = coords
+                    let distance = routeData.routeLength
+                    self.recommendedRoute = RouteOption(type: .recommended,
+                                                         totalDistance: distance,
+                                                         estimatedTime: 0,
+                                                         waypoints: self.waypoints,
+                                                         coordinates: coords)
+                    self.hasRecommendation = true
+                } catch {
+                    self.displayAlert(title: "파싱 오류", message: error.localizedDescription)
+                }
+            }
         }
     }
     
@@ -238,116 +276,23 @@ class RecommendCourseViewModel: ObservableObject {
         recommendedRoute = nil
     }
     
-    // 형식화된 거리
+    // 거리 표시 포맷
     var formattedDistance: String {
         guard let route = recommendedRoute else { return "0.0 km" }
-        return String(format: "%.1f km", route.totalDistance / 1000.0)
-    }
-    
-    // 형식화된 시간
-    var formattedTime: String {
-        guard let route = recommendedRoute else { return "0분" }
-        let minutes = route.estimatedTime
-        if minutes < 60 {
-            return "\(minutes)분"
+        if route.totalDistance < 1000 {
+            return String(format: "%d m", Int(route.totalDistance))
         } else {
-            let hours = minutes / 60
-            let mins = minutes % 60
-            return "\(hours)시간 \(mins)분"
+            return String(format: "%.1f km", route.totalDistance / 1000)
         }
     }
     
-    // 임의의 경로 생성 (테스트용)
-    private func generateRandomPath(around center: NMGLatLng, pointCount: Int, radiusKm: Double) -> [NMGLatLng] {
-        var path: [NMGLatLng] = [center]
-        
-        for _ in 1..<pointCount {
-            // 이전 포인트를 기준으로 랜덤한 방향으로 이동
-            let lastPoint = path.last!
-            
-            // 랜덤한 방향 (0-359도)
-            let angle = Double.random(in: 0..<360) * .pi / 180
-            
-            // 최대 반경 내에서 랜덤한 거리
-            let distance = Double.random(in: 0.05...0.1) * radiusKm
-            
-            // 지구 반경 (km)
-            let earthRadius = 6371.0
-            
-            // 위도/경도 변화량 계산
-            let latChange = distance / earthRadius * (.pi / 180) * cos(angle)
-            let lngChange = distance / earthRadius * (.pi / 180) * sin(angle) / cos(lastPoint.lat * .pi / 180)
-            
-            let newLat = lastPoint.lat + latChange * 180 / .pi
-            let newLng = lastPoint.lng + lngChange * 180 / .pi
-            
-            path.append(NMGLatLng(lat: newLat, lng: newLng))
-        }
-        
-        // 마지막에 시작점으로 돌아오는 경로 추가 (원형 경로)
-        path.append(center)
-        
-        return path
+    // 시간 표시 포맷
+    var formattedTime: String {
+        return "\(recommendedRoute?.estimatedTime ?? 0)분"
     }
     
-    // 총 거리 계산 (미터 단위)
-    private func calculateTotalDistance(_ coordinates: [NMGLatLng]) -> Double {
-        var totalDistance = 0.0
-        
-        for i in 0..<coordinates.count-1 {
-            let point1 = coordinates[i]
-            let point2 = coordinates[i+1]
-            
-            // 하버사인 공식을 사용하여 두 지점 간 거리 계산
-            let lat1 = point1.lat * .pi / 180
-            let lat2 = point2.lat * .pi / 180
-            let dLat = lat2 - lat1
-            let dLon = (point2.lng - point1.lng) * .pi / 180
-            
-            let a = pow(sin(dLat/2), 2) + cos(lat1) * cos(lat2) * pow(sin(dLon/2), 2)
-            let c = 2 * atan2(sqrt(a), sqrt(1-a))
-            
-            // 지구 반경 (미터)
-            let earthRadius = 6371000.0
-            let distance = earthRadius * c
-            
-            totalDistance += distance
-        }
-        
-        return totalDistance
-    }
-    
-    // 예상 시간 계산 (분 단위, 평균 속도 4km/h 가정)
-    private func calculateEstimatedTime(_ distanceInMeters: Double) -> Int {
-        // 분당 약 67미터 (4km/h)
-        let metersPerMinute = 4000.0 / 60.0
-        let minutes = Int(distanceInMeters / metersPerMinute)
-        return max(1, minutes)
-    }
-    
-    // 지도 뷰 조정
-    private func adjustMapView(for coordinates: [NMGLatLng]) {
-        // 경로의 중심점 계산
-        var sumLat = 0.0
-        var sumLng = 0.0
-        
-        for coord in coordinates {
-            sumLat += coord.lat
-            sumLng += coord.lng
-        }
-        
-        centerCoordinate = NMGLatLng(
-            lat: sumLat / Double(coordinates.count),
-            lng: sumLng / Double(coordinates.count)
-        )
-        
-        // 경로에 맞게 줌 레벨 조정
-        // (실제 구현에서는 경로의 경계 상자를 계산하여 최적의 줌 레벨 설정)
-        zoomLevel = 15.0
-    }
-    
-    // 알림 표시
-    private func showAlert(title: String, message: String) {
+    // Helper to display alerts
+    private func displayAlert(title: String, message: String) {
         alertTitle = title
         alertMessage = message
         showAlert = true
@@ -355,5 +300,5 @@ class RecommendCourseViewModel: ObservableObject {
 }
 
 #Preview {
-    RecommendCourseView(onBack: {})
+    RecommendCourseView(onBack: {}, startLocation: NMGLatLng(lat: 37.5666, lng: 126.9780), waypoints: [])
 }

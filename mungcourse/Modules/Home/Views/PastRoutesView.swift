@@ -48,12 +48,27 @@ struct PastRoutesView: View {
         }
         .cornerRadius(10)
     }
-    // startedAt(String) -> Date 변환 함수
+    // startedAt(String) -> Date 변환 함수 (ISO8601 및 기본 형식 처리)
     private static func parseDate(from startedAt: String) -> Date? {
+        // ISO8601 형식(소수 초 포함) 파싱 시도
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = isoFormatter.date(from: startedAt) {
+            return date
+        }
+        // 기본 형식(초 단위) 파싱
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         formatter.locale = Locale(identifier: "ko_KR")
-        return formatter.date(from: startedAt)
+        if let date = formatter.date(from: startedAt) {
+            return date
+        }
+        // 마지막 대안: ISO8601DateFormatter 기본 옵션
+        let fallbackFormatter = ISO8601DateFormatter()
+        if let date = fallbackFormatter.date(from: startedAt) {
+            return date
+        }
+        return nil
     }
 }
 

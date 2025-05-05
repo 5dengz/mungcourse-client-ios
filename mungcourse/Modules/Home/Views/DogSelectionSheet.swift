@@ -49,7 +49,9 @@ struct DogSelectionSheet: View {
                                 .foregroundColor(dogVM.selectedDog?.id == dog.id ? Color("main") : .black)
                         }
                         .onTapGesture {
-                            dogVM.selectedDog = dog
+                            // 메인 반려견을 선택하고 상세 정보 및 기록을 불러옵니다.
+                            dogVM.selectDog(dog)
+                            dogVM.mainDog(dog)
                             isPresented = false
                         }
                     }

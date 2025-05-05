@@ -1,7 +1,45 @@
 import SwiftUI
 
+// 개인 정보 사용 동의 화면
+struct PrivacyConsentView: View {
+    @AppStorage("hasAgreedPrivacy") private var hasAgreedPrivacy: Bool = false
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("개인 정보 사용 동의")
+                .font(.title)
+                .fontWeight(.bold)
+                .padding(.top, 50)
+
+            ScrollView {
+                Text(
+                    "앱 사용을 위해 다음 개인 정보를 수집 및 사용합니다:\n\n" +
+                    "- 위치 정보: 산책 경로 추천 및 기록\n" +
+                    "- 카메라 및 사진: 프로필 등록 및 공유\n" +
+                    "- 알림: 산책 리마인더 및 알림"
+                )
+                .font(.body)
+                .multilineTextAlignment(.leading)
+                .padding()
+            }
+
+            Spacer()
+
+            CommonFilledButton(
+                title: "동의하고 시작하기",
+                action: {
+                    hasAgreedPrivacy = true
+                }
+            )
+            .padding(.horizontal, 30)
+            .padding(.bottom, 30)
+        }
+        .background(Color("gray100").ignoresSafeArea())
+    }
+}
+
 struct OnboardingView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("hasAgreedPrivacy") private var hasAgreedPrivacy: Bool = false
     @State private var currentPage = 0
     
     // 온보딩 페이지 데이터
@@ -29,64 +67,69 @@ struct OnboardingView: View {
     ]
     
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            Color("gray100").ignoresSafeArea()
-            // 메인 콘텐츠
-            VStack {
-                Spacer()
-                
-                // 페이지 컨텐츠
-                TabView(selection: $currentPage) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        OnboardingPageView(
-                            mainTitle: pages[index].mainTitle,
-                            subTitle: pages[index].subTitle,
-                            imageName: pages[index].imageName
-                        )
-                        .tag(index)
-                    }
-                }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .animation(.easeInOut, value: currentPage)
-                
-                // 페이지 인디케이터
-                HStack(spacing: 8) {
-                    ForEach(0..<pages.count, id: \.self) { index in
-                        Circle()
-                            .fill(currentPage == index ? Color.main : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                .padding(10)
-                
-                // 다음 버튼
-                CommonFilledButton(
-                    title: currentPage < pages.count - 1 ? "다음" : "시작하기",
-                    action: {
-                        if currentPage < pages.count - 1 {
-                            currentPage += 1
-                        } else {
-                            completeOnboarding()
+        Group {
+            if hasAgreedPrivacy {
+                ZStack(alignment: .topTrailing) {
+                    Color("gray100").ignoresSafeArea()
+                    // 메인 콘텐츠
+                    VStack {
+                        Spacer()
+                        
+                        // 페이지 컨텐츠
+                        TabView(selection: $currentPage) {
+                            ForEach(0..<pages.count, id: \.self) { index in
+                                OnboardingPageView(
+                                    mainTitle: pages[index].mainTitle,
+                                    subTitle: pages[index].subTitle,
+                                    imageName: pages[index].imageName
+                                )
+                                .tag(index)
+                            }
                         }
+                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                        .animation(.easeInOut, value: currentPage)
+                        
+                        // 페이지 인디케이터
+                        HStack(spacing: 8) {
+                            ForEach(0..<pages.count, id: \.self) { index in
+                                Circle()
+                                    .fill(currentPage == index ? Color.main : Color.gray.opacity(0.3))
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
+                        .padding(10)
+                        
+                        // 다음 버튼
+                        CommonFilledButton(
+                            title: currentPage < pages.count - 1 ? "다음" : "시작하기",
+                            action: {
+                                if currentPage < pages.count - 1 {
+                                    currentPage += 1
+                                } else {
+                                    completeOnboarding()
+                                }
+                            }
+                        )
+                        .padding(.horizontal, 30)
+                        .padding(.bottom, 30)
                     }
-                )
-                .padding(.horizontal, 30)
-                .padding(.bottom, 30)
+                    
+                    // 건너뛰기 버튼 - 최상위 레이어로 설정
+                    Button(action: {
+                        completeOnboarding()
+                    }) {
+                        Text("건너뛰기")
+                            .font(.custom("Pretendard-SemiBold", size: 15))
+                            .foregroundColor(Color.gray600)
+                            .padding(.top, 30)
+                            .padding(.trailing, 30)
+                    }
+                    .zIndex(100) // z-인덱스를 높여서 항상 최상단에 표시
+                }
+            } else {
+                PrivacyConsentView()
             }
-            
-            // 건너뛰기 버튼 - 최상위 레이어로 설정
-            Button(action: {
-                completeOnboarding()
-            }) {
-                Text("건너뛰기")
-                    .font(.custom("Pretendard-SemiBold", size: 15))
-                    .foregroundColor(Color.gray600)
-                    .padding(.top, 30)
-                    .padding(.trailing, 30)
-            }
-            .zIndex(100) // z-인덱스를 높여서 항상 최상단에 표시
         }
-        
     }
     
     // 온보딩 완료 처리를 위한 함수

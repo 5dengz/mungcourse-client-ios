@@ -1,4 +1,5 @@
 import SwiftUI
+import NMapsMap
 
 struct SelectWaypointView: View {
     let onBack: () -> Void
@@ -87,10 +88,12 @@ struct SelectWaypointView: View {
         }
         .fullScreenCover(isPresented: $showRecommendFlow) {
             if let currentLocation = viewModel.getCurrentLocation() {
+                // CLLocationCoordinate2D를 NMGLatLng로 변환
+                let nmglocation = NMGLatLng(lat: currentLocation.latitude, lng: currentLocation.longitude)
                 NavigationStack {
                     RecommendCourseView(
                         onBack: { showRecommendFlow = false },
-                        startLocation: currentLocation,
+                        startLocation: nmglocation,
                         waypoints: selectedWaypoints
                     )
                     .environmentObject(dogVM)
@@ -172,4 +175,4 @@ struct EmptyResultView: View {
 
 #Preview {
     SelectWaypointView(onBack: { })
-} 
+}

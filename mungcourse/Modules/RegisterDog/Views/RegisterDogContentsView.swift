@@ -55,13 +55,13 @@ struct RegisterDogContentsView: View {
                     action: registerAction,
                     isEnabled: isFormValid && !isLoading
                 )
-                .padding(.top, 8)
+                .padding(.top, 20)
 
                 Spacer() // Keep spacer if needed within the scroll content
             }
             .padding(.bottom)
         }
-        .scrollDismissesKeyboard(.interactive) // 스크롤 시 키보드 내림
+        .scrollDismissesKeyboard(.interactively) // 스크롤 시 키보드 내림 (interactive → interactively로 수정)
         .scrollIndicators(.hidden) // 스크롤바 숨김 처리
     }
 }

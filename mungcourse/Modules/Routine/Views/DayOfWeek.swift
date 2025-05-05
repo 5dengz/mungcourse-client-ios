@@ -33,4 +33,18 @@ extension DayOfWeek {
         case .sun: return "SUN"
         }
     }
+    /// 주어진 Date에 해당하는 DayOfWeek를 반환합니다.
+    static func from(date: Date) -> DayOfWeek {
+        let weekday = Calendar.current.component(.weekday, from: date)
+        switch weekday {
+        case 1: return .sun
+        case 2: return .mon
+        case 3: return .tue
+        case 4: return .wed
+        case 5: return .thu
+        case 6: return .fri
+        case 7: return .sat
+        default: return .mon
+        }
+    }
 }

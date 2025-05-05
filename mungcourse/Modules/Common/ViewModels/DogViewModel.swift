@@ -40,9 +40,14 @@ class DogViewModel: ObservableObject {
     }
 
     func selectDog(_ dog: Dog) {
+        mainDog = dog
         selectedDog = dog
         selectedDogName = dog.name
         walkRecords = []
+        Task {
+            await fetchDogDetail(dog.id)
+            await fetchWalkRecords(dog.id)
+        }
     }
 
     var dogNames: [String] {

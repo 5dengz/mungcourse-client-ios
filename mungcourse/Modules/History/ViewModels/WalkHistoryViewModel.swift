@@ -12,6 +12,7 @@ class WalkHistoryViewModel: ObservableObject {
     
     // 선택한 날짜의 산책 기록
     @Published var walkRecords: [WalkRecord] = []
+    @Published var walkDetails: [WalkDetail] = []  // 일별 산책 상세 리스트 추가
     @Published var isLoadingRecords: Bool = false
     @Published var recordsError: Error? = nil
     
@@ -109,7 +110,8 @@ class WalkHistoryViewModel: ObservableObject {
         isLoadingRecords = true
         recordsError = nil
         selectedDate = date
-        
+        walkDetails.removeAll()  // 이전 상세 정보 초기화
+
         WalkService.shared.fetchWalkRecords(date: date)
             .receive(on: DispatchQueue.main)
             .sink(
@@ -121,7 +123,18 @@ class WalkHistoryViewModel: ObservableObject {
                     }
                 },
                 receiveValue: { [weak self] records in
-                    self?.walkRecords = records
+                    guard let self = self else { return }
+                    self.walkRecords = records
+                    self.walkDetails.removeAll()
+                    // 각 산책 상세 정보 병행 로드
+                    records.forEach { record in
+                        WalkService.shared.fetchWalkDetail(walkId: record.id)
+                            .receive(on: DispatchQueue.main)
+                            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] detail in
+                                self?.walkDetails.append(detail)
+                            })
+                            .store(in: &self.cancellables)
+                    }
                     print("산책 기록 로드 완료: \(records.count)개")
                 }
             )

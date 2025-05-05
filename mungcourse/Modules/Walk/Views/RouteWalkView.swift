@@ -115,32 +115,3 @@ struct RouteWalkView: View {
     }
 }
 
-#Preview {
-    // 더미 데이터로 프리뷰 생성
-    let waypoint = DogPlace(
-        id: 1,
-        name: "멍카페",
-        dogPlaceImgUrl: nil,
-        distance: 500,
-        category: "cafe",
-        openingHours: "09:00-18:00",
-        lat: 37.5689,
-        lng: 126.9812
-    )
-    
-    let dummyRoute = RouteOption(
-        type: .recommended,
-        totalDistance: 1500,
-        estimatedTime: 30,
-        waypoints: [waypoint],
-        coordinates: [
-            NMGLatLng(lat: 37.5666, lng: 126.9783),
-            NMGLatLng(lat: 37.5689, lng: 126.9812),
-            NMGLatLng(lat: 37.5666, lng: 126.9783)
-        ]
-    )
-    
-    return NavigationStack {
-        RouteWalkView(route: dummyRoute)
-    }
-}

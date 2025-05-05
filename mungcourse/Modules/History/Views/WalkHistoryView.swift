@@ -94,7 +94,7 @@ struct WalkHistoryView: View {
                                         .frame(width: 40, height: 40)
                                         .background(
                                             Circle()
-                                                .fill(viewModel.hasWalkRecord(for: date) ? Color("main") : Color("gray200"))
+                                                .fill(getDateBackgroundColor(date))
                                         )
                                         .overlay(
                                             Circle()

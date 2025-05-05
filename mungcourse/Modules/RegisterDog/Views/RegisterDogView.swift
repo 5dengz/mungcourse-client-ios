@@ -134,11 +134,12 @@ struct RegisterDogView: View {
 
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
-        if isEditing, let id = initialDetail?.id {
-            print("[RegisterDogView] 디버그: 수정 모드, updateDog 호출 id=\(id)")
-            viewModel.updateDog(dogId: id)
+        if isEditing {
+            // 편집 모드: 항상 PATCH 호출
+            let dogId = initialDetail!.id!  // 기존 프로필의 id
+            viewModel.updateDog(dogId: dogId)
         } else {
-            print("[RegisterDogView] 디버그: 신규 등록 모드, registerDog 호출")
+            // 신규 등록 모드: POST 호출
             viewModel.registerDog()
         }
     }

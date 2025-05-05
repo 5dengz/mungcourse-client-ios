@@ -157,7 +157,7 @@ class WalkService {
     // 특정 연도와 월의 산책 날짜 조회 (달력 표시용)
     func fetchWalkDates(year: Int, month: Int) -> AnyPublisher<[WalkDateResponse], Error> {
         let yearMonth = String(format: "%04d-%02d", year, month)
-        guard let url = URL(string: "\(baseURL)/v1/walks/calender?yearAndMonth=\(yearMonth)") else {
+        guard let url = URL(string: "\(baseURL)/v1/walks/calender?date=\(yearMonth)") else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
         

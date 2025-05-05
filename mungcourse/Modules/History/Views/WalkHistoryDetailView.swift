@@ -80,6 +80,32 @@ struct WeeklyWalkChartView: View {
     }
 }
 
+// 일간 산책 차트 뷰
+struct DailyWalkChartView: View {
+    let records: [WalkRecord]
+    var body: some View {
+        Chart {
+            ForEach(records) { rec in
+                BarMark(
+                    x: .value("시각", rec.formattedStartTime),
+                    y: .value("시간(분)", Double(rec.durationSec) / 60.0)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color("main").opacity(0.8), Color("main")],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .cornerRadius(4)
+            }
+        }
+        .chartYAxis { AxisMarks(position: .leading) }
+        .chartXAxis { AxisMarks() }
+        .frame(height: 200)
+    }
+}
+
 // Identifiable을 준수하는 Int 래퍼 구조체
 struct IdentifiableInt: Identifiable {
     let id: Int
@@ -92,16 +118,12 @@ struct IdentifiableInt: Identifiable {
 struct WalkHistoryDetailView: View {
     @ObservedObject var viewModel: WalkHistoryViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedWalkId: IdentifiableInt? = nil
-    
+
     var body: some View {
         ZStack(alignment: .top) {
-            // 배경색을 상단 SafeArea까지 확장
-            Color.white
-                .ignoresSafeArea()
-            
+            Color.white.ignoresSafeArea()
             VStack(spacing: 0) {
-                // 자체 구현 헤더 (흰색 배경과 하단 그림자 적용)
+                // 헤더
                 ZStack {
                     Text("\(formatDate(date: viewModel.selectedDate))")
                         .font(.custom("Pretendard-SemiBold", size: 20))
@@ -128,12 +150,10 @@ struct WalkHistoryDetailView: View {
                 
                 ScrollView {
                     if viewModel.isLoadingRecords {
-                        // 로딩 중
                         ProgressView()
                             .frame(maxWidth: .infinity)
                             .padding(.top, 100)
                     } else if viewModel.walkRecords.isEmpty {
-                        // 데이터 없음
                         VStack(spacing: 20) {
                             Image(systemName: "pawprint")
                                 .font(.system(size: 50))
@@ -147,44 +167,64 @@ struct WalkHistoryDetailView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.top, 100)
                     } else {
-                        // 산책 기록 목록 표시
-                        VStack(alignment: .leading, spacing: 16) {
-                            // 산책 목록 표시
+                        VStack(alignment: .leading, spacing: 24) {
+                            // 하루 총 산책 섹션
+                            Text("하루 총 산책")
+                                .font(.custom("Pretendard-SemiBold", size: 18))
+                                .foregroundColor(Color("gray900"))
+                                .padding(.horizontal, 16)
+                            // 일간 통계
+                            HStack(spacing: 12) {
+                                let totalDistance = viewModel.walkRecords.reduce(0) { $0 + $1.distanceKm }
+                                let totalDuration = viewModel.walkRecords.reduce(0) { $0 + $1.durationSec }
+                                let totalCalories = viewModel.walkRecords.reduce(0) { $0 + $1.calories }
+                                InfoCard(title: "산책 거리", value: String(format: "%.1f km", totalDistance), iconName: "location")
+                                InfoCard(title: "산책 시간", value: "\(totalDuration/60)분", iconName: "clock")
+                                InfoCard(title: "소모 칼로리", value: "\(totalCalories) kcal", iconName: "flame.fill")
+                            }
+                            .padding(.horizontal, 16)
+                            // 일간 차트
+                            DailyWalkChartView(records: viewModel.walkRecords)
+                                .padding(.horizontal, 16)
+                            
+                            // 산책 요약 섹션
+                            Text("산책 요약")
+                                .font(.custom("Pretendard-SemiBold", size: 18))
+                                .foregroundColor(Color("gray900"))
+                                .padding(.horizontal, 16)
                             ForEach(viewModel.walkRecords) { record in
-                                WalkRecordCard(record: record)
-                                    .onTapGesture {
-                                        selectedWalkId = IdentifiableInt(record.id)
-                                        viewModel.loadWalkDetail(walkId: record.id)
-                                    }
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(record.formattedStartTime)
+                                        .font(.custom("Pretendard-SemiBold", size: 16))
+                                        .foregroundColor(Color("gray900"))
+                                        .padding(.horizontal, 16)
+                                    WalkRouteSummaryView(
+                                        coordinates: record.gpsData.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                                        distance: record.formattedDistance,
+                                        duration: record.formattedDuration,
+                                        calories: "\(record.calories)",
+                                        isLoading: false,
+                                        errorMessage: nil,
+                                        emptyMessage: "저장된 경로 정보가 없습니다",
+                                        boundingBox: nil,
+                                        mapHeight: 180
+                                    )
+                                    .padding(16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(Color.white)
+                                            .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
+                                    )
+                                    .padding(.horizontal, 16)
+                                }
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 20)
-                        .padding(.bottom, 30)
+                        .padding(.vertical, 20)
                     }
                 }
             }
         }
         .navigationBarHidden(true)
-        .sheet(item: $selectedWalkId) { walkIdWrapper in
-            if let detail = viewModel.selectedWalkDetail {
-                WalkDetailSheet(walkDetail: detail, dismiss: {
-                    selectedWalkId = nil
-                })
-            } else {
-                ProgressView()
-                    .onDisappear {
-                        selectedWalkId = nil
-                    }
-            }
-        }
-    }
-    
-    private var selectedWalkIdBinding: Binding<IdentifiableInt?> {
-        Binding<IdentifiableInt?>(
-            get: { self._selectedWalkId.wrappedValue },
-            set: { self._selectedWalkId.wrappedValue = $0 }
-        )
     }
     
     // 날짜 포맷팅 함수 (yyyy년 MM월 dd일)
@@ -252,6 +292,7 @@ struct WalkDetailSheet: View {
                 Text("산책 상세 정보")
                     .font(.custom("Pretendard-SemiBold", size: 18))
                     .foregroundColor(Color("gray900"))
+                    .padding(.top, 24)
                 
                 HStack {
                     Spacer()

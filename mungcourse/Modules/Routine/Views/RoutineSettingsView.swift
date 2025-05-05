@@ -28,6 +28,7 @@ class RoutineViewModel: ObservableObject {
     @Published var selectedDay: DayOfWeek = .today
     @Published var showAddRoutine: Bool = false
     @Published var editingRoutine: Routine? = nil
+    @Published var baseDate: Date = Date()
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -61,7 +62,8 @@ class RoutineViewModel: ObservableObject {
     private func dateString(for day: DayOfWeek) -> String {
         var calendar = Calendar(identifier: .gregorian)
         calendar.firstWeekday = 2
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else {
+        // baseDate를 기준으로 해당 주의 시작일 계산
+        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: baseDate)) else {
             return ""
         }
         let dates = (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
@@ -163,7 +165,7 @@ struct RoutineSettingsView: View {
                 }
                 .padding(.top, 16)
                 
-                RoutineDaySelector(selectedDay: $viewModel.selectedDay)
+                RoutineDaySelector(selectedDay: $viewModel.selectedDay, baseDate: viewModel.baseDate)
                     .padding(.top, 8)
                 
                 // 루틴 리스트
@@ -219,7 +221,11 @@ struct RoutineSettingsView: View {
                 viewModel.fetchRoutines(for: viewModel.selectedDay)
             }
         }
-        .sheet(isPresented: $showDatePicker) {
+        .sheet(isPresented: $showDatePicker, onDismiss: {
+            // 달력에서 날짜 선택 후 주 및 선택일 업데이트
+            viewModel.baseDate = selectedDate
+            viewModel.selectedDay = DayOfWeek.from(date: selectedDate)
+        }) {
             CommonDatePickerSheet(selection: $selectedDate) {
                 showDatePicker = false
             } onDismiss: {

@@ -72,6 +72,7 @@ struct ContentView: View {
                     WalkHistoryView()
                 case .profile:
                     ProfileTabView()
+                        .id(dogVM.mainDog?.id)
                 }
             }
 
