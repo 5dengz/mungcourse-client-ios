@@ -39,6 +39,19 @@ struct PastRoutesView: View {
                 .frame(height: 180)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
+            // 최근 산책 정보 표시
+            if let walk = viewModel.recentWalk {
+                WalkStatsBar(
+                    distance: String(format: "%.2f", walk.distanceKm),
+                    duration: {
+                        let mins = walk.durationSec / 60
+                        let secs = walk.durationSec % 60
+                        return String(format: "%d:%02d", mins, secs)
+                    }(),
+                    calories: "\(walk.calories)",
+                    isActive: false
+                )
+            }
         }
         .cornerRadius(10)
     }
