@@ -4,6 +4,7 @@ import Combine
 struct LoginView: View {
     // ViewModel 사용
     @StateObject private var viewModel = LoginViewModel()
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         VStack {
@@ -12,12 +13,11 @@ struct LoginView: View {
             // 안내 문구
             VStack(spacing: 8) {
                 Text("멍코스와 함께\n산책을 시작하세요!")
-                    .font(Font.custom("Pretendard", size: 24))
-                    .fontWeight(.semibold)
+                    .font(Font.custom("Pretendard-SemiBold", size: 24))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                 Text("안전 코스 추천부터 산책 기록까지")
-                    .font(Font.custom("Pretendard-Medium", size: 16))
+                    .font(Font.custom("Pretendard-Regular", size: 16))
                     .foregroundColor(Color("gray600"))
                     .multilineTextAlignment(.center)
             }
@@ -41,7 +41,7 @@ struct LoginView: View {
                     textColor: .black,
                     backgroundColor: .pointYellow,
                     isLoading: viewModel.isLoading,
-                    action: { viewModel.loginWithApple() }
+                    action: { viewModel.loginWithKakao() }
                 )
                 
                 // 구글 로그인 버튼
@@ -63,27 +63,28 @@ struct LoginView: View {
                     isLoading: viewModel.isLoading,
                     action: { viewModel.loginWithApple() }
                 )
-                
-                // 로딩 인디케이터
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                        .scaleEffect(1.5)
-                        .padding(.top, 10)
-                }
-                
-                // 오류 메시지
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding(.top, 10)
-                }
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 50)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray100)
+        .fullScreenCover(isPresented: $viewModel.needsDogRegistration) {
+            RegisterDogView()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                // 앱이 활성화될 때 로그인 상태 확인
+                viewModel.checkLoginStatus()
+            }
+        }
+        .alert(item: $viewModel.errorMessage) { errorMsg in
+            Alert(
+                title: Text("로그인 오류"),
+                message: Text(errorMsg.message),
+                dismissButton: .default(Text("확인"))
+            )
+        }
     }
 }
 

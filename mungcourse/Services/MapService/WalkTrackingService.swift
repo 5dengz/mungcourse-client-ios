@@ -5,6 +5,9 @@ import Combine
 
 /// Service responsible for tracking walk sessions, including location updates, distance calculations, and session management
 class WalkTrackingService: NSObject, ObservableObject {
+    // MARK: - Singleton instance
+    static let shared = WalkTrackingService()
+    
     // MARK: - Published Properties
     @Published var currentLocation: CLLocation?
     @Published var walkPath: [NMGLatLng] = []
@@ -117,6 +120,69 @@ class WalkTrackingService: NSObject, ObservableObject {
     private func updateCalories() {
         calories = distance * caloriesPerKmMultiplier
         print("[WalkTrackingService] calories 갱신: \(calories)")
+    }
+    
+    // MARK: - API Service
+    
+    /// 산책 세션 데이터를 서버에 업로드
+    /// - Parameters:
+    ///   - session: 업로드할 산책 세션
+    ///   - dogIds: 함께 산책한 강아지 ID 배열
+    ///   - completion: 결과 콜백 (성공 또는 실패)
+    func uploadWalkSession(session: WalkSession, dogIds: [Int], completion: @escaping (Result<Bool, Error>) -> Void) {
+        print("[WalkTrackingService] 산책 세션 업로드 시작: \(session.id)")
+        
+        // API Base URL
+        guard let baseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String, !baseURL.isEmpty else {
+            completion(.failure(URLError(.badURL)))
+            return
+        }
+        
+        let urlString = baseURL + "/v1/walks"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(URLError(.badURL)))
+            return
+        }
+        
+        // 요청 생성
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 요청 데이터 준비
+        let sessionData = session.toAPIDictionary(dogIds: dogIds)
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: sessionData, options: [])
+            request.httpBody = jsonData
+            
+            // 네트워크 요청 실행
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    print("[WalkTrackingService] 산책 세션 업로드 실패: \(error.localizedDescription)")
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    completion(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                
+                if httpResponse.statusCode == 200 || httpResponse.statusCode == 201 {
+                    print("[WalkTrackingService] 산책 세션 업로드 성공: \(session.id)")
+                    completion(.success(true))
+                } else {
+                    if let data = data, let errorString = String(data: data, encoding: .utf8) {
+                        print("[WalkTrackingService] 산책 세션 업로드 실패: \(errorString)")
+                    }
+                    completion(.failure(URLError(.badServerResponse)))
+                }
+            }
+        } catch {
+            print("[WalkTrackingService] JSON 인코딩 실패: \(error.localizedDescription)")
+            completion(.failure(error))
+        }
     }
 }
 

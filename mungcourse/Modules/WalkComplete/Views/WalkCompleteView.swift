@@ -2,16 +2,14 @@ import SwiftUI
 import NMapsMap
 
 struct WalkCompleteView: View {
-    // 임시 데이터, 실제 데이터 연동 시 파라미터로 전달
-    var distance: String = "1.2"
-    var duration: String = "00:05:10"
-    var calories: String = "25"
+    @StateObject private var viewModel = WalkCompleteViewModel()
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 0) {
-            // 상단 헤더
-            WalkCompleteHeader(onClose: {
-                // 홈 이동 액션 (네비게이션에서 처리)
+            // 상단 헤더 (날짜 데이터 ViewModel에서 사용)
+            WalkCompleteHeader(walkDate: viewModel.walkDate, onClose: {
+                dismiss()
             })
             .padding(.bottom, 8)
 
@@ -23,16 +21,17 @@ struct WalkCompleteView: View {
                             .font(.title3)
                             .fontWeight(.semibold)
                         WalkStatsBar(
-                            distance: distance,
-                            duration: duration,
-                            calories: calories,
+                            distance: viewModel.distance,
+                            duration: viewModel.duration,
+                            calories: viewModel.calories,
                             isActive: false
                         )
-                        // 네이버 지도 (경로 표시 예정, 일단 지도만)
-                        NaverMapView(
-                            centerCoordinate: .constant(NMGLatLng(lat: 37.5665, lng: 126.9780)),
-                            zoomLevel: .constant(16.0),
-                            pathCoordinates: .constant([]),
+                        // 네이버 지도 (경로 표시)
+                        AdvancedNaverMapView(
+                            dangerCoordinates: .constant(viewModel.dangerCoordinates),
+                            centerCoordinate: .constant(viewModel.centerCoordinate),
+                            zoomLevel: .constant(viewModel.zoomLevel),
+                            pathCoordinates: .constant(viewModel.pathCoordinates),
                             userLocation: .constant(nil),
                             showUserLocation: false,
                             trackingMode: .direction
@@ -48,9 +47,9 @@ struct WalkCompleteView: View {
                             .font(.title3)
                             .fontWeight(.semibold)
                         WalkStatsBar(
-                            distance: distance,
-                            duration: duration,
-                            calories: calories,
+                            distance: viewModel.distance,
+                            duration: viewModel.duration,
+                            calories: viewModel.calories,
                             isActive: false
                         )
                         // 그래프 영역 (추후 구현)
@@ -70,12 +69,35 @@ struct WalkCompleteView: View {
 
             // 홈으로 이동 버튼
             CommonFilledButton(title: "홈으로 이동", action: {
-                // 홈 이동 액션 (네비게이션에서 처리)
+                // 피드백 모달 표시
+                viewModel.showFeedbackModal()
             })
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
         .background(Color("white").ignoresSafeArea())
+        .sheet(isPresented: $viewModel.isFeedbackModalPresented) {
+            WalkCompleteFeedbackModal(
+                isPresented: $viewModel.isFeedbackModalPresented,
+                selectedRating: $viewModel.feedbackRating,
+                onComplete: {
+                    viewModel.submitFeedback()
+                    dismiss() // 피드백 제출 후 화면 닫기
+                }
+            )
+        }
+        .onChange(of: viewModel.isFeedbackSubmitted) { _, isSubmitted in
+            if isSubmitted {
+                // 피드백 제출 완료 후 홈으로 이동
+                dismiss()
+            }
+        }
+    }
+    
+    // 사용자 정의 이니셜라이저로 ViewModel 초기화 가능
+    init(walkData: WalkSessionData? = nil) {
+        let vm = WalkCompleteViewModel(walkData: walkData)
+        _viewModel = StateObject(wrappedValue: vm)
     }
 }
 

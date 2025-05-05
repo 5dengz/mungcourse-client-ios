@@ -1,125 +1,142 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var dogVM: DogViewModel
     @Binding var selectedTab: ContentView.Tab
+    @Binding var isStartWalkOverlayPresented: Bool
+    var onSelectCourse: () -> Void
+
+    @State private var showingDogSelection: Bool = false
+
     var body: some View {
         ScrollView {
             VStack(spacing: 35) {
-                ProfileArea(selectedTab: $selectedTab)
-                ButtonArea()
+                ProfileArea(
+                    selectedTab: $selectedTab,
+                    showingDogSelection: $showingDogSelection,
+                    selectedDog: $dogVM.selectedDog,
+                    dogs: dogVM.dogs
+                )
+                ButtonArea(
+                    isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
+                    onSelectCourse: onSelectCourse
+                )
                 NearbyTrailsView()
-                WalkIndexView()
                 PastRoutesView()
+                    .padding(.bottom, 35)
                 Spacer()
             }
-            .padding()
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
         }
         .navigationTitle("홈")
+        .dogSelectionSheet(isPresented: $showingDogSelection)
+        .fullScreenCover(isPresented: $showingDogSelection) {
+            RegisterDogView(onComplete: {
+                dogVM.fetchDogs()
+            }, showBackButton: true)
+            .environmentObject(dogVM)
+        }
     }
 }
 
-// --- Placeholder Views ---
-
-// ProfileArea는 그대로 유지
 struct ProfileArea: View {
     @Binding var selectedTab: ContentView.Tab
-    // TODO: 실제 강아지 데이터 목록 로드 및 선택 로직 구현 필요
-    @State private var dogName = "몽실이" // @State로 변경하여 값 변경 가능하도록 함
-    // TODO: 실제 강아지 목록 데이터 필요
-    let availableDogs = ["몽실이", "초코", "해피"] // 임시 강아지 목록
-    @State private var showingDogSelection = false // 강아지 선택 다이얼로그 표시 상태
+    @Binding var showingDogSelection: Bool
+    @Binding var selectedDog: Dog?
+    let dogs: [Dog]
 
     var body: some View {
-        HStack(alignment: .top, spacing: 15) { // 상단 정렬 및 요소 간 간격
-            VStack(alignment: .leading, spacing: 5) { // 세로 정렬 및 간격
-                Text("반가워요") // 첫 줄 분리
-                    .font(.system(size: 24)) // 기본 시스템 폰트 사용
+        HStack(alignment: .top, spacing: 15) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("반가워요")
+                    .font(.custom("Pretendard-SemiBold", size: 24))
 
-                HStack(spacing: 8) { // 버튼과 "보호자님!" 텍스트를 가로로 묶음
-                    Button {
-                        showingDogSelection = true // 다이얼로그 표시
+                HStack(spacing: 8) {
+                    Button(action: {
+                        showingDogSelection = true
                         print("강아지 이름 변경 버튼 탭됨.")
-                    } label: {
-                        HStack(spacing: 4) { // 이름과 아이콘 가로 배치
-                            Text(dogName)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color("AccentColor")) // 텍스트 색상 통일
-                            Image(systemName: "chevron.down") // 아래 화살표 아이콘 추가
-                                .font(.caption) // 아이콘 크기 약간 작게
-                                .foregroundColor(Color("AccentColor")) // 아이콘 색상 통일
+                    }) {
+                        HStack(spacing: 4) {
+                            Text(selectedDog?.name ?? "")
+                                .font(.custom("Pretendard-SemiBold", size: 24))
+                                .foregroundColor(Color("AccentColor"))
+                            Image("arrow_down")
+                                .font(.caption)
+                                .foregroundColor(Color("AccentColor"))
                         }
-                        .overlay( // 밑줄 효과를 위한 오버레이
-                            Rectangle() // 사각형으로 밑줄 생성
-                                .frame(height: 2) // 밑줄 두께
-                                .offset(y: 3) // 텍스트 아래로 위치 조정 (값을 조절하여 간격 변경)
-                                .foregroundColor(Color("AccentColor")), // 밑줄 색상
-                            alignment: .bottomLeading // 텍스트 하단 왼쪽에 정렬
+                        .overlay(
+                            Rectangle()
+                                .frame(height: 2)
+                                .offset(y: 3)
+                                .foregroundColor(Color("AccentColor")),
+                            alignment: .bottomLeading
                         )
                     }
-                    .font(.system(size: 24)) // 기본 시스템 폰트 사용
-                    .buttonStyle(.plain) // 기본 버튼 스타일 제거하여 텍스트처럼 보이게 함
+                    .buttonStyle(.plain)
 
-                    Text("보호자님!") // "보호자님!" 텍스트
-                        .font(.system(size: 24)) // 기본 시스템 폰트 사용
-                } // HStack (버튼 + 보호자님!) 끝
+                    Text("보호자님!")
+                        .font(.custom("Pretendard-SemiBold", size: 24))
+                }
+            }
 
-                // --- 드롭다운 목록 코드 완전 제거 ---
-
-            } // VStack (메인 텍스트 영역) 끝
-
-            Spacer() // 텍스트 영역과 프로필 이미지 사이 공간 최대화
+            Spacer()
 
             Button(action: {
                 selectedTab = .profile
             }) {
-                Image("profile_empty") // 시스템 프로필 아이콘 사용
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 60, height: 60) // 이미지 크기 설정
-                    .foregroundColor(.gray) // 아이콘 색상 설정
-            }
-        }
-        .padding(.vertical) // 좌우 패딩 제거, 상하 패딩만 유지
-        
-        .confirmationDialog("강아지 선택", isPresented: $showingDogSelection, titleVisibility: .visible) {
-            // 사용 가능한 모든 강아지 목록을 버튼으로 표시
-            ForEach(availableDogs, id: \ .self) { name in
-                Button(name) {
-                    dogName = name // 선택된 이름으로 업데이트
+                if let urlString = selectedDog?.dogImgUrl, let url = URL(string: urlString), !urlString.isEmpty {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFill()
+                        case .failure(_):
+                            Image("profile_empty").resizable().scaledToFill()
+                        case .empty:
+                            ProgressView()
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .frame(width: 60, height: 60)
+                    .clipShape(Circle())
+                } else {
+                    Image("profile_empty")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(Circle())
                 }
             }
-            // 취소 버튼 (선택 사항이지만 추가하는 것이 좋음)
-            Button("취소", role: .cancel) { }
-        } message: {
-            Text("함께 산책할 강아지를 선택해주세요.") // 다이얼로그 메시지 (선택 사항)
         }
+        .padding(.vertical)
     }
 }
 
 struct ButtonArea: View {
+    @Binding var isStartWalkOverlayPresented: Bool
+    var onSelectCourse: () -> Void
+    
     var body: some View {
         HStack(spacing: 9) {
             MainButton(
                 title: "산책 시작",
                 imageName: "start_walk",
-                backgroundColor: Color("AccentColor"),
-                foregroundColor: Color("white"),
+                backgroundColor: Color("main"),
+                foregroundColor: Color("pointwhite"),
                 action: {
-                    print("산책 시작 버튼 탭됨")
-                    // TODO: 산책 시작 화면으로 네비게이션 또는 관련 로직 구현
+                    isStartWalkOverlayPresented = true
                 }
             )
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course",
-                backgroundColor: Color("white"),
+                backgroundColor: Color("pointwhite"),
                 foregroundColor: Color("main"),
                 action: {
-                    print("코스 선택 버튼 탭됨")
-                    // TODO: 경로 만들기 화면으로 네비게이션 또는 관련 로직 구현
+                    onSelectCourse()
                 }
             )
         }
     }
 }
-

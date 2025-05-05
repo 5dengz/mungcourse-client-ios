@@ -2,6 +2,8 @@
 #
 # gitignore 파일 작성
 #
+.cursor/
+
 ## Build generated
 build/
 DerivedData/
@@ -61,3 +63,7 @@ fastlane/test_output
 GoogleService-Info.plist
 # 네이버 맵 및 구글 로그인 관련 키를 git에 커밋하지 않도록 설정
 mungcourse/Config/Secrets.xcconfig
+.github/copilot-instructions.md
+
+.github/docs/API-plan.md
+.windsurfrules

@@ -26,15 +26,15 @@ struct WalkStatsBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            StatItem(label: "거리(km)", value: distance, valueColor: Color("black"))
+            StatItem(label: "거리(km)", value: distance, valueColor: Color("pointblack"))
             Divider()
                 .frame(width: 1, height: 22)
                 .background(Color("gray300"))
-            StatItem(label: "시간", value: duration, valueColor: isActive ? Color("main") : Color("black"))
+            StatItem(label: "시간", value: duration, valueColor: isActive ? Color("main") : Color("pointblack"))
             Divider()
                 .frame(width: 1, height: 22)
                 .background(Color("gray300"))
-            StatItem(label: "칼로리", value: calories, valueColor: Color("black"))
+            StatItem(label: "칼로리", value: calories, valueColor: Color("pointblack"))
         }
         .background(Color("white"))
         .padding(.vertical, 8)

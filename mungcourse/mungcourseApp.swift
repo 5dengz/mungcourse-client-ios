@@ -9,12 +9,19 @@ import SwiftUI
 import NMapsMap // 네이버 지도 SDK 임포트 (SwiftData 제거)
 import GoogleSignIn
 
+// 알림 이름 확장
+extension Notification.Name {
+    static let appDataDidReset = Notification.Name("appDataDidReset") // 기존 알림명이 상수로 선언되지 않았다면 추가
+    static let forceViewUpdate = Notification.Name("forceViewUpdate") // 새로운 알림 이름 추가
+}
+
 @main
 struct mungcourseApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
-    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
-    @AppStorage("authToken") private var authToken: String = "" // 추후 토큰 저장용
+    @StateObject private var tokenManager = TokenManager.shared
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
+    @StateObject private var dogVM = DogViewModel()
+    @State private var forceUpdate: Bool = false // 강제 업데이트를 위한 상태
 
     
     init() {
@@ -30,46 +37,68 @@ struct mungcourseApp: App {
             fatalError("GIDClientID not found in Info.plist")
         }
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: googleId)
+
+        // 디버깅: Info.plist에서 API_BASE_URL 값 확인
+        let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String
+        print("[DEBUG] API_BASE_URL 런타임 값:", apiBaseURL ?? "nil")
+        
+        // UserDefaults 변경사항 모니터링 설정
+        NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            // 디버깅용 로그
+            print("[DEBUG] UserDefaults 변경 감지: hasCompletedOnboarding =", UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"))
+        }
+        // 앱 데이터 리셋(로그아웃/탈퇴) 시 싱글턴/뷰모델 초기화
+        let dogVMCopy = dogVM // 로컬 상수에 저장
+        NotificationCenter.default.addObserver(
+            forName: .appDataDidReset,
+            object: nil,
+            queue: .main
+        ) { [weak dogVMCopy] _ in
+            Task { @MainActor in
+                dogVMCopy?.reset()
+            }
+            // forceUpdate.toggle() 대신 알림 발행
+            NotificationCenter.default.post(name: .forceViewUpdate, object: nil)
+        }
     }
 
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                // 로딩 완료 후 보여줄 메인 컨텐츠 결정
-                if !showLoadingScreen {
-                    // 토큰이 있으면 온보딩과 로그인 화면을 건너뛰고 바로 홈 화면으로 이동
-                    if !authToken.isEmpty {
-                        // 토큰이 유효한 경우 (추후 검증 로직 추가)
-                        ContentView()
-                    } else if !hasCompletedOnboarding {
-                        // 1. 온보딩 미완료: 온보딩 화면 표시
-                        OnboardingView()
-                        // OnboardingView 내에서 완료 시 hasCompletedOnboarding = true 로 설정
-                    } else if !isLoggedIn {
-                        // 2. 온보딩 완료, 로그인 안 됨: 로그인 화면 표시
-                        LoginView()
-                        // LoginView 내에서 로그인 완료 시 isLoggedIn = true 로 설정
-                    } else {
-                        // 3. 로그인 완료: 메인 컨텐츠 표시
-                        ContentView()
+            // 상태 값에 따라 뷰 표시 (forceUpdate를 사용하여 뷰 갱신 강제)
+            Group {
+                if !hasCompletedOnboarding {
+                    OnboardingView()
+                } else if tokenManager.accessToken == nil {
+                    LoginView()
+                } else {
+                    SplashView()
+                        .environmentObject(dogVM)
+                        .preferredColorScheme(.light)
+                        .background(Color("gray100").ignoresSafeArea())
+                }
+            }
+            // 상태 변경을 감지하기 위해 UserDefaults 변경 알림을 수신
+            .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+                // 메인 스레드에서 상태 업데이트 보장
+                DispatchQueue.main.async {
+                    // UserDefaults에서 직접 읽어와 상태 갱신
+                    let newValue = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+                    if hasCompletedOnboarding != newValue {
+                        print("[DEBUG] OnReceive - hasCompletedOnboarding 업데이트: \(hasCompletedOnboarding) -> \(newValue)")
+                        hasCompletedOnboarding = newValue
+                        // 강제 갱신 트리거
+                        forceUpdate.toggle()
                     }
                 }
-
-                // 로딩 화면을 조건부로 위에 표시
-                if showLoadingScreen {
-                    LoadingView()
-                        .transition(.opacity) // 부드러운 전환 효과
-                        .zIndex(1) // 항상 위에 오도록 설정
-                        .onAppear {
-                            // 2초 후에 로딩 화면 숨김
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                print("Minimum time passed, hiding loading screen") // 디버깅 로그 추가
-                                withAnimation {
-                                    self.showLoadingScreen = false
-                                }
-                            }
-                        }
-                }
+            }
+            .id(forceUpdate) // 상태가 변경될 때마다 View를 강제로 다시 그림
+            // forceViewUpdate 알림을 감지하여 forceUpdate 상태 변경
+            .onReceive(NotificationCenter.default.publisher(for: .forceViewUpdate)) { _ in
+                forceUpdate.toggle()
             }
         }
     }

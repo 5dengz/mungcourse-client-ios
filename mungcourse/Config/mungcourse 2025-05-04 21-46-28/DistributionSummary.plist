@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>mungcourse.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>1</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>BEA1349753098C4D09BBBA65553E4877D1D691F5</string>
+				<key>dateExpires</key>
+				<string>5/4/26</string>
+				<key>type</key>
+				<string>Cloud Managed Apple Distribution</string>
+			</dict>
+			<key>embeddedBinaries</key>
+			<array>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>1</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>BEA1349753098C4D09BBBA65553E4877D1D691F5</string>
+						<key>dateExpires</key>
+						<string>5/4/26</string>
+						<key>type</key>
+						<string>Cloud Managed Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>NMapsGeometry.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>862N6E8862</string>
+						<key>name</key>
+						<string>Kyoungho Eom</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>1.0.2</string>
+				</dict>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>3.21.0</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>BEA1349753098C4D09BBBA65553E4877D1D691F5</string>
+						<key>dateExpires</key>
+						<string>5/4/26</string>
+						<key>type</key>
+						<string>Cloud Managed Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>NMapsMap.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>862N6E8862</string>
+						<key>name</key>
+						<string>Kyoungho Eom</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>3.21.0</string>
+				</dict>
+			</array>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>862N6E8862.com.odengz.mungcourse</string>
+				<key>aps-environment</key>
+				<string>production</string>
+				<key>com.apple.developer.applesignin</key>
+				<array>
+					<string>Default</string>
+				</array>
+				<key>com.apple.developer.icloud-container-identifiers</key>
+				<array/>
+				<key>com.apple.developer.icloud-services</key>
+				<array>
+					<string>CloudKit</string>
+				</array>
+				<key>com.apple.developer.team-identifier</key>
+				<string>862N6E8862</string>
+				<key>get-task-allow</key>
+				<false/>
+			</dict>
+			<key>name</key>
+			<string>mungcourse.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>c5a5ff36-dd74-4233-bc75-43a1992bd8b4</string>
+				<key>dateExpires</key>
+				<string>5/4/26</string>
+				<key>name</key>
+				<string>iOS Team Ad Hoc Provisioning Profile: com.odengz.mungcourse</string>
+			</dict>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>862N6E8862</string>
+				<key>name</key>
+				<string>Kyoungho Eom</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>

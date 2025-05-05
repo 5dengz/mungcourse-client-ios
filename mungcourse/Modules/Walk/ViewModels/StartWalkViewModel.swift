@@ -4,6 +4,7 @@ import NMapsMap
 import Combine
 
 class StartWalkViewModel: ObservableObject {
+    @Published var smokingZones: [NMGLatLng] = []
     // Map state
     @Published var centerCoordinate: NMGLatLng
     @Published var zoomLevel: Double = 16.0
@@ -90,6 +91,11 @@ class StartWalkViewModel: ObservableObject {
     }
     
     func startWalk() {
+        // 산책 시작 위치 기준 흡연구역 조회
+        if let startLocation = userLocation {
+            fetchSmokingZones(center: startLocation)
+        }
+
         print("[StartWalkViewModel] startWalk() 호출")
         walkTrackingService.startWalk(onPermissionDenied: { [weak self] in
             print("[StartWalkViewModel] 위치 권한 거부됨")
@@ -132,27 +138,53 @@ class StartWalkViewModel: ObservableObject {
     }
     
     // MARK: - API 연동
-    func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://your.api/v1/walks") else {
-            completion(false)
-            return
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // TODO: 인증 토큰 필요시 헤더 추가
-        let body = session.toAPIDictionary(dogIds: dogIds)
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let _ = error {
-                completion(false)
-                return
+    private static var apiBaseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
+    }
+    
+    // MARK: - 흡연구역 조회 (2km 반경)
+    func fetchSmokingZones(center: NMGLatLng) {
+        let urlString = "\(Self.apiBaseURL)/v1/walks/smokingzone?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
+        guard let url = URL(string: urlString) else { return }
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self, let data = data, error == nil else { return }
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Double]]
+                let zones = json?.compactMap { dict -> NMGLatLng? in
+                    guard let lat = dict["lat"], let lng = dict["lng"] else { return nil }
+                    return NMGLatLng(lat: lat, lng: lng)
+                } ?? []
+                DispatchQueue.main.async {
+                    self.smokingZones = zones
+                }
+            } catch {
+                print("흡연구역 파싱 실패: \(error)")
             }
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                completion(false)
-                return
-            }
-            completion(true)
         }.resume()
+    }
+    
+    func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
+        print("📤 산책 데이터 업로드 시작")
+        
+        WalkService.shared.uploadWalkSession(session, dogIds: dogIds)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completionResult in
+                switch completionResult {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("❌ 산책 데이터 업로드 실패: \(error)")
+                    completion(false)
+                }
+            }, receiveValue: { success in
+                if success {
+                    print("✅ 산책 데이터 업로드 성공")
+                    completion(true)
+                } else {
+                    print("⚠️ 산책 데이터 업로드 실패")
+                    completion(false)
+                }
+            })
+            .store(in: &cancellables)
     }
 }

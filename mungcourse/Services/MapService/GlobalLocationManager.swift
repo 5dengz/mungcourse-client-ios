@@ -16,9 +16,15 @@ class GlobalLocationManager: NSObject, CLLocationManagerDelegate, ObservableObje
 
     func startUpdatingLocation() {
         if CLLocationManager.locationServicesEnabled() {
-            print("[GlobalLocationManager] startUpdatingLocation() called at \(Date())")
-            locationManager.requestWhenInUseAuthorization()
-            locationManager.startUpdatingLocation()
+            // 권한 상태가 허용된 경우에만 위치 업데이트 시작
+            let status = locationManager.authorizationStatus
+            if status == .authorizedWhenInUse || status == .authorizedAlways {
+                print("[GlobalLocationManager] startUpdatingLocation() called at \(Date()) - 권한 허용됨")
+                locationManager.startUpdatingLocation()
+            } else {
+                print("[GlobalLocationManager] 위치 권한이 허용되지 않음: \(status)")
+                locationManager.requestWhenInUseAuthorization()
+            }
         }
     }
 

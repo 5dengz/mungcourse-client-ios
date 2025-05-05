@@ -1,13 +1,17 @@
 import SwiftUI
 import NMapsMap
+// Common 모듈에서 가져옴
+import Foundation
 
 struct StartWalkView: View {
     @StateObject private var viewModel = StartWalkViewModel()
     @Environment(\.dismiss) private var dismiss
     @State private var showCompleteAlert = false
+    @State private var showCompleteView = false // WalkComplete 화면 표시 상태
     @State private var completedSession: WalkSession? = nil
     @State private var effectScale: CGFloat = 0.5
     @State private var effectOpacity: Double = 1.0
+    @EnvironmentObject var dogVM: DogViewModel // 강아지 뷰모델 주입
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -24,7 +28,8 @@ struct StartWalkView: View {
             VStack(spacing: 0) {
                 // Map View
                 ZStack {
-                    NaverMapView(
+                    AdvancedNaverMapView(
+    dangerCoordinates: $viewModel.smokingZones,
                         centerCoordinate: $viewModel.centerCoordinate,
                         zoomLevel: $viewModel.zoomLevel,
                         pathCoordinates: $viewModel.pathCoordinates,
@@ -61,11 +66,21 @@ struct StartWalkView: View {
                     print("[디버그] WalkControllerView onEnd pressed")
                     completedSession = viewModel.endWalk()
                     if let session = completedSession {
-                        // TODO: 실제 dogIds를 선택받아야 함. 임시로 [1] 사용
-                        viewModel.uploadWalkSession(session, dogIds: [1]) { success in
-                            // 업로드 성공/실패에 따라 알림 등 처리 가능
+                        // 선택된 강아지 ID 가져오기
+                        let dogIds = dogVM.selectedDog != nil ? [dogVM.selectedDog!.id] : []
+                        
+                        // API 업로드 및 WalkCompleteView로 이동
+                        viewModel.uploadWalkSession(session, dogIds: dogIds) { success in
+                            if success {
+                                print("✅ 산책 데이터 업로드 성공")
+                                // 산책 완료 화면으로 이동
+                                showCompleteView = true
+                            } else {
+                                print("❌ 산책 데이터 업로드 실패")
+                                // 실패 시에도 일단 산책 완료 화면으로 이동
+                                showCompleteView = true
+                            }
                         }
-                        showCompleteAlert = true
                     }
                 }
             )
@@ -76,12 +91,19 @@ struct StartWalkView: View {
             WalkHeaderView(onBack: { dismiss() }),
             alignment: .top
         )
-        .alert("산책 완료", isPresented: $showCompleteAlert) {
-            Button("확인") {
-                dismiss()
+        // 산책 완료 화면 표시
+        .fullScreenCover(isPresented: $showCompleteView) {
+            if let session = completedSession {
+                let walkData = WalkSessionData(
+                    distance: session.distance,
+                    duration: Int(session.duration),
+                    date: session.endTime,
+                    coordinates: session.path
+                )
+                NavigationStack {
+                    WalkCompleteView(walkData: walkData)
+                }
             }
-        } message: {
-            Text("총 거리: \(viewModel.formattedDistance)km\n소요 시간: \(viewModel.formattedDuration)\n소모 칼로리: \(viewModel.formattedCalories)kcal")
         }
         .alert("위치 권한 필요", isPresented: $viewModel.showPermissionAlert) {
             Button("설정으로 이동") {
@@ -101,30 +123,13 @@ struct StartWalkView: View {
     }
 }
 
-// Extension for rounded corners on specific edges
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
 
-// Custom shape for rounded corners
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-    
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}
+// RoundedCorner 구조체와 View extension은 Common/Utils/CommonViewExtensions.swift 로 이동했습니다.
+// 사용하려면 해당 파일이 프로젝트에 포함되어 있어야 합니다.
 
 #Preview {
     NavigationStack {
         StartWalkView()
+            .environmentObject(DogViewModel())
     }
 }
