@@ -39,10 +39,10 @@ typealias WalkDatesResponse = BaseResponse<[WalkDateResponse]>
 // 산책 날짜 개별 응답 모델
 struct WalkDateResponse: Codable, Identifiable {
     let id = UUID()
-    let date: String // YYYY-MM-DD 형식
-    
+    let date: String // YYYY-MM-DD HH:mm:ss
+
     enum CodingKeys: String, CodingKey {
-        case date
+        case date = "startedAt"
     }
 }
 

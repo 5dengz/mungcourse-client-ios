@@ -29,7 +29,13 @@ struct RegisterDogContentsView: View {
     // var addAnotherDogAction: () -> Void
     
     var body: some View {
-        ScrollView {
+        ZStack {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    UIApplication.shared.endEditing()
+                }
+            ScrollView {
             VStack(spacing: 24) {
                 ProfileImageView(
                     image: $profileImage,
@@ -63,5 +69,6 @@ struct RegisterDogContentsView: View {
         }
         .scrollDismissesKeyboard(.interactively) // 스크롤 시 키보드 내림
         .scrollIndicators(.hidden) // 스크롤바 숨김 처리
-    }
+        }
+    
 }

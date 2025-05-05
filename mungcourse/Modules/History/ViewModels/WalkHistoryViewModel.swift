@@ -97,8 +97,18 @@ class WalkHistoryViewModel: ObservableObject {
                     }
                 },
                 receiveValue: { [weak self] walkDateResponses in
-                    self?.walkDates = walkDateResponses.map { $0.date }
-                    print("산책 날짜 로드 완료: \(walkDateResponses.count)개")
+                    let formatter = DateFormatter()
+formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+let outputFormatter = DateFormatter()
+outputFormatter.dateFormat = "yyyy-MM-dd"
+self?.walkDates = walkDateResponses.compactMap {
+    if let dateObj = formatter.date(from: $0.date) {
+        return outputFormatter.string(from: dateObj)
+    } else {
+        return nil
+    }
+}
+print("산책 날짜 로드 완료: \(walkDateResponses.count)개")
                 }
             )
             .store(in: &cancellables)

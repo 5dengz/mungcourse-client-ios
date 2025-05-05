@@ -166,16 +166,22 @@ class WalkService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         return NetworkManager.shared.requestWithTokenPublisher(request)
-            .tryMap { data, response -> Data in
-                guard let httpResponse = response as? HTTPURLResponse,
-                      (200...299).contains(httpResponse.statusCode) else {
-                    throw URLError(.badServerResponse)
-                }
-                return data
-            }
-            .decode(type: WalkDatesResponse.self, decoder: JSONDecoder())
-            .map { $0.data ?? [] }
-            .eraseToAnyPublisher()
+    .tryMap { data, response -> Data in
+        if let httpResponse = response as? HTTPURLResponse {
+            print("[fetchWalkDates] statusCode: \(httpResponse.statusCode)")
+        }
+        if let bodyString = String(data: data, encoding: .utf8) {
+            print("[fetchWalkDates] response body: \(bodyString)")
+        }
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+        return data
+    }
+    .decode(type: WalkDatesResponse.self, decoder: JSONDecoder())
+    .map { $0.data ?? [] }
+    .eraseToAnyPublisher()
     }
     
     // 특정 날짜의 산책 기록 목록 조회
