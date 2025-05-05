@@ -5,8 +5,12 @@ import PhotosUI // Import PhotosUI
 
 struct ProfileImageView: View {
     @Binding var image: Image?
-    @Binding var selectedImageData: Data? // Add binding for image data
-    @State private var selectedItem: PhotosPickerItem? = nil // State for the picker item
+    @Binding var selectedImageData: Data?
+    var objectKey: String?
+    @ObservedObject var viewModel: RegisterDogViewModel
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var isDeleting: Bool = false
+    @State private var errorMessage: String? = nil
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -56,8 +60,22 @@ struct ProfileImageView: View {
                 }
             } else {
                 Button(action: {
-                    image = nil
-                    selectedImageData = nil
+                    guard let objectKey = objectKey else {
+                        image = nil
+                        selectedImageData = nil
+                        return
+                    }
+                    isDeleting = true
+                    errorMessage = nil
+                    viewModel.deleteProfileImageS3(objectKey: objectKey) { success in
+                        isDeleting = false
+                        if success {
+                            image = nil
+                            selectedImageData = nil
+                        } else {
+                            errorMessage = viewModel.errorMessage?.message ?? "이미지 삭제 실패"
+                        }
+                    }
                 }) {
                     ZStack {
                         Circle()
@@ -71,19 +89,42 @@ struct ProfileImageView: View {
                 
             }
         }
-        .padding(.vertical) // Add some vertical padding
+        .padding(.vertical)
+        .overlay(
+            Group {
+                if isDeleting {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .frame(width: 32, height: 32)
+                        .offset(x: 40, y: 40)
+                }
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding(.top, 4)
+                        .multilineTextAlignment(.center)
+                }
+            }
+        )
     }
 }
+
 
 #Preview {
     // Define @State variable correctly within the Preview scope
     struct PreviewWrapper: View {
         @State var previewImage: Image? = nil // Or provide a default image like Image(systemName: "pawprint.fill")
         @State var imageData: Data? = nil // Add state for data in preview
-
+        let viewModel = RegisterDogViewModel()
         var body: some View {
-            ProfileImageView(image: $previewImage, selectedImageData: $imageData) // Pass the data binding
-                .padding()
+            ProfileImageView(
+                image: $previewImage,
+                selectedImageData: $imageData,
+                objectKey: nil,
+                viewModel: viewModel
+            )
+            .padding()
         }
     }
     return PreviewWrapper() // Return the wrapper view

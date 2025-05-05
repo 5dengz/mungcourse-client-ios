@@ -18,6 +18,52 @@ enum NetworkError: Error {
 
 // MARK: - DogService 구현
 class DogService: DogServiceProtocol {
+    // 프로필 이미지 S3 삭제
+    func deleteProfileImageS3(objectKey: String) async throws {
+        let endpoint = baseURL.appendingPathComponent("/v1/s3")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body = ["key": objectKey]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        print("➡️ [DogService.deleteProfileImageS3] DELETE 요청 URL: \(endpoint)")
+        print("   [DogService.deleteProfileImageS3] 요청 바디: \(body)")
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.deleteProfileImageS3] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.deleteProfileImageS3] Invalid HTTP response")
+            throw NetworkError.invalidResponse
+        }
+        print("⬅️ [DogService.deleteProfileImageS3] 응답 코드: \(httpResponse.statusCode)")
+        if let responseBody = String(data: data, encoding: .utf8) {
+            print("⬅️ [DogService.deleteProfileImageS3] 응답 바디: \(responseBody)")
+        }
+        struct S3DeleteResponse: Decodable {
+            let timestamp: String?
+            let statusCode: Int?
+            let message: String?
+            let success: Bool?
+        }
+        let decoded = try? JSONDecoder().decode(S3DeleteResponse.self, from: data)
+        if let decoded = decoded {
+            print("[DogService.deleteProfileImageS3] statusCode: \(decoded.statusCode ?? -1), success: \(decoded.success ?? false), message: \(decoded.message ?? "")")
+            if decoded.success != true || (decoded.statusCode ?? 0) < 200 || (decoded.statusCode ?? 0) >= 300 {
+                throw NetworkError.httpError(statusCode: decoded.statusCode ?? -1, data: data)
+            }
+        } else {
+            print("[DogService.deleteProfileImageS3] 응답 디코딩 실패")
+            throw NetworkError.invalidResponse
+        }
+        print("✅ [DogService.deleteProfileImageS3] S3 이미지 삭제 성공: \(objectKey)")
+    }
+
     static let shared = DogService()
     private init() {}
 
@@ -142,57 +188,51 @@ class DogService: DogServiceProtocol {
     
     // MARK: - Async/Await 기반 구현
 
-    // contentType 매개변수 제거 및 로깅 개선
+    // getS3PresignedUrl 함수 NetworkManager 적용
     func getS3PresignedUrl(fileName: String, fileExtension: String) async throws -> S3PresignedUrlFullResponse {
         let endpoint = baseURL.appendingPathComponent("/v1/s3")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // Authorization 헤더 추가
         if let token = authToken, !token.isEmpty {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        // Authorization-Refresh 헤더 추가
         if let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty {
             request.setValue("Bearer \(refresh)", forHTTPHeaderField: "Authorization-Refresh")
         }
-
-        let cleanExt = fileExtension.hasPrefix(".")
-            ? String(fileExtension.dropFirst())
-            : fileExtension
+        let cleanExt = fileExtension.hasPrefix(".") ? String(fileExtension.dropFirst()) : fileExtension
         let body = ["fileName": fileName, "fileNameExtension": cleanExt]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        // —> **로그로 헤더/바디 확인**
         print("➡️ PresignedURL Request: POST \(endpoint.absoluteString)")
         print("🔍 PresignedURL Request Headers: \(request.allHTTPHeaderFields ?? [:])")
         if let b = request.httpBody, let s = String(data: b, encoding: .utf8) {
             print("🔍 PresignedURL Request Body: \(s)")
         }
-
-        let (data, resp) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = resp as? HTTPURLResponse else {
-            print("❌ Error: Invalid HTTP response received for S3 URL request.")
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.getS3PresignedUrl] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.getS3PresignedUrl] Invalid HTTP response")
             throw NetworkError.invalidResponse
         }
-
-        // 응답 상태코드 로깅 개선
         print("📡 S3 URL Request - Status Code: \(httpResponse.statusCode)")
         print("🔍 PresignedURL Response Headers: \(httpResponse.allHeaderFields)")
         if let respBody = String(data: data, encoding: .utf8) {
             print("🔍 PresignedURL Response Body: \(respBody)")
         }
-        
         guard (200...299).contains(httpResponse.statusCode) else {
-            // 오류 응답 상세 로깅
             print("❌ Error: S3 URL request failed with status: \(httpResponse.statusCode)")
             if let errorBody = String(data: data, encoding: .utf8) {
                 print("📄 Error response: \(errorBody)")
             }
             throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
-
         do {
             let decoder = JSONDecoder()
             let decodedResponse = try decoder.decode(S3PresignedUrlFullResponse.self, from: data)
@@ -207,28 +247,33 @@ class DogService: DogServiceProtocol {
         }
     }
 
+    // uploadImageToS3 함수 NetworkManager 적용
     func uploadImageToS3(presignedUrl: String, imageData: Data) async throws {
         guard let url = URL(string: presignedUrl) else { throw NetworkError.invalidURL }
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-        // 크기만 알려주는 건 OK
         request.setValue("\(imageData.count)", forHTTPHeaderField: "Content-Length")
         request.httpBody = imageData
-
-        // —> **로그로 헤더/바디 확인**
         print("➡️ S3 Upload Request: PUT \(request.url?.absoluteString ?? "")")
         print("🔍 S3 Upload Request Headers: \(request.allHTTPHeaderFields ?? [:])")
         print("🔍 S3 Upload Request Body Size: \(imageData.count) bytes")
-
-        let (respData, resp) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = resp as? HTTPURLResponse else {
-            print("❌ Error: Invalid HTTP response received during S3 upload.")
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.uploadImageToS3] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.uploadImageToS3] Invalid HTTP response")
             throw NetworkError.invalidResponse
         }
         print("🔍 S3 Upload Response Status Code: \(httpResponse.statusCode)")
         print("🔍 S3 Upload Response Headers: \(httpResponse.allHeaderFields)")
-        if let bodyString = String(data: respData, encoding: .utf8) {
+        if let bodyString = String(data: data, encoding: .utf8) {
             print("🔍 S3 Upload Response Body: \(bodyString)")
         }
         guard (200...299).contains(httpResponse.statusCode) else {
@@ -238,47 +283,45 @@ class DogService: DogServiceProtocol {
         print("✅ Image uploaded successfully to S3.")
     }
 
+    // registerDogWithDetails 함수 NetworkManager 적용
     func registerDogWithDetails(dogData: DogRegistrationData) async throws -> DogRegistrationResponseData {
         let endpoint = baseURL.appendingPathComponent("/v1/dogs")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
         guard let token = authToken, !token.isEmpty else {
-             print("❌ Error: Auth token is missing for /v1/dogs request.")
+            print("❌ Error: Auth token is missing for /v1/dogs request.")
             throw NetworkError.missingToken
         }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
         do {
             let encoder = JSONEncoder()
-            // If server expects specific date format, configure encoder
-            // encoder.dateEncodingStrategy = .iso8601 // or .formatted(dateFormatter)
             request.httpBody = try encoder.encode(dogData)
             print("➡️ Registering dog: \(endpoint) with token: \(token.prefix(10))... Body: \(String(data:request.httpBody!, encoding: .utf8) ?? "Invalid Body")")
         } catch {
-             print("❌ Error encoding dog registration request body: \(error)")
+            print("❌ Error encoding dog registration request body: \(error)")
             throw NetworkError.encodingError(error)
         }
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-             print("❌ Error: Invalid HTTP response received for dog registration.")
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.registerDogWithDetails] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.registerDogWithDetails] Invalid HTTP response")
             throw NetworkError.invalidResponse
         }
-
-        // Check for successful status code (e.g., 200 OK or 201 Created)
         guard (200...299).contains(httpResponse.statusCode) else {
-             print("❌ Error: Dog registration failed with status: \(httpResponse.statusCode)")
-             if let errorBody = String(data: data, encoding: .utf8) { print("   Error body: \(errorBody)") }
+            print("❌ Error: Dog registration failed with status: \(httpResponse.statusCode)")
+            if let errorBody = String(data: data, encoding: .utf8) { print("   Error body: \(errorBody)") }
             throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
-
-        // 1) JSON 래퍼를 먼저 파싱
         do {
             let decoder = JSONDecoder()
-            // decoder.keyDecodingStrategy = .convertFromSnakeCase // 필요시 사용
             let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
             let registeredData = apiResponse.data
             print("✅ Dog registered successfully: \(registeredData.name)")
@@ -289,55 +332,32 @@ class DogService: DogServiceProtocol {
         }
     }
 
-    // GET /v1/dogs/main 메인 반려견 조회
-    func fetchMainDog() -> AnyPublisher<Dog, Error> {
-        let endpoint = baseURL.appendingPathComponent("/v1/dogs/main")
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "GET"
-        if let token = authToken, !token.isEmpty {
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-
-        return Future<Dog, Error> { promise in
-            URLSession.shared.dataTaskPublisher(for: request)
-                .map { $0.data }
-                .tryMap { data -> Dog in
-                    if let jsonString = String(data: data, encoding: .utf8) {
-                        print("[DogService.fetchMainDog] 응답: \(jsonString)")
-                    }
-                    let responseWrapper = try JSONDecoder().decode(DogDataResponse.self, from: data)
-                    return responseWrapper.data
-                }
-                .sink(receiveCompletion: { completion in
-                    if case .failure(let error) = completion {
-                        print("[DogService.fetchMainDog] 오류: \(error.localizedDescription)")
-                        promise(.failure(error))
-                    }
-                }, receiveValue: { dog in
-                    promise(.success(dog))
-                })
-                .store(in: &self.cancellables)
-        }
-        .eraseToAnyPublisher()
-    }
-
-    // GET /v1/dogs/{dogId} 강아지 세부 정보 조회
+    // fetchDogDetail 함수 NetworkManager 적용
     func fetchDogDetail(dogId: Int) async throws -> DogRegistrationResponseData {
         let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // 토큰 추가
         guard let token = authToken, !token.isEmpty else {
             print("❌ Error: Auth token is missing for /v1/dogs/{dogId} request.")
             throw NetworkError.missingToken
         }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw NetworkError.httpError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1, data: data)
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.fetchDogDetail] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.fetchDogDetail] Invalid HTTP response")
+            throw NetworkError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
         let decoder = JSONDecoder()
         let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
@@ -354,10 +374,21 @@ class DogService: DogServiceProtocol {
             throw NetworkError.missingToken
         }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw NetworkError.httpError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1, data: data)
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.fetchWalkRecords] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.fetchWalkRecords] Invalid HTTP response")
+            throw NetworkError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
         let decoder = JSONDecoder()
         let apiResponse = try decoder.decode(ServiceAPIResponse<[WalkRecordData]>.self, from: data)
@@ -383,11 +414,23 @@ class DogService: DogServiceProtocol {
             print("❌ Error encoding dog update request body: \(error)")
             throw NetworkError.encodingError(error)
         }
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-            print("❌ Error: Dog update failed with status: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.updateDog] 네트워크 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.updateDog] Invalid HTTP response")
+            throw NetworkError.invalidResponse
+        }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            print("❌ Error: Dog update failed with status: \(httpResponse.statusCode)")
             if let errorBody = String(data: data, encoding: .utf8) { print("   Error body: \(errorBody)") }
-            throw NetworkError.httpError(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1, data: data)
+            throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
         do {
             let decoder = JSONDecoder()
@@ -406,33 +449,37 @@ class DogService: DogServiceProtocol {
         let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "DELETE"
-        // 토큰 추가
         guard let token = authToken, !token.isEmpty else {
-            print("❌ Error: Auth token is missing for DELETE /v1/dogs/{dogId} request.")
+            print("❌ [DogService.deleteDog] Auth token is missing for DELETE /v1/dogs/{dogId} request.")
             throw NetworkError.missingToken
         }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
-        print("➡️ Deleting dog: \(endpoint) with token: \(token.prefix(10))")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            print("❌ Error: Invalid HTTP response received for dog deletion.")
+        print("➡️ [DogService.deleteDog] DELETE 요청 URL: \(endpoint)")
+        print("   [DogService.deleteDog] 요청 헤더: \(request.allHTTPHeaderFields ?? [:])")
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        if let error = error {
+            print("❌ [DogService.deleteDog] 네트워크/알 수 없는 에러: \(error)")
+            throw error
+        }
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.deleteDog] Invalid HTTP response")
             throw NetworkError.invalidResponse
         }
-
-        // 성공 응답 확인 (일반적으로 200 OK 또는 204 No Content)
+        print("⬅️ [DogService.deleteDog] 응답 코드: \(httpResponse.statusCode)")
+        if let responseBody = String(data: data, encoding: .utf8) {
+            print("⬅️ [DogService.deleteDog] 응답 바디: \(responseBody)")
+        }
         guard (200...299).contains(httpResponse.statusCode) else {
-            print("❌ Error: Dog deletion failed with status: \(httpResponse.statusCode)")
+            print("❌ [DogService.deleteDog] 실패 상태 코드: \(httpResponse.statusCode)")
             if let errorBody = String(data: data, encoding: .utf8), !errorBody.isEmpty {
-                print("   Error body: \(errorBody)")
+                print("   [DogService.deleteDog] 에러 바디: \(errorBody)")
             }
-            // 실패 시 구체적인 에러 처리를 위해 data를 전달할 수 있습니다.
             throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
         }
-
-        print("✅ Dog with ID \(dogId) deleted successfully.")
-        // 성공 시 별도의 반환값 없음
+        print("✅ [DogService.deleteDog] Dog with ID \(dogId) deleted successfully.")
     }
 }

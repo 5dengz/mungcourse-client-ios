@@ -20,6 +20,9 @@ struct RegisterDogContentsView: View {
     var registerAction: () -> Void
     // 수정 모드 여부 (첫 로그인이 아닌 경우)
     let isEditing: Bool
+    // 추가: S3 objectKey와 viewModel
+    let objectKey: String?
+    let viewModel: RegisterDogViewModel
     
     // TODO: Define actions passed from the parent if needed
     // var addAnotherDogAction: () -> Void
@@ -27,7 +30,12 @@ struct RegisterDogContentsView: View {
     var body: some View {
         ScrollView { 
             VStack(spacing: 24) {
-                ProfileImageView(image: $profileImage, selectedImageData: $selectedImageData)
+                ProfileImageView(
+                    image: $profileImage,
+                    selectedImageData: $selectedImageData,
+                    objectKey: objectKey,
+                    viewModel: viewModel
+                )
 
                 VStack(spacing: 35) { 
                     RequiredTextField(title: "이름", placeholder: "입력하기", text: $name)

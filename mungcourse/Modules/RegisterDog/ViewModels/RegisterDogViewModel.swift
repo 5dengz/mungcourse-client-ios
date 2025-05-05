@@ -27,6 +27,29 @@ struct RegisterDogError: Identifiable {
 }
 
 class RegisterDogViewModel: ObservableObject {
+    // 프로필 이미지 S3 삭제
+    func deleteProfileImageS3(objectKey: String, completion: @escaping (Bool) -> Void) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                print("➡️ ViewModel: Calling dogService.deleteProfileImageS3(objectKey: \(objectKey))")
+                try await dogService.deleteProfileImageS3(objectKey: objectKey)
+                print("✅ ViewModel: S3 이미지 삭제 성공: \(objectKey)")
+                await MainActor.run {
+                    isLoading = false
+                    completion(true)
+                }
+            } catch {
+                print("❌ ViewModel: S3 이미지 삭제 실패: \(error.localizedDescription)")
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = RegisterDogError(message: "프로필 사진 삭제 중 오류가 발생했습니다: \(error.localizedDescription)")
+                    completion(false)
+                }
+            }
+        }
+    }
     // MARK: - Published 속성
     @Published var name: String = ""
     @Published var gender: Gender? = nil

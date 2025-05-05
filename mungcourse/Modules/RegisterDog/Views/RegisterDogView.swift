@@ -109,7 +109,13 @@ struct RegisterDogView: View {
                         isFormValid: viewModel.isFormValid,
                         isLoading: viewModel.isLoading,
                         registerAction: registerAction,
-                        isEditing: isEditing // 수정 모드 여부 전달
+                        isEditing: isEditing,
+                        objectKey: (isEditing ? (initialDetail?.dogImgUrl.flatMap { url in
+                            // S3 object key만 추출 (URL path에서 host 이후 부분)
+                            if let u = URL(string: url) { return u.path.dropFirst() }
+                            return nil
+                        }) : nil).map(String.init),
+                        viewModel: viewModel
                     )
                     .padding(.horizontal, 20)
                     // Remove navigation modifiers from here

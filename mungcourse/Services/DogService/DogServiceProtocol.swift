@@ -82,4 +82,6 @@ protocol DogServiceProtocol {
     func updateDog(dogId: Int, dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
     // 강아지 정보 삭제 추가
     func deleteDog(dogId: Int) async throws
+    // 프로필 이미지(S3) 삭제 추가 (API: key)
+    func deleteProfileImageS3(objectKey: String) async throws
 }
