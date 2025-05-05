@@ -70,3 +70,54 @@ WalkTrackingService
         - pinpoint_danger.png 마커 이미지 리소스 추가 필요
 - 결과: 산책 시작 시점 기준 2km 내 흡연구역이 지도에 danger 마커로 실시간 표시됨
 
+---
+
+### 2025-05-05 StartWalkViewModel에서 fetchSmokingZones 인식 오류(Cannot find in scope) 문제 해결
+
+- 문제: StartWalkViewModel.swift에서 fetchSmokingZones(center:) 호출 시 'Cannot find in scope' 에러 발생
+- 원인: fetchSmokingZones(center:) 함수가 클래스 내에 정의되어 있지 않거나, 선언 위치/오타 등으로 스코프 내에서 인식되지 않음
+- 해결:
+    - StartWalkViewModel 내에 fetchSmokingZones(center:) 메서드를 정확히 추가(또는 오타/위치 수정)
+    - 함수 구현 예시는 아래 참고
+```swift
+// MARK: - 흡연구역 조회 (2km 반경)
+func fetchSmokingZones(center: NMGLatLng) {
+    let urlString = "https://your.api.server/v1/walks/smokingzone?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
+    guard let url = URL(string: urlString) else { return }
+    URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+        guard let self = self, let data = data, error == nil else { return }
+        do {
+            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Double]]
+            let zones = json?.compactMap { dict -> NMGLatLng? in
+                guard let lat = dict["lat"], let lng = dict["lng"] else { return nil }
+                return NMGLatLng(lat: lat, lng: lng)
+            } ?? []
+            DispatchQueue.main.async {
+                self.smokingZones = zones
+            }
+        } catch {
+            print("흡연구역 파싱 실패: \(error)")
+        }
+    }.resume()
+}
+```
+- 참고: Swift 공식 문서 메서드 선언 및 클래스 내 스코프 규칙
+- 결과: 함수 선언이 정상적으로 추가되어 에러 없이 빌드 및 실행 가능
+
+---
+
+### 2025-05-05 산책 기록 저장 API 연동 개선
+
+- 문제: 산책 완료 후 산책 데이터를 서버에 저장하는 API 호출 코드가 ViewModel에 직접 포함되어 있어 관심사 분리가 미흡함
+- 원인: WalkService에 산책 기록 저장 API가 구현되어 있지 않고, StartWalkViewModel이 직접 API 통신을 담당함
+- 해결:
+    - WalkService.swift에 uploadWalkSession 메서드를 추가하여 산책 기록 저장 API 기능 구현
+    - StartWalkViewModel의 uploadWalkSession 메서드를 수정하여 직접 API 호출 대신 WalkService 사용
+    - Combine 프레임워크를 활용하여 비동기 처리 및 통신 결과 핸들링
+- 참고: SwiftUI 공식 문서 Combine, AnyPublisher, Future/Promise 패턴
+- 결과: 
+    - 코드의 관심사가 명확히 분리되어 유지보수성 향상
+    - API 통신 로직이 WalkService에 집중되어 재사용성 개선
+    - API 변경 시 WalkService만 수정하면 되어 코드 유지관리 용이
+
+

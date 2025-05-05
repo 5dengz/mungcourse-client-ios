@@ -17,8 +17,18 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     var trackingMode: NMFMyPositionMode = .direction
     
     func makeUIView(context: Context) -> NMFNaverMapView {
-        // ... 기존 코드 ...
-        // danger 마커 표시
+        print("[디버그] makeUIView 호출")
+        
+        // 먼저 mapView를 생성
+        let mapView = NMFNaverMapView()
+        
+        mapView.showLocationButton = showUserLocation
+        mapView.mapView.positionMode = trackingMode
+        mapView.showZoomControls = true
+        mapView.showCompass = true
+        mapView.showScaleBar = true
+        
+        // danger 마커 표시 (mapView 선언 이후로 이동)
         for coord in dangerCoordinates {
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
@@ -28,14 +38,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             marker.mapView = mapView.mapView
             context.coordinator.dangerMarkers.append(marker)
         }
-        print("[디버그] makeUIView 호출")
-        let mapView = NMFNaverMapView()
         
-        mapView.showLocationButton = showUserLocation
-        mapView.mapView.positionMode = trackingMode
-        mapView.showZoomControls = true
-        mapView.showCompass = true
-        mapView.showScaleBar = true
         // 현위치 버튼 위치 조정(상단 우측, 여백 80, 16)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             let buttons = mapView.subviews.compactMap { $0 as? UIButton }
