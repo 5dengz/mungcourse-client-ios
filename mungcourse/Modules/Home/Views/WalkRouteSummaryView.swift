@@ -49,10 +49,8 @@ struct WalkRouteSummaryView: View {
                             .foregroundColor(Color("gray600"))
                         Text(emptyMessage ?? "산책 경로 데이터가 없습니다")
                             .font(.custom("Pretendard-Medium", size: 16))
-                            .padding(.top, 4)
-                        Text("산책을 시작해보세요!")
-                            .font(.custom("Pretendard-Regular", size: 14))
                             .foregroundColor(Color("gray600"))
+                            .padding(.top, 6)                            
                     }
                 } else {
                     SimpleNaverMapView(

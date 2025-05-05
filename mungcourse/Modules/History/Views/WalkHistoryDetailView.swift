@@ -103,7 +103,7 @@ struct WalkHistoryDetailView: View {
             VStack(spacing: 0) {
                 // 자체 구현 헤더 (흰색 배경과 하단 그림자 적용)
                 ZStack {
-                    Text("\(formatDate(date: viewModel.selectedDate)) 산책 기록")
+                    Text("\(formatDate(date: viewModel.selectedDate))")
                         .font(.custom("Pretendard-SemiBold", size: 20))
                         .foregroundColor(Color("gray900"))
                         .frame(maxWidth: .infinity)
@@ -145,7 +145,7 @@ struct WalkHistoryDetailView: View {
                                 .foregroundColor(Color("gray500"))
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 50)
+                        .padding(.top, 100)
                     } else {
                         // 산책 기록 목록 표시
                         VStack(alignment: .leading, spacing: 16) {

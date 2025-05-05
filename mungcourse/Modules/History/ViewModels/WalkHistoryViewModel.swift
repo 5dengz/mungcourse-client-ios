@@ -32,6 +32,13 @@ class WalkHistoryViewModel: ObservableObject {
         loadWalkDatesForCurrentMonth()
     }
     
+    init(selectedDate: Date) {
+        self.selectedDate = selectedDate
+        self.currentMonth = selectedDate
+        loadWalkDatesForCurrentMonth()
+        loadWalkRecords(for: selectedDate)
+    }
+    
     // MARK: - 달력 관련 메소드
     
     // 이전달로 이동

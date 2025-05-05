@@ -7,6 +7,9 @@ struct HomeView: View {
     var onSelectCourse: () -> Void
 
     @State private var showingDogSelection: Bool = false
+    @State private var showWalkHistoryDetail: Bool = false
+    @State private var walkHistoryDate: Date? = nil
+    @State private var showNoRecordToast = false
 
     var body: some View {
         ScrollView {
@@ -22,8 +25,16 @@ struct HomeView: View {
                     onSelectCourse: onSelectCourse
                 )
                 NearbyTrailsView()
-                PastRoutesView()
-                    .padding(.bottom, 42)
+                PastRoutesView(onShowDetail: { date in
+                    self.walkHistoryDate = date
+                    self.showWalkHistoryDetail = true
+                }, onShowEmptyDetail: {
+                    self.showNoRecordToast = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        self.showNoRecordToast = false
+                    }
+                })
+                .padding(.bottom, 42)
                 Spacer()
             }
             .padding(.horizontal, 20)
@@ -37,6 +48,27 @@ struct HomeView: View {
             }, showBackButton: true)
             .environmentObject(dogVM)
         }
+        .fullScreenCover(isPresented: $showWalkHistoryDetail) {
+            if let date = walkHistoryDate {
+                WalkHistoryDetailView(viewModel: WalkHistoryViewModel(selectedDate: date))
+            }
+        }
+        .overlay(
+            Group {
+                if showNoRecordToast {
+                    Text("산책 기록이 없습니다!")
+                        .font(.custom("Pretendard-SemiBold", size: 16))
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 24)
+                        .background(Color.black.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(16)
+                        .transition(.opacity)
+                        .zIndex(1)
+                        .padding(.bottom, 80) // 탭바 위에 오도록 하단 패딩
+                }
+            }, alignment: .bottom
+        )
     }
 }
 

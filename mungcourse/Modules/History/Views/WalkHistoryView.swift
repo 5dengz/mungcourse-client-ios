@@ -98,7 +98,7 @@ struct WalkHistoryView: View {
                                         )
                                         .overlay(
                                             Circle()
-                                                .stroke(date.isToday() ? Color("main") : (viewModel.hasWalkRecord(for: date) ? Color("main") : Color.clear), lineWidth: date.isToday() ? 3 : (viewModel.hasWalkRecord(for: date) ? 2 : 0))
+                                                .stroke(date.isToday() ? Color("main") : (viewModel.hasWalkRecord(for: date) ? Color("main") : Color.clear), lineWidth: date.isToday() ? 2 : (viewModel.hasWalkRecord(for: date) ? 2 : 0))
                                         )
                                 }
                                 .disabled(date > Date()) // 미래 날짜는 비활성화만, 숫자는 항상 보임
@@ -107,13 +107,13 @@ struct WalkHistoryView: View {
                         .padding(.horizontal, 28)
                     }
                     
-                    // 에러 메시지 표시
-                    if viewModel.dateError != nil {
-                        Text("데이터를 불러오는 중 오류가 발생했습니다.")
-                            .font(.custom("Pretendard-Regular", size: 14))
-                            .foregroundColor(.red)
-                            .padding()
-                    }
+                    // 에러 메시지 표시 (콘솔 로그만, 화면에는 표시하지 않음)
+                    // if viewModel.dateError != nil {
+                    //     Text("데이터를 불러오는 중 오류가 발생했습니다.")
+                    //         .font(.custom("Pretendard-Regular", size: 14))
+                    //         .foregroundColor(.red)
+                    //         .padding()
+                    // }
                     
                     Spacer()
                 }
@@ -132,11 +132,11 @@ struct WalkHistoryView: View {
     // 날짜 텍스트 색상 결정
     private func getDateTextColor(_ date: Date) -> Color {
         if date.isToday() {
-            return .white
-        } else if date > Date() {
-            return Color("gray300") // 미래 날짜는 더 밝은 회색
-        } else {
+            return Color("main")
+        } else if viewModel.hasWalkRecord(for: date) {
             return Color("gray500")
+        } else {
+            return Color("gray400") // 기록 없는 과거/미래 동일하게
         }
     }
     
@@ -147,7 +147,7 @@ struct WalkHistoryView: View {
         } else if viewModel.hasWalkRecord(for: date) {
             return Color("main25")
         } else {
-            return Color("gray200")
+            return Color("gray200") // 기록 없는 과거/미래 동일하게
         }
     }
 }

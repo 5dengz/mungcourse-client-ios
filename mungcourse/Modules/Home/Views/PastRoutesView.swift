@@ -4,6 +4,8 @@ import NMapsGeometry
 
 struct PastRoutesView: View {
     @StateObject private var viewModel = PastRoutesViewModel()
+    var onShowDetail: ((Date) -> Void)? = nil
+    var onShowEmptyDetail: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -13,8 +15,14 @@ struct PastRoutesView: View {
                     .font(.custom("Pretendard-SemiBold", size: 18))
                 Spacer()
                 Button("더보기") {
-                    // TODO: 더보기 액션 구현
-                    print("과거 산책 기록 더보기 탭됨")
+                    if let walk = viewModel.recentWalk {
+                        // startedAt(String) -> Date 변환
+                        if let date = Self.parseDate(from: walk.startedAt) {
+                            onShowDetail?(date)
+                        }
+                    } else {
+                        onShowEmptyDetail?()
+                    }
                 }
                 .font(.custom("Pretendard-Regular", size: 14))
                 .fontWeight(.light)
@@ -39,6 +47,13 @@ struct PastRoutesView: View {
             )
         }
         .cornerRadius(10)
+    }
+    // startedAt(String) -> Date 변환 함수
+    private static func parseDate(from startedAt: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.date(from: startedAt)
     }
 }
 
