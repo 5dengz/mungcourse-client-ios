@@ -44,19 +44,6 @@ struct PastRoutesView: View {
                         .padding(8)
                 }
             }
-            
-            // 새로고침 버튼
-            Button(action: {
-                viewModel.loadRecentWalk()
-            }) {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                    Text("새로 고침")
-                        .font(.custom("Pretendard-Regular", size: 12))
-                }
-                .foregroundColor(Color("gray600"))
-                .padding(.top, 5)
-            }
         }
         .cornerRadius(10)
     }

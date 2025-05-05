@@ -4,7 +4,7 @@ import NMapsMap
 struct SimpleNaverMapView: UIViewRepresentable {
     var coordinates: [NMGLatLng]
     var boundingBox: NMGLatLngBounds?
-    var pathColor: UIColor = .systemBlue
+    var pathColor: UIColor = UIColor(named: "main") ?? .systemBlue
     var pathWidth: CGFloat = 5.0
     
     class OverlayHolder {
@@ -17,6 +17,10 @@ struct SimpleNaverMapView: UIViewRepresentable {
         let mapView = NMFMapView()
         mapView.positionMode = .direction
         mapView.zoomLevel = 15 // 초기 줌 레벨
+        
+        // 네이버 로고 숨기기
+        mapView.logoAlign = .leftTop
+        mapView.logoMargin = UIEdgeInsets(top: -100, left: -100, bottom: 0, right: 0)
         
         // UI 설정
         mapView.isRotateGestureEnabled = false // 회전 제스처 비활성화
@@ -51,10 +55,7 @@ struct SimpleNaverMapView: UIViewRepresentable {
             addMarkers(on: mapView, context: context)
             
             // 경로에 맞게 지도 영역 조정
-            if let bounds = boundingBox {
-                mapView.moveCamera(NMFCameraUpdate(fit: bounds, padding: 50))
-            } else if let firstCoord = coordinates.first {
-                // 바운딩 박스가 없으면 첫 좌표로 이동
+            if let firstCoord = coordinates.first {
                 mapView.moveCamera(NMFCameraUpdate(scrollTo: firstCoord))
             }
         }
@@ -88,7 +89,9 @@ struct SimpleNaverMapView: UIViewRepresentable {
         // 시작 마커
         let startMarker = NMFMarker()
         startMarker.position = start
-        startMarker.iconImage = NMF_MARKER_IMAGE_GREEN
+        if let iconImage = UIImage(named: "pinpoint_paw") {
+            startMarker.iconImage = NMFOverlayImage(image: iconImage)
+        }
         startMarker.iconTintColor = .systemGreen
         startMarker.captionText = "시작"
         startMarker.captionColor = .systemGreen
