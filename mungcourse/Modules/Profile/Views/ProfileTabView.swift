@@ -41,8 +41,8 @@ class ProfileViewModel: ObservableObject {
     func fetchUserInfo() {
         isLoading = true
         errorMessage = nil
-        guard let accessToken = TokenManager.shared.getAccessToken(),
-              let refreshToken = TokenManager.shared.getRefreshToken() else {
+        guard TokenManager.shared.getAccessToken() != nil,
+              TokenManager.shared.getRefreshToken() != nil else {
             errorMessage = "토큰이 없습니다. 다시 로그인 해주세요."
             isLoading = false
             print("[ProfileViewModel] 토큰 없음")
@@ -162,35 +162,25 @@ struct ProfileTabView: View {
             if let detail = dogVM.dogDetail {
                 RegisterDogView(initialDetail: detail, onComplete: {
                     // 완료 후 강아지 목록 새로고침 및 메인 강아지 재설정
-                    Task {
-                        await dogVM.fetchDogs()
-                        // 삭제 후 남은 강아지가 있으면 첫 번째 강아지를 메인으로 설정
-                        if let firstDog = dogVM.dogs.first {
-                            await MainActor.run {
-                                dogVM.mainDog = firstDog
-                            }
-                        } else {
-                            // 모든 강아지가 삭제된 경우 (이론상 RegisterDogView에서 막지만 방어 코드)
-                            // 필요하다면 사용자에게 알리거나 다른 처리
-                            print("모든 강아지가 삭제되었습니다.")
-                            await MainActor.run {
-                                dogVM.mainDog = nil
-                                // TODO: UI에서 안내 메시지 또는 등록 화면으로 이동 처리
-                            }
-                        }
+                    dogVM.fetchDogs()
+                    // 삭제 후 남은 강아지가 있으면 첫 번째 강아지를 메인으로 설정
+                    if let firstDog = dogVM.dogs.first {
+                        dogVM.mainDog = firstDog
+                    } else {
+                        // 모든 강아지가 삭제된 경우 (이론상 RegisterDogView에서 막지만 방어 코드)
+                        // 필요하다면 사용자에게 알리거나 다른 처리
+                        print("모든 강아지가 삭제되었습니다.")
+                        dogVM.mainDog = nil
+                        // TODO: UI에서 안내 메시지 또는 등록 화면으로 이동 처리
                     }
                 }, showBackButton: true)
                     .environmentObject(dogVM)
             } else {
                 RegisterDogView(onComplete: {
                     // 신규 등록 후에도 목록 새로고침 및 메인 설정 (필요시)
-                    Task {
-                        await dogVM.fetchDogs()
-                        if let firstDog = dogVM.dogs.first, dogVM.mainDog == nil {
-                            await MainActor.run {
-                                dogVM.mainDog = firstDog
-                            }
-                        }
+                    dogVM.fetchDogs()
+                    if let firstDog = dogVM.dogs.first, dogVM.mainDog == nil {
+                        dogVM.mainDog = firstDog
                     }
                 }, showBackButton: true)
                     .environmentObject(dogVM)

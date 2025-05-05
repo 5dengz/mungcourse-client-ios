@@ -58,7 +58,7 @@ class WalkService {
                         return
                     }
                     
-                    promise(.success(walkData))
+                    promise(.success(walkData.toWalkDTO()))
                 } catch {
                     print("JSON 디코딩 오류: \(error)")
                     promise(.failure(error))

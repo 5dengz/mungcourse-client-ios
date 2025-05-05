@@ -82,7 +82,7 @@ class LoginViewModel: ObservableObject {
                 self.isLoading = false
                 
                 switch result {
-                case .success(let token):
+                case .success(_):
                     self.checkDogs()
                 case .failure(let error):
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -102,7 +102,7 @@ class LoginViewModel: ObservableObject {
                 self.isLoading = false
                 
                 switch result {
-                case .success(let token):
+                case .success(_):
                     self.checkDogs()
                 case .failure(let error):
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
@@ -122,7 +122,7 @@ class LoginViewModel: ObservableObject {
                 self.isLoading = false
                 
                 switch result {
-                case .success(let token):
+                case .success(_):
                     self.checkDogs()
                 case .failure(let error):
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)

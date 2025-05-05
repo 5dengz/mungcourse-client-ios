@@ -1,7 +1,4 @@
-if error.code == .userAuthenticationRequired {
-    // 인증 실패 시 토큰 갱신 시도
-    return self.refreshTokenAndRetry(request)
-}import Foundation
+import Foundation
 import Combine
 
 final class NetworkManager {
