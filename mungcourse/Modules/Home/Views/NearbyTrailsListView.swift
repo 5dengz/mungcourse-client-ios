@@ -24,11 +24,11 @@ struct NearbyTrailsListView: View {
                             viewModel.fetchNearbyDogPlaces(category: selectedCategory)
                         } label: {
                             Text(category)
-                                .font(.custom("Pretendard-Regular", size: 14))
+                                .font(.custom("Pretendard-Regular", size: 15))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 4)
                                 .background(isSelected ? Color("main") : Color("gray300"))
-                                .foregroundColor(isSelected ? .Color("pointwhite") : .Color("gray400"))
+                                .foregroundColor(isSelected ? Color("pointwhite") : Color("gray600"))
                                 .clipShape(Capsule())
                         }
                     }
@@ -56,7 +56,9 @@ struct NearbyTrailsListView: View {
                                     distance: String(format: "%.1fkm", place.distance / 1000),
                                     imageName: place.dogPlaceImgUrl ?? "",
                                     roundTripTime: place.openingHours ?? "",
-                                    category: place.category
+                                    category: place.category,
+                                    infoWidth: 330,
+                                    infoHeight: 76
                                 )
                                 .onTapGesture {
                                     selectedPlace = place
@@ -81,4 +83,5 @@ struct NearbyTrailsListView: View {
         }
     }
 }
+
 

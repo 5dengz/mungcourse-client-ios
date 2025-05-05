@@ -8,6 +8,20 @@ struct TrailItemView: View {
     let imageName: String // 이미지 이름 또는 URL
     let roundTripTime: String // 왕복 시간 (NearbyTrailsView에서 openingHours 사용 중)
     let category: String // 카테고리 파라미터 추가
+    // 정보 영역 크기 크기 지정 프로퍼티
+    let infoWidth: CGFloat
+    let infoHeight: CGFloat
+
+    // 초기화: 기본값을 통해 기존 사용 방식을 유지하며 외부 오버라이드 가능
+    init(trailName: String, distance: String, imageName: String, roundTripTime: String, category: String, infoWidth: CGFloat = 210, infoHeight: CGFloat = 66) {
+        self.trailName = trailName
+        self.distance = distance
+        self.imageName = imageName
+        self.roundTripTime = roundTripTime
+        self.category = category
+        self.infoWidth = infoWidth
+        self.infoHeight = infoHeight
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) { // spacing 0으로 변경
@@ -53,7 +67,7 @@ struct TrailItemView: View {
                             .scaledToFit()
                             .frame(width: 15, height: 15)
                         Text(distance)
-                            .font(.custom("Pretendard-Regular", size: 12))
+                            .font(.custom("Pretendard-Regular", size: 13))
                     }
                 }
                 
@@ -64,7 +78,7 @@ struct TrailItemView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .frame(width: 210, height: 66)
+            .frame(width: infoWidth, height: infoHeight)
             .background(Color("pointwhite")) // 정보영역에만 배경 적용
         }
         .cornerRadius(8)
