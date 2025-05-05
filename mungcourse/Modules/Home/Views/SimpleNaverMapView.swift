@@ -93,11 +93,18 @@ struct SimpleNaverMapView: UIViewRepresentable {
         let startMarker = NMFMarker()
         startMarker.position = start
         if let iconImage = UIImage(named: "pinpoint_paw") {
-            startMarker.iconImage = NMFOverlayImage(image: iconImage)
+            // 핀포인트 이미지 31x39로 리사이즈
+            let size = CGSize(width: 31, height: 39)
+            let renderer = UIGraphicsImageRenderer(size: size)
+            let resizedImage = renderer.image { _ in
+                iconImage.draw(in: CGRect(origin: .zero, size: size))
+            }
+            startMarker.iconImage = NMFOverlayImage(image: resizedImage)
         }
-        startMarker.iconTintColor = .systemGreen
+        // Asset Catalog의 "main" 컬러 사용
+        startMarker.iconTintColor = UIColor(named: "main")!
         startMarker.captionText = "시작"
-        startMarker.captionColor = .systemGreen
+        startMarker.captionColor = UIColor(named: "main")!
         startMarker.mapView = mapView
         context.coordinator.overlayHolder?.startMarker = startMarker
         // 종료 마커 (시작점과 종료점이 다를 경우에만)
@@ -105,9 +112,10 @@ struct SimpleNaverMapView: UIViewRepresentable {
             let endMarker = NMFMarker()
             endMarker.position = end
             endMarker.iconImage = NMF_MARKER_IMAGE_RED
-            endMarker.iconTintColor = .systemRed
+            // Asset Catalog의 "main" 컬러 사용
+            endMarker.iconTintColor = UIColor(named: "main")!
             endMarker.captionText = "종료"
-            endMarker.captionColor = .systemRed
+            endMarker.captionColor = UIColor(named: "main")!
             endMarker.mapView = mapView
             context.coordinator.overlayHolder?.endMarker = endMarker
         }

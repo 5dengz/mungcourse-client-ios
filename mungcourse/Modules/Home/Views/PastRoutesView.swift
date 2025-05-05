@@ -97,7 +97,7 @@ struct PastRoutesView: View {
         SimpleNaverMapView(
             coordinates: viewModel.getNaverMapCoordinates(),
             boundingBox: viewModel.calculateMapBounds(),
-            pathColor: .systemBlue,
+            pathColor: Color("main"),
             pathWidth: 5.0
         )
     }
