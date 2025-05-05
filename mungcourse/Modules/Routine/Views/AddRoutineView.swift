@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct AddRoutineView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -8,7 +9,12 @@ struct AddRoutineView: View {
     @State private var hour: Int = 8
     @State private var minute: Int = 0
     @State private var isAlarmOn: Bool = false
+    @State private var cancellables = Set<AnyCancellable>()
     
+    private var isFormValid: Bool {
+        !title.isEmpty && !selectedDays.isEmpty
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             CommonHeaderView(
@@ -17,7 +23,7 @@ struct AddRoutineView: View {
                 title: "루틴 추가"
             )
             .padding(.bottom, 12)
-            .padding(.top, 16)
+            .padding(.top, 32)
             .padding(.horizontal, 20)
             
             VStack(spacing: 28) {
@@ -88,6 +94,7 @@ struct AddRoutineView: View {
                     .padding(.horizontal, 20)
                 }
                 
+                /* 알림 설정 섹션 주석 처리
                 HStack {
                     Text("알림 설정")
                         .font(.custom("Pretendard-SemiBold", size: 16))
@@ -97,11 +104,46 @@ struct AddRoutineView: View {
                         .labelsHidden()
                 }
                 .padding(.horizontal, 20)
+                */
             }
             .padding(.vertical, 24)
             .padding(.horizontal, 20)
-            
-            Spacer()
+
+            Spacer()  // 버튼을 하단으로 밀기 위한 Spacer 삽입
+
+            // '추가하기' 버튼
+            CommonFilledButton(
+                title: "추가하기",
+                action: addRoutine,
+                isEnabled: isFormValid
+            )
+            .padding(.horizontal, 40)
+            .padding(.bottom, 28)
         }
+    }
+
+    private func addRoutine() {
+        let hour24 = isAM ? (hour % 12) : (hour % 12 + 12)
+        let alarmTimeFormatted = String(format: "%02d:%02d", hour24, minute)
+        let days = selectedDays.map { $0.apiValue }
+        let request = CreateRoutineRequest(
+            name: title,
+            alarmTime: alarmTimeFormatted,
+            repeatDays: days,
+            isAlarmActive: true
+        )
+        RoutineService.shared.createRoutine(requestBody: request)
+            .receive(on: RunLoop.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("Failed to create routine:", error)
+                }
+            } receiveValue: { _ in
+                presentationMode.wrappedValue.dismiss()
+            }
+            .store(in: &cancellables)
     }
 }

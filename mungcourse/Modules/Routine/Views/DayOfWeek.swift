@@ -24,13 +24,13 @@ extension DayOfWeek {
     static var monday: DayOfWeek { .mon }
     var apiValue: String {
         switch self {
-        case .mon: return "MONDAY"
-        case .tue: return "TUESDAY"
-        case .wed: return "WEDNESDAY"
-        case .thu: return "THURSDAY"
-        case .fri: return "FRIDAY"
-        case .sat: return "SATURDAY"
-        case .sun: return "SUNDAY"
+        case .mon: return "MON"
+        case .tue: return "TUE"
+        case .wed: return "WED"
+        case .thu: return "THU"
+        case .fri: return "FRI"
+        case .sat: return "SAT"
+        case .sun: return "SUN"
         }
     }
 }

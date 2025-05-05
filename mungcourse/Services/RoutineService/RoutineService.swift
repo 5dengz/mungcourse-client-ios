@@ -23,12 +23,14 @@ struct CreateRoutineRequest: Encodable {
     let name: String
     let alarmTime: String
     let repeatDays: [String]
+    let isAlarmActive: Bool
 }
 
 struct CreateRoutineResponse: Decodable {
     let name: String
     let alarmTime: String
     let repeatDays: [String]
+    let isAlarmActive: Bool
 }
 
 // MARK: - RoutineService

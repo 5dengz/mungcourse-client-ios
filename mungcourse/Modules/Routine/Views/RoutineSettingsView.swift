@@ -84,7 +84,7 @@ class RoutineViewModel: ObservableObject {
     // 새 루틴 등록 (API 호출)
     func addRoutine(title: String, time: String, days: Set<DayOfWeek>) {
         let repeatDays = days.map { $0.apiValue }
-        let request = CreateRoutineRequest(name: title, alarmTime: time, repeatDays: repeatDays)
+        let request = CreateRoutineRequest(name: title, alarmTime: time, repeatDays: repeatDays, isAlarmActive: true)
         RoutineService.shared.createRoutine(requestBody: request)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in

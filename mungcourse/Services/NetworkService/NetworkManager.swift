@@ -88,7 +88,11 @@ final class NetworkManager {
             return Fail(error: URLError(.userAuthenticationRequired))
                 .eraseToAnyPublisher()
         }
-        
+        // refreshToken이 있으면 Authorization-Refresh 헤더에 추가
+        if let refreshToken = TokenManager.shared.getRefreshToken() {
+            request.setValue("Bearer \(refreshToken)", forHTTPHeaderField: "Authorization-Refresh")
+        }
+
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryCatch { [weak self] error -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> in
                 guard let self = self else {
@@ -143,6 +147,10 @@ final class NetworkManager {
         .flatMap { token -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> in
             var newRequest = request
             newRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            // refreshToken이 있으면 Authorization-Refresh 헤더에 추가
+            if let refreshToken = TokenManager.shared.getRefreshToken() {
+                newRequest.setValue("Bearer \(refreshToken)", forHTTPHeaderField: "Authorization-Refresh")
+            }
             return URLSession.shared.dataTaskPublisher(for: newRequest)
                 .mapError { $0 as Error }
                 .eraseToAnyPublisher()
