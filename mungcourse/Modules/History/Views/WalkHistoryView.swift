@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WalkHistoryView: View {
     @StateObject private var viewModel = WalkHistoryViewModel()
+    @State private var navigateToDetail = false
 
     // 가로 간격 7.5로 설정된 그리드 아이템 정의
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 7.5), count: 7)
