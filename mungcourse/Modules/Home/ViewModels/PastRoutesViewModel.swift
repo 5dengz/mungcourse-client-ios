@@ -42,9 +42,17 @@ class PastRoutesViewModel: ObservableObject {
                 case .finished:
                     break
                 case .failure(let error):
-                    self.state = .error(error)
-                    self.errorMessage = "산책 기록을 불러오는 데 실패했습니다: \(error.localizedDescription)"
-                    print("산책 데이터 로드 오류: \(error)")
+                    let nsError = error as NSError
+                    if nsError.domain == "com.mungcourse.error" && nsError.code == 404 {
+                        // 데이터 없음: 빈 상태로 처리
+                        self.state = .idle
+                        self.errorMessage = nil
+                        self.recentWalk = nil
+                    } else {
+                        self.state = .error(error)
+                        self.errorMessage = "산책 기록을 불러오는 데 실패했습니다: \(error.localizedDescription)"
+                        print("산책 데이터 로드 오류: \(error)")
+                    }
                 }
             } receiveValue: { [weak self] dto in
                 guard let self = self else { return }

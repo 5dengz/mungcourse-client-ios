@@ -306,23 +306,16 @@ class DogService: DogServiceProtocol {
         print("➡️ S3 Upload Request: PUT \(request.url?.absoluteString ?? "")")
         print("🔍 S3 Upload Request Headers: \(request.allHTTPHeaderFields ?? [:])")
         print("🔍 S3 Upload Request Body Size: \(imageData.count) bytes")
-        let (data, response, error) = await withCheckedContinuation { continuation in
-            NetworkManager.shared.performAPIRequest(request) { data, response, error in
-                continuation.resume(returning: (data, response, error))
-            }
-        }
-        if let error = error {
-            print("❌ [DogService.uploadImageToS3] 네트워크 에러: \(error)")
-            throw error
-        }
-        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+        // NetworkManager 사용 금지! URLSession 직접 사용 (Authorization 헤더 자동 추가 방지)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
             print("❌ [DogService.uploadImageToS3] Invalid HTTP response")
             throw NetworkError.invalidResponse
         }
         print("🔍 S3 Upload Response Status Code: \(httpResponse.statusCode)")
         print("🔍 S3 Upload Response Headers: \(httpResponse.allHeaderFields)")
-        if let bodyString = String(data: data, encoding: .utf8) {
-            print("🔍 S3 Upload Response Body: \(bodyString)")
+        if let str = String(data: data, encoding: .utf8) {
+            print("🔍 S3 Upload Response Body: \(str)")
         }
         guard (200...299).contains(httpResponse.statusCode) else {
             print("❌ Error: S3 Upload failed with status: \(httpResponse.statusCode)")

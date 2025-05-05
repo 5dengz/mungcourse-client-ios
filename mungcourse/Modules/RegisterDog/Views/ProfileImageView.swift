@@ -44,7 +44,7 @@ struct ProfileImageView: View {
                             .fill(Color("gray600"))
                             .frame(width: 34, height: 34)
                         Image("icon_camera")
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                             .font(.system(size: 16))
                     }
                 }
@@ -82,7 +82,7 @@ struct ProfileImageView: View {
                             .fill(Color("gray400"))
                             .frame(width: 32, height: 32)
                         Image(systemName: "trash")
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                             .font(.system(size: 16))
                     }
                 }
@@ -100,7 +100,7 @@ struct ProfileImageView: View {
                 }
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
-                        .foregroundColor(.red)
+                        .foregroundColor(Color("pointRed"))
                         .font(.caption)
                         .padding(.top, 4)
                         .multilineTextAlignment(.center)

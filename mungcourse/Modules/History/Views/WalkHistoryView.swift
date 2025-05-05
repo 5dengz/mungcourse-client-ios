@@ -94,14 +94,14 @@ struct WalkHistoryView: View {
                                         .frame(width: 40, height: 40)
                                         .background(
                                             Circle()
-                                                .fill(getDateBackgroundColor(date))
+                                                .fill(viewModel.hasWalkRecord(for: date) ? Color("main") : Color("gray200"))
                                         )
                                         .overlay(
                                             Circle()
-                                                .stroke(viewModel.hasWalkRecord(for: date) ? Color("main") : Color.clear, lineWidth: 2)
+                                                .stroke(date.isToday() ? Color("main") : (viewModel.hasWalkRecord(for: date) ? Color("main") : Color.clear), lineWidth: date.isToday() ? 3 : (viewModel.hasWalkRecord(for: date) ? 2 : 0))
                                         )
                                 }
-                                .disabled(date > Date()) // 미래 날짜 비활성화
+                                .disabled(date > Date()) // 미래 날짜는 비활성화만, 숫자는 항상 보임
                             }
                         }
                         .padding(.horizontal, 28)

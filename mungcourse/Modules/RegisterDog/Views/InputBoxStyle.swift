@@ -5,7 +5,7 @@ struct InputBoxStyle: ViewModifier {
         content
             .padding(.horizontal)
             .frame(height: 41)
-            .background(Color.white) // Or slightly off-white if needed
+            .background(Color("pointwhite")) // Or slightly off-white if needed
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)

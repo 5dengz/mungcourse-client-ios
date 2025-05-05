@@ -89,7 +89,7 @@ struct RegisterDogView: View {
                             }) {
                                 Text("삭제")
                                     .font(.custom("Pretendard-Regular", size: 16))
-                                    .foregroundColor(Color("gray300"))
+                                    .foregroundColor(Color("gray400"))
                             }
                         }
                     }

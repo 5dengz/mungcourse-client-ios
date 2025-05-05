@@ -23,7 +23,7 @@ struct HomeView: View {
                 )
                 NearbyTrailsView()
                 PastRoutesView()
-                    .padding(.bottom, 35)
+                    .padding(.bottom, 42)
                 Spacer()
             }
             .padding(.horizontal, 20)

@@ -12,7 +12,7 @@ struct RequiredTextField: View {
             TextField(placeholder, text: $text)
                 .font(.custom("Pretendard-Regular", size: 14))
                 .inputBoxStyle() // Use the extension method
-                .foregroundColor(text.isEmpty ? Color("gray500") : Color("black")) // Placeholder color
+                .foregroundColor(text.isEmpty ? Color("gray500") : Color("pointblack")) // Placeholder color
         }
     }
 }

@@ -83,9 +83,12 @@ struct SplashView: View {
         }
         .fullScreenCover(isPresented: $shouldShowRegisterDog) {
             RegisterDogView(onComplete: {
-                // 등록 완료 후 홈 화면으로 이동
+                // 강아지 등록 완료 후 강아지 목록을 새로 fetch한 뒤 홈 화면으로 이동
                 resetCovers()
-                shouldShowMain = true
+                dogVM.fetchDogs()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    shouldShowMain = true
+                }
             }, showBackButton: false)
             .environmentObject(dogVM)
         }
