@@ -1,4 +1,7 @@
-import Foundation
+if error.code == .userAuthenticationRequired {
+    // 인증 실패 시 토큰 갱신 시도
+    return self.refreshTokenAndRetry(request)
+}import Foundation
 import Combine
 
 final class NetworkManager {
@@ -42,7 +45,7 @@ final class NetworkManager {
     }
     
     /// 토큰이 포함된 Combine Publisher 기반 API 요청 함수
-    func requestWithTokenPublisher(_ request: URLRequest) -> AnyPublisher<(Data, URLResponse), Error> {
+    func requestWithTokenPublisher(_ request: URLRequest) -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> {
         var request = request
         
         // accessToken이 있으면 Authorization 헤더에 추가
@@ -55,33 +58,45 @@ final class NetworkManager {
         }
         
         return URLSession.shared.dataTaskPublisher(for: request)
-            .tryCatch { [weak self] error -> AnyPublisher<(Data, URLResponse), Error> in
+            .tryCatch { [weak self] error -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> in
                 guard let self = self else {
                     return Fail(error: error).eraseToAnyPublisher()
                 }
                 
-                if let urlError = error as? URLError, urlError.code == .userAuthenticationRequired {
+                if error.code == .userAuthenticationRequired {
                     // 인증 실패 시 토큰 갱신 시도
                     return self.refreshTokenAndRetry(request)
                 }
                 return Fail(error: error).eraseToAnyPublisher()
             }
-            .tryCatch { [weak self] output -> AnyPublisher<(Data, URLResponse), Error> in
-                guard let self = self, let response = output.response as? HTTPURLResponse else {
-                    return Just(output).setFailureType(to: Error.self).eraseToAnyPublisher()
+            .flatMap { [weak self] output -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> in
+                guard let self = self else {
+                    // 명시적으로 URLSession.DataTaskPublisher.Output 타입의 값을 생성
+                    return Just(output)
+                        .setFailureType(to: Error.self)
+                        .eraseToAnyPublisher()
                 }
                 
-                if response.statusCode == 401 {
+                guard let httpResponse = output.response as? HTTPURLResponse else {
+                    // 명시적으로 URLSession.DataTaskPublisher.Output 타입의 값을 생성
+                    return Just(output)
+                        .setFailureType(to: Error.self)
+                        .eraseToAnyPublisher()
+                }
+                
+                if httpResponse.statusCode == 401 {
                     // 401 응답 시 토큰 갱신 시도
                     return self.refreshTokenAndRetry(request)
                 }
-                return Just(output).setFailureType(to: Error.self).eraseToAnyPublisher()
+                return Just(output)
+                    .setFailureType(to: Error.self)
+                    .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
     
     /// 토큰 갱신 후 요청 재시도 함수
-    private func refreshTokenAndRetry(_ request: URLRequest) -> AnyPublisher<(Data, URLResponse), Error> {
+    private func refreshTokenAndRetry(_ request: URLRequest) -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> {
         return Future<String, Error> { promise in
             TokenManager.shared.refreshAccessToken { success in
                 if success, let newToken = TokenManager.shared.getAccessToken() {
@@ -93,7 +108,7 @@ final class NetworkManager {
                 }
             }
         }
-        .flatMap { token -> AnyPublisher<(Data, URLResponse), Error> in
+        .flatMap { token -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> in
             var newRequest = request
             newRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             return URLSession.shared.dataTaskPublisher(for: newRequest)
