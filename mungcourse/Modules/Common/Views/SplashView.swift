@@ -3,6 +3,7 @@ import Foundation
 import Combine
 
 struct SplashView: View {
+    @EnvironmentObject var dogVM: DogViewModel
     @State private var animateSmall = false
     @State private var animateMedium = false
     @State private var animateLarge = false
@@ -53,13 +54,17 @@ struct SplashView: View {
         .onAppear {
             splashStartTime = Date()
             animateSequence()
+            dogVM.fetchDogs()
+            checkTokenAndNavigate()
+        }
+        .onChange(of: dogVM.dogs) { _ in
             checkTokenAndNavigate()
         }
         .fullScreenCover(isPresented: $shouldShowLogin) {
             LoginView()
         }
         .fullScreenCover(isPresented: $shouldShowMain) {
-            ContentView()
+            ContentView().environmentObject(dogVM)
         }
         .fullScreenCover(isPresented: $shouldShowRegisterDog) {
             RegisterDogView(onComplete: {
@@ -67,6 +72,7 @@ struct SplashView: View {
                 resetCovers()
                 shouldShowMain = true
             }, showBackButton: false)
+            .environmentObject(dogVM)
         }
     }
 
@@ -132,77 +138,19 @@ struct SplashView: View {
 
     private func checkTokenAndNavigate() {
         if let token = TokenManager.shared.getAccessToken(), !token.isEmpty, isTokenValid(token) {
-            // 로그인 되어 있으면 강아지 검사
-            fetchDogsAndNavigate()
+            // 로그인 되어 있으면 강아지 목록 상태로 분기
+            showAfterMinimumSplash {
+                resetCovers()
+                if dogVM.dogs.isEmpty {
+                    shouldShowRegisterDog = true
+                } else {
+                    shouldShowMain = true
+                }
+            }
         } else {
             showAfterMinimumSplash {
                 resetCovers()
                 shouldShowLogin = true
-            }
-        }
-    }
-
-    private func fetchDogsAndNavigate() {
-        guard let apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
-              let url = URL(string: "\(apiBaseURL)/v1/dogs") else {
-            showAfterMinimumSplash {
-                resetCovers()
-                shouldShowRegisterDog = true
-            }
-            return
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        if let accessToken = TokenManager.shared.getAccessToken() {
-            request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        }
-        NetworkManager.shared.performAPIRequest(request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("[SplashView] 강아지 목록 조회 에러: \(error.localizedDescription)")
-                    showAfterMinimumSplash {
-                        resetCovers()
-                        shouldShowRegisterDog = true
-                    }
-                    return
-                }
-                guard let data = data, let httpResponse = response as? HTTPURLResponse else {
-                    showAfterMinimumSplash {
-                        resetCovers()
-                        shouldShowRegisterDog = true
-                    }
-                    return
-                }
-                print("[SplashView] 강아지 목록 응답 원본: \(String(data: data, encoding: .utf8) ?? "데이터 디코딩 실패")")
-                if httpResponse.statusCode == 200 {
-                    do {
-                        // API wrapper를 통해 decoding
-                        let apiResponse = try JSONDecoder().decode(ServiceAPIResponse<[Dog]>.self, from: data)
-                        let dogs = apiResponse.data
-                        if dogs.isEmpty {
-                            showAfterMinimumSplash {
-                                resetCovers()
-                                shouldShowRegisterDog = true
-                            }
-                        } else {
-                            showAfterMinimumSplash {
-                                resetCovers()
-                                shouldShowMain = true
-                            }
-                        }
-                    } catch {
-                        print("[SplashView] 강아지 목록 디코딩 에러: \(error.localizedDescription)")
-                        showAfterMinimumSplash {
-                            resetCovers()
-                            shouldShowRegisterDog = true
-                        }
-                    }
-                } else {
-                    showAfterMinimumSplash {
-                        resetCovers()
-                        shouldShowRegisterDog = true
-                    }
-                }
             }
         }
     }
