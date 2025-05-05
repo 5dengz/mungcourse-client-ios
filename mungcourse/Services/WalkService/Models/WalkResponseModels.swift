@@ -10,10 +10,10 @@ struct BaseResponse<T: Codable>: Codable {
 }
 
 // 산책 API 응답 타입
-typealias WalkResponse = BaseResponse<Walk>
+typealias WalkResponse = BaseResponse<WalkDTO>
 
-// 산책 모델
-struct Walk: Codable, Identifiable {
+// 산책 모델 (DTO)
+struct WalkDTO: Codable, Identifiable {
     let id: Int
     let distanceKm: Double
     let durationSec: Int

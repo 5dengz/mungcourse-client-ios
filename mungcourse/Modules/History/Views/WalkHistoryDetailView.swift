@@ -267,30 +267,18 @@ struct WalkDetailSheet: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 4)
                     
-                    // 산책 경로 지도 섹션
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("산책 경로")
-                            .font(.custom("Pretendard-SemiBold", size: 18))
-                            .foregroundColor(Color("gray900"))
-                        
-                        // 여기에 지도 표시 (NaverMap 또는 MapKit 사용)
-                        if walkDetail.gpsData.isEmpty {
-                            Text("저장된 경로 정보가 없습니다")
-                                .font(.custom("Pretendard-Regular", size: 14))
-                                .foregroundColor(Color("gray500"))
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(40)
-                        } else {
-                            // 지도 표시를 위한 플레이스홀더
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color("gray200"))
-                                .frame(height: 200)
-                                .overlay(
-                                    Text("산책 경로")
-                                        .foregroundColor(Color("gray600"))
-                                )
-                        }
-                    }
+                    // 산책 경로 지도+통계 통합 뷰
+                    WalkRouteSummaryView(
+                        coordinates: walkDetail.gpsData.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                        distance: walkDetail.formattedDistance,
+                        duration: walkDetail.formattedDuration,
+                        calories: "\(walkDetail.calories)",
+                        isLoading: false,
+                        errorMessage: nil,
+                        emptyMessage: "저장된 경로 정보가 없습니다",
+                        boundingBox: nil,
+                        mapHeight: 200
+                    )
                     .padding(16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)

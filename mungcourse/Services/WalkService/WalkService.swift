@@ -8,7 +8,7 @@ class WalkService {
     private let baseURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? "https://api.mungcourse.com"
     
     // 최근 산책 기록 가져오기
-    func fetchRecentWalk() -> AnyPublisher<Walk, Error> {
+    func fetchRecentWalk() -> AnyPublisher<WalkDTO, Error> {
         guard let url = URL(string: "\(baseURL)/v1/walks/recent") else {
             return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
         }
@@ -17,7 +17,7 @@ class WalkService {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        return Future<Walk, Error> { [weak self] promise in
+        return Future<WalkDTO, Error> { [weak self] promise in
             guard let self = self else {
                 promise(.failure(URLError(.unknown)))
                 return

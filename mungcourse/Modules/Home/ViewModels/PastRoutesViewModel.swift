@@ -46,11 +46,23 @@ class PastRoutesViewModel: ObservableObject {
                     self.errorMessage = "산책 기록을 불러오는 데 실패했습니다: \(error.localizedDescription)"
                     print("산책 데이터 로드 오류: \(error)")
                 }
-            } receiveValue: { [weak self] walk in
+            } receiveValue: { [weak self] dto in
                 guard let self = self else { return }
                 
-                self.recentWalk = walk
-                self.state = .loaded(walk)
+                // DTO → 도메인 Walk 매핑
+                let domainWalk = Walk(
+                    id: dto.id,
+                    distanceKm: dto.distanceKm,
+                    durationSec: dto.durationSec,
+                    calories: dto.calories,
+                    startedAt: dto.startedAt,
+                    endedAt: dto.endedAt,
+                    routeRating: Int(dto.routeRating ?? 0),
+                    dogIds: dto.dogIds,
+                    gpsData: dto.gpsData.map { GPSCoordinate(lat: $0.lat, lng: $0.lng) }
+                )
+                self.recentWalk = domainWalk
+                self.state = .loaded(domainWalk)
             }
             .store(in: &cancellables)
     }
