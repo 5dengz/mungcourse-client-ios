@@ -33,6 +33,15 @@ struct CreateRoutineResponse: Decodable {
     let isAlarmActive: Bool
 }
 
+// MARK: - Update Routine
+struct UpdateRoutineRequest: Encodable {
+    let name: String
+    let alarmTime: String
+    let repeatDays: [String]
+    let isAlarmActive: Bool
+    let applyFromDate: String
+}
+
 // MARK: - RoutineService
 class RoutineService {
     static let shared = RoutineService()
@@ -120,4 +129,81 @@ class RoutineService {
         }
         .eraseToAnyPublisher()
     }
-} 
+
+    /// Update an existing routine
+    func updateRoutine(routineId: Int, requestBody: UpdateRoutineRequest) -> AnyPublisher<Void, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            request.httpBody = try JSONEncoder().encode(requestBody)
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+        return Future<Void, Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let httpResp = response as? HTTPURLResponse,
+                      (200...299).contains(httpResp.statusCode) else {
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Delete an existing routine
+    func deleteRoutine(routineId: Int) -> AnyPublisher<Void, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        return Future<Void, Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let httpResp = response as? HTTPURLResponse,
+                      (200...299).contains(httpResp.statusCode) else {
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Toggle routine check/uncheck
+    func toggleRoutineCheck(routineCheckId: Int) -> AnyPublisher<Void, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineCheckId)/toggle")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body = ["routineCheckId": routineCheckId]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+        return Future<Void, Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error)); return
+                }
+                guard let httpResp = response as? HTTPURLResponse,
+                      (200...299).contains(httpResp.statusCode) else {
+                    promise(.failure(URLError(.badServerResponse))); return
+                }
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+}

@@ -4,6 +4,8 @@ import SwiftUI
 struct RoutineListItem: View {
     let routine: Routine
     var onToggle: () -> Void
+    var onEdit: () -> Void
+    var onDelete: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
@@ -37,16 +39,15 @@ struct RoutineListItem: View {
         .contentShape(Rectangle())
         .contextMenu {
             Button {
-                // 편집 기능 (추후 구현)
+                onEdit()
             } label: {
                 Label("편집", systemImage: "pencil")
             }
-            
             Button(role: .destructive) {
-                // 삭제 기능 (추후 구현)
+                onDelete()
             } label: {
                 Label("삭제", systemImage: "trash")
             }
         }
     }
-} 
+}

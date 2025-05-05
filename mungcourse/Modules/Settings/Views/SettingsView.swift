@@ -91,10 +91,10 @@ struct SettingsView: View {
                         Spacer()
                     }
                     .padding(.horizontal, 16)
-                    .background(Color.white)
+                    .background(Color("pointwhite"))
                 }
             }
-            .background(Color(UIColor.systemGroupedBackground))
+            .background(Color("pointwhite"))
             Spacer()
         }
         .padding(.horizontal, 16)

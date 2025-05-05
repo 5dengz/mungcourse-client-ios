@@ -3,13 +3,17 @@ import Combine
 
 // 루틴 모델
 struct Routine: Identifiable {
+    let routineId: Int
+    let routineCheckId: Int
     let id: UUID
     var title: String
     var time: String
     var isDone: Bool
     var days: Set<DayOfWeek>
     
-    init(id: UUID = UUID(), title: String, time: String, isDone: Bool = false, days: Set<DayOfWeek>) {
+    init(routineId: Int, routineCheckId: Int, id: UUID = UUID(), title: String, time: String, isDone: Bool = false, days: Set<DayOfWeek>) {
+        self.routineId = routineId
+        self.routineCheckId = routineCheckId
         self.id = id
         self.title = title
         self.time = time
@@ -23,6 +27,7 @@ class RoutineViewModel: ObservableObject {
     @Published var routines: [Routine] = []
     @Published var selectedDay: DayOfWeek = .today
     @Published var showAddRoutine: Bool = false
+    @Published var editingRoutine: Routine? = nil
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -36,7 +41,7 @@ class RoutineViewModel: ObservableObject {
     }
     
     /// 특정 요일의 루틴을 API로 가져옵니다.
-    private func fetchRoutines(for day: DayOfWeek) {
+    func fetchRoutines(for day: DayOfWeek) {
         let dateStr = dateString(for: day)
         RoutineService.shared.fetchRoutines(date: dateStr)
             .receive(on: DispatchQueue.main)
@@ -46,7 +51,7 @@ class RoutineViewModel: ObservableObject {
                 }
             }, receiveValue: { [weak self] dataList in
                 self?.routines = dataList.map {
-                    Routine(title: $0.name, time: $0.alarmTime, isDone: $0.isCompleted, days: [day])
+                    Routine(routineId: $0.routineId, routineCheckId: $0.routineCheckId, title: $0.name, time: $0.alarmTime, isDone: $0.isCompleted, days: [day])
                 }
             })
             .store(in: &cancellables)
@@ -74,11 +79,32 @@ class RoutineViewModel: ObservableObject {
         routines.filter { $0.days.contains(selectedDay) }
     }
     
-    // 루틴 완료 상태 토글 (로컬 반영)
+    // 루틴 완료 상태 토글 (API 호출)
     func toggleRoutineCompletion(routine: Routine) {
-        if let index = routines.firstIndex(where: { $0.id == routine.id }) {
-            routines[index].isDone.toggle()
-        }
+        RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error toggling routine check: \(error)")
+                }
+            }, receiveValue: { [weak self] in
+                self?.fetchRoutines(for: self?.selectedDay ?? .monday)
+            })
+            .store(in: &cancellables)
+    }
+    
+    // 루틴 삭제 (API 호출)
+    func deleteRoutine(_ routine: Routine) {
+        RoutineService.shared.deleteRoutine(routineId: routine.routineId)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("Error deleting routine: \(error)")
+                }
+            }, receiveValue: { [weak self] in
+                self?.fetchRoutines(for: self?.selectedDay ?? .monday)
+            })
+            .store(in: &cancellables)
     }
     
     // 새 루틴 등록 (API 호출)
@@ -111,6 +137,7 @@ struct RoutineSettingsView: View {
     @StateObject private var viewModel = RoutineViewModel()
     @State private var showDatePicker = false
     @State private var selectedDate = Date()
+    @State private var showEditRoutine = false
     
     var body: some View {
         let routines = viewModel.filteredRoutines()
@@ -140,8 +167,12 @@ struct RoutineSettingsView: View {
                                 let routine = routines[index]
                                 RoutineListItem(
                                     routine: routine,
-                                    onToggle: {
-                                        viewModel.toggleRoutineCompletion(routine: routine)
+                                    onToggle: { viewModel.toggleRoutineCompletion(routine: routine) },
+                                    onEdit: {
+                                        viewModel.editingRoutine = routine
+                                    },
+                                    onDelete: {
+                                        viewModel.deleteRoutine(routine)
                                     }
                                 )
                                 if index < routines.count - 1 {
@@ -173,6 +204,11 @@ struct RoutineSettingsView: View {
         }
         .sheet(isPresented: $viewModel.showAddRoutine) {
             AddRoutineView()
+        }
+        .sheet(item: $viewModel.editingRoutine) { routine in
+            EditRoutineView(routine: routine) {
+                viewModel.fetchRoutines(for: viewModel.selectedDay)
+            }
         }
         .sheet(isPresented: $showDatePicker) {
             CommonDatePickerSheet(selection: $selectedDate) {

@@ -35,14 +35,14 @@ struct LoginView: View {
             // 로그인 버튼들
             VStack(spacing: 16) {
                 // 카카오 로그인 버튼
-                SocialLoginButton(
-                    icon: { Image( "sns_kakaotalk").foregroundColor(.black) },
-                    text: "카카오 로그인",
-                    textColor: .black,
-                    backgroundColor: .pointYellow,
-                    isLoading: viewModel.isLoading,
-                    action: { viewModel.loginWithKakao() }
-                )
+                // SocialLoginButton(
+                //     icon: { Image( "sns_kakaotalk").foregroundColor(.black) },
+                //     text: "카카오 로그인",
+                //     textColor: .black,
+                //     backgroundColor: .pointYellow,
+                //     isLoading: viewModel.isLoading,
+                //     action: { viewModel.loginWithKakao() }
+                // )
                 
                 // 구글 로그인 버튼
                 SocialLoginButton(

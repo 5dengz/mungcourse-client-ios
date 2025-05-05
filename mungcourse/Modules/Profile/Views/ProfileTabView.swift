@@ -123,7 +123,14 @@ struct ProfileTabView: View {
                 ProfileSectionView(
                     nickname: dogVM.mainDog?.name,
                     profileImageUrl: dogVM.mainDog?.dogImgUrl,
-                    onEdit: { showEditDog = true },
+                    onEdit: {
+                        Task {
+                            if let id = dogVM.mainDog?.id {
+                                await dogVM.fetchDogDetail(id)
+                            }
+                            showEditDog = true
+                        }
+                    },
                     onTapImage: { showSelectDog = true }
                 )
                 .padding(.bottom, 24)

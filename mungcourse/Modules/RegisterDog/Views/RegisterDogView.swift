@@ -33,6 +33,7 @@ struct RegisterDogView: View {
         // ViewModel 생성 및 초기값 설정
         let vm = RegisterDogViewModel()
         if let detail = initialDetail {
+            vm.initialDetail = detail  // 초기 데이터 할당하여 변경 감지 기능이 작동하도록 설정
             vm.name = detail.name
             vm.breed = detail.breed
             vm.gender = Gender(rawValue: detail.gender)

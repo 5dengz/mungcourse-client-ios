@@ -78,6 +78,7 @@ class RegisterDogViewModel: ObservableObject {
     // MARK: - 초기화
     init(dogService: DogServiceProtocol = DogService.shared) {
         self.dogService = dogService
+        self.initialDetail = nil
     }
     
     // MARK: - 계산 프로퍼티
@@ -91,7 +92,7 @@ class RegisterDogViewModel: ObservableObject {
         Double(weight) != nil
     }
     
-    var initialDetail: DogRegistrationResponseData? = nil
+    var initialDetail: DogRegistrationResponseData?
 
     var isModified: Bool {
         guard let initial = initialDetail else { return false }
