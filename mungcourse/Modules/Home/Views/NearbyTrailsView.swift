@@ -29,10 +29,10 @@ struct NearbyTrailsView: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
-                        ForEach(viewModel.dogPlaces) { place in
+                        ForEach(viewModel.dogPlaces.prefix(10)) { place in
                             TrailItemView(
                                 trailName: place.name,
-                                distance: String(format: "%.1fkm", place    .distance / 1000),
+                                distance: String(format: "%.1fkm", place.distance / 1000),
                                 imageName: place.dogPlaceImgUrl ?? "",
                                 roundTripTime: place.openingHours ?? "",
                                 category: place.category

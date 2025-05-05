@@ -23,11 +23,11 @@ struct TrailItemView: View {
                     .frame(width: 210, height: 146)
                 } else {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Color("gray300"))
                         .frame(width: 210, height: 146)
                         .overlay(
                             Image(systemName: "photo")
-                                .foregroundColor(.white)
+                                .foregroundColor(Color("gray500"))
                                 .font(.largeTitle)
                         )
                 }
@@ -35,6 +35,8 @@ struct TrailItemView: View {
                 // 왕복 시간 뷰 복원
                 if !roundTripTime.isEmpty {
                     OpeningHoursView(openingHours: roundTripTime)
+                    .padding(.top, 8)
+                    .padding(.leading, 8)
                 }
             }
 

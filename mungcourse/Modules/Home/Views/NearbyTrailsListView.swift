@@ -11,12 +11,9 @@ struct NearbyTrailsListView: View {
     var body: some View {
         VStack(spacing: 0) {
             // 공통 헤더
-            CommonHeaderView(leftIcon: "arrow_back", leftAction: { dismiss() }, title: "주변 산책로") {
-                Image("tab_map")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-            }
+            CommonHeaderView(leftIcon: "arrow_back", leftAction: { dismiss() }, title: "주변 산책로")
+            .padding(.top, 16)
+            .padding(.bottom, 8)
             // 카테고리 필터
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -29,12 +26,13 @@ struct NearbyTrailsListView: View {
                             Text(category)
                                 .font(.custom("Pretendard-Regular", size: 14))
                                 .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(isSelected ? Color("gray800") : Color("gray300"))
-                                .foregroundColor(isSelected ? .white : .black)
+                                .padding(.vertical, 4)
+                                .background(isSelected ? Color("main") : Color("gray300"))
+                                .foregroundColor(isSelected ? .Color("pointwhite") : .Color("gray400"))
                                 .clipShape(Capsule())
                         }
                     }
+                    .padding(.bottom, 8)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
@@ -67,10 +65,11 @@ struct NearbyTrailsListView: View {
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 8)
+                        
                     }
                 }
             }
+            .padding(.vertical, 16)
         }
         .onAppear {
             viewModel.fetchNearbyDogPlaces()
@@ -83,10 +82,3 @@ struct NearbyTrailsListView: View {
     }
 }
 
-#if DEBUG
-struct NearbyTrailsListView_Previews: PreviewProvider {
-    static var previews: some View {
-        NearbyTrailsListView()
-    }
-}
-#endif
