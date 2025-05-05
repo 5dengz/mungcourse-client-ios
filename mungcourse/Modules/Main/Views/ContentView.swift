@@ -57,31 +57,25 @@ struct ContentView: View {
                 case .home:
                     HomeView(
                         selectedTab: $selectedTab,
-                        showingDogSelection: $showingDogSelection,
-                        selectedDog: $dogVM.selectedDog,
-                        dogs: dogVM.dogs,
                         isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
                         onSelectCourse: {
                             showSelectWaypoint = true
                         }
-                    )
+                    ).environmentObject(dogVM)
                 case .startWalk:
                     HomeView(
                         selectedTab: $selectedTab,
-                        showingDogSelection: $showingDogSelection,
-                        selectedDog: $dogVM.selectedDog,
-                        dogs: dogVM.dogs,
                         isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
                         onSelectCourse: {
                             showSelectWaypoint = true
                         }
-                    )
+                    ).environmentObject(dogVM)
                 case .routine:
                     RoutineSettingsView()
                 case .history:
                     WalkHistoryView()
                 case .profile:
-                    ProfileTabView(showingDogSelection: $showingDogSelection)
+                    ProfileTabView()
                 }
             }
 

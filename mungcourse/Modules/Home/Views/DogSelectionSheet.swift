@@ -3,8 +3,7 @@ import UIKit
 
 struct DogSelectionSheet: View {
     @Binding var isPresented: Bool
-    @Binding var selectedDog: Dog?
-    let dogs: [Dog]
+    @EnvironmentObject var dogVM: DogViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -15,7 +14,7 @@ struct DogSelectionSheet: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 21) {
-                    ForEach(dogs) { dog in
+                    ForEach(dogVM.dogs) { dog in
                         VStack(alignment: .center, spacing: 9) {
                             ZStack {
                                 AsyncImage(url: URL(string: dog.dogImgUrl ?? "")) { phase in
@@ -35,9 +34,9 @@ struct DogSelectionSheet: View {
                                 }
                                 .frame(width: 68, height: 68)
                                 .clipShape(Circle())
-                                .opacity(selectedDog?.id == dog.id ? 0.6 : 1.0)
+                                .opacity(dogVM.selectedDog?.id == dog.id ? 0.6 : 1.0)
                                 
-                                if selectedDog?.id == dog.id {
+                                if dogVM.selectedDog?.id == dog.id {
                                     Image("icon_check")
                                         .resizable()
                                         .scaledToFit()
@@ -47,10 +46,10 @@ struct DogSelectionSheet: View {
                             
                             Text(dog.name)
                                 .font(.custom("Pretendard-Regular", size: 15))
-                                .foregroundColor(selectedDog?.id == dog.id ? Color("main") : .black)
+                                .foregroundColor(dogVM.selectedDog?.id == dog.id ? Color("main") : .black)
                         }
                         .onTapGesture {
-                            selectedDog = dog
+                            dogVM.selectedDog = dog
                             isPresented = false
                         }
                     }
@@ -71,9 +70,10 @@ struct DogSelectionSheet: View {
 
 // 시트를 표시하기 위한 확장 - HomeView에서 사용
 extension View {
-    func dogSelectionSheet(isPresented: Binding<Bool>, selectedDog: Binding<Dog?>, dogs: [Dog]) -> some View {
+    func dogSelectionSheet(isPresented: Binding<Bool>) -> some View {
         self.sheet(isPresented: isPresented) {
-            DogSelectionSheet(isPresented: isPresented, selectedDog: selectedDog, dogs: dogs)
+            DogSelectionSheet(isPresented: isPresented)
+                .environmentObject(DogViewModel()) // 실제 사용 시 상위에서 주입
         }
     }
 }

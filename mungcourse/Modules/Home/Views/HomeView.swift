@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var dogVM: DogViewModel
     @Binding var selectedTab: ContentView.Tab
-    @Binding var showingDogSelection: Bool
-    @Binding var selectedDog: Dog?
-    let dogs: [Dog]
     @Binding var isStartWalkOverlayPresented: Bool
     var onSelectCourse: () -> Void
+
+    @State private var showingDogSelection: Bool = false
 
     var body: some View {
         ScrollView {
@@ -14,8 +14,8 @@ struct HomeView: View {
                 ProfileArea(
                     selectedTab: $selectedTab,
                     showingDogSelection: $showingDogSelection,
-                    selectedDog: $selectedDog,
-                    dogs: dogs
+                    selectedDog: $dogVM.selectedDog,
+                    dogs: dogVM.dogs
                 )
                 ButtonArea(
                     isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
@@ -30,7 +30,7 @@ struct HomeView: View {
             .padding(.top, 20)
         }
         .navigationTitle("홈")
-        .dogSelectionSheet(isPresented: $showingDogSelection, selectedDog: $selectedDog, dogs: dogs)
+        .dogSelectionSheet(isPresented: $showingDogSelection)
     }
 }
 

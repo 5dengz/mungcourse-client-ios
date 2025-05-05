@@ -98,7 +98,6 @@ struct ProfileTabView: View {
     @EnvironmentObject var dogVM: DogViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
-    @Binding var showingDogSelection: Bool // (unused in Profile Tab)
     @State private var showSettings = false
     @State private var showSelectDog = false
     @State private var showEditDog = false
@@ -176,6 +175,7 @@ struct ProfileTabView: View {
                             print("모든 강아지가 삭제되었습니다.")
                             await MainActor.run {
                                 dogVM.mainDog = nil
+                                // TODO: UI에서 안내 메시지 또는 등록 화면으로 이동 처리
                             }
                         }
                     }
@@ -187,7 +187,7 @@ struct ProfileTabView: View {
                     Task {
                         await dogVM.fetchDogs()
                         if let firstDog = dogVM.dogs.first, dogVM.mainDog == nil {
-                           await MainActor.run {
+                            await MainActor.run {
                                 dogVM.mainDog = firstDog
                             }
                         }
@@ -209,6 +209,6 @@ struct ProfileTabView: View {
 }
 
 #Preview {
-    ProfileTabView(showingDogSelection: .constant(false))
+    ProfileTabView()
         .environmentObject(DogViewModel())
 }
