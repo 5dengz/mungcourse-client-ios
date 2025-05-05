@@ -404,7 +404,9 @@ private class AppleSignInDelegate: NSObject, ASAuthorizationControllerDelegate, 
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let currentNonce = nonce else {
+        // nonce 값이 있는지 확인하지만 실제로 사용하지 않음
+        // 향후 JWT 토큰 검증에 사용할 예정
+        guard let _ = nonce else {
             completion(.failure(AuthError.unknown))
             return
         }

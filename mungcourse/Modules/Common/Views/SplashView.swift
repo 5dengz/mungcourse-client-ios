@@ -64,7 +64,7 @@ struct SplashView: View {
                 checkTokenAndNavigate()
             }
         }
-        .onChange(of: dogVM.dogs) { _ in
+        .onChange(of: dogVM.dogs) { oldValue, newValue in
             if hasCompletedOnboarding {
                 checkTokenAndNavigate()
             }

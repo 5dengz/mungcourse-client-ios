@@ -36,15 +36,15 @@ class RouteSelectionViewModel: ObservableObject {
         let startLatLng = NMGLatLng(lat: startLocation.latitude, lng: startLocation.longitude)
         
         // 1. 추천 경로 생성
-        var recommendedRoute = createRecommendedRoute(startLatLng: startLatLng)
+        let recommendedRoute = createRecommendedRoute(startLatLng: startLatLng)
         routeOptions.append(recommendedRoute)
         
         // 2. 최단 경로 생성
-        var shortestRoute = createShortestRoute(startLatLng: startLatLng) 
+        let shortestRoute = createShortestRoute(startLatLng: startLatLng) 
         routeOptions.append(shortestRoute)
         
         // 3. 경치 좋은 경로 생성
-        var scenicRoute = createScenicRoute(startLatLng: startLatLng)
+        let scenicRoute = createScenicRoute(startLatLng: startLatLng)
         routeOptions.append(scenicRoute)
         
         // 로딩 완료

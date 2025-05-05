@@ -17,11 +17,7 @@ class WalkService {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        return Future<WalkDTO, Error> { [weak self] promise in
-            guard let self = self else {
-                promise(.failure(URLError(.unknown)))
-                return
-            }
+        return Future<WalkDTO, Error> { promise in
             
             NetworkManager.shared.performAPIRequest(request) { data, response, error in
                 if let error = error {

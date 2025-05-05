@@ -108,7 +108,7 @@ struct WalkHistoryView: View {
                     }
                     
                     // 에러 메시지 표시
-                    if let error = viewModel.dateError {
+                    if viewModel.dateError != nil {
                         Text("데이터를 불러오는 중 오류가 발생했습니다.")
                             .font(.custom("Pretendard-Regular", size: 14))
                             .foregroundColor(.red)

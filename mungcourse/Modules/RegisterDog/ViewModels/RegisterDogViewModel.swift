@@ -298,7 +298,7 @@ class RegisterDogViewModel: ObservableObject {
         // 테스트를 위한 지연 시간 추가
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
             // 랜덤으로 성공/실패 처리 (테스트용)
-            let isSuccess = true // Set to false to test error case
+            let isSuccess = Bool.random() // 랜덤하게 true/false 설정하여 테스트
             
             if isSuccess {
                 print("강아지 등록 성공 (목업)")

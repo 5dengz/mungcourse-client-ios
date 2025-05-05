@@ -20,7 +20,7 @@ class RouteService {
             return
         }
         
-        var urlComponents = URLComponents(string: baseURL + "/v1/routes/walking")!
+        let urlComponents = URLComponents(string: baseURL + "/v1/routes/walking")!
         
         // 출발지 좌표
         let startLat = String(startLocation.latitude)
