@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import CoreLocation
+import SwiftUI
 
 // MARK: - NearbyTrailsViewModel (위치 변경 감지 및 데이터 fetch)
 class NearbyTrailsViewModel: ObservableObject {
@@ -10,9 +11,9 @@ class NearbyTrailsViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    // 자동 위치 업데이트 구독 제거
+    // 위치 변경 자동 구독 로직 제거
     init() {
-        // 위치 변경 자동 구독 제거
+        // 앱이 처음 켜지거나 홈 화면으로 돌아올 때만 데이터 로드
     }
 
     func fetchNearbyDogPlaces(category: String? = nil) {
