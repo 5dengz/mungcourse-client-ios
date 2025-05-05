@@ -99,8 +99,7 @@ struct SettingsView: View {
             }
             .padding(.horizontal, 16)
             .navigationBarHidden(true)
-        }
-        .ignoresSafeArea(edges: .bottom)
+            .ignoresSafeArea(edges: .bottom)
     }
 }
 

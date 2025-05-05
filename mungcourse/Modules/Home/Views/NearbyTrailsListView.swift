@@ -5,6 +5,8 @@ struct NearbyTrailsListView: View {
     @StateObject private var viewModel = NearbyTrailsViewModel()
     @State private var categories: [String] = ["전체", "공원", "산책로", "카페"]
     @State private var selectedCategory: String? = nil
+    @State private var selectedPlace: DogPlace? = nil
+    @State private var showDetail = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -58,6 +60,10 @@ struct NearbyTrailsListView: View {
                                     roundTripTime: place.openingHours ?? "",
                                     category: place.category
                                 )
+                                .onTapGesture {
+                                    selectedPlace = place
+                                    showDetail = true
+                                }
                             }
                         }
                         .padding(.horizontal, 16)
@@ -68,6 +74,11 @@ struct NearbyTrailsListView: View {
         }
         .onAppear {
             viewModel.fetchNearbyDogPlaces()
+        }
+        .fullScreenCover(isPresented: $showDetail) {
+            if let place = selectedPlace {
+                NearbyTrailMapDetailView(place: place)
+            }
         }
     }
 }
