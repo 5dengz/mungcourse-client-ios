@@ -28,13 +28,15 @@ struct DogSelectionView: View {
     @State private var showAddDogView = false
     
     // 선택 완료 시 실행할 액션
-    var onComplete: (() -> Void)? = nil
+    var onComplete: (([Dog]) -> Void)? = nil
     
     // 산책 시 건너뛰기 버튼 액션
-    var onSkip: (() -> Void)? = nil
+    var onSkip: (([Dog]) -> Void)? = nil
     
     // 산책 시 선택 취소 버튼 액션
     var onCancel: (() -> Void)? = nil
+    
+    @State private var selectedDogs: [Dog] = []
     
     private let columns = [
         GridItem(.flexible()),
@@ -59,7 +61,7 @@ struct DogSelectionView: View {
                     
                     Button(action: {
                         dismiss()
-                        onSkip?()
+                        onSkip?([])
                     }) {
                         Text("건너뛰기")
                             .font(.custom("Pretendard-Regular", size: 18))
@@ -132,6 +134,15 @@ struct DogSelectionView: View {
                                             .resizable()
                                             .frame(width: 40, height: 40)
                                     }
+                                    
+                                    // 선택된 반려견 표시
+                                    if isWalkMode && selectedDogs.contains(dog) {
+                                        Circle()
+                                            .fill(Color.black.opacity(0.4))
+                                        Image("icon_check")
+                                            .resizable()
+                                            .frame(width: 40, height: 40)
+                                    }
                                 }
                                 .frame(width: 135, height: 135)
                                 .clipShape(Circle())
@@ -141,15 +152,21 @@ struct DogSelectionView: View {
                                     .foregroundColor(.black)
                             }
                             .onTapGesture {
-                                dogVM.selectDog(dog)
-                                dogVM.mainDog = dog
-                                
-                                // 즉시 선택 모드 또는 산책 모드인 경우 dismiss 호출
-                                if immediateSelection {
-                                    dismiss()
-                                } else if isWalkMode {
-                                    dismiss()
-                                    onComplete?()
+                                if isWalkMode {
+                                    if let idx = selectedDogs.firstIndex(of: dog) {
+                                        selectedDogs.remove(at: idx)
+                                    } else {
+                                        selectedDogs.append(dog)
+                                    }
+                                } else {
+                                    dogVM.selectDog(dog)
+                                    dogVM.mainDog = dog
+                                    if immediateSelection {
+                                        dismiss()
+                                    } else {
+                                        dismiss()
+                                        onComplete?([dog])
+                                    }
                                 }
                             }
                         }
@@ -186,7 +203,7 @@ struct DogSelectionView: View {
                 if showCompleteButton || isWalkMode {
                     CommonFilledButton(title: "선택 완료", action: {
                         dismiss()
-                        onComplete?()
+                        onComplete?(selectedDogs)
                     })
                     .padding(.horizontal, 32)
                     .padding(.bottom, 48)

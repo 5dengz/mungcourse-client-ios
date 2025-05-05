@@ -85,6 +85,7 @@ struct AccountDeletionConfirmView: View {
                                     }
                                 }
                             }
+                            .frame(maxWidth: .infinity)   // HStack을 전체 폭으로 확장
                             .padding(.vertical, 20)
                         }
                         
@@ -105,51 +106,51 @@ struct AccountDeletionConfirmView: View {
                         .padding(.horizontal, 16)
                         
                         Spacer()
-                        
-                        // 하단 버튼: 취소 및 탈퇴하기
-                        VStack(spacing: 12) {
-                            if viewModel.isDeleting {
-                                // 탈퇴 처리 중일 때는 프로그레스 뷰 표시 (첫 번째)
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 55)
-                                    .background(Color("gray100"))
-                                    .cornerRadius(8)
-                                    .padding(.horizontal, 16)
-                            } else {
-                                // 탈퇴하기 버튼 (첫 번째)
-                                CommonFilledButton(
-                                    title: "탈퇴하기",
-                                    action: {
-                                        showDeleteConfirmModal = true // 모달 표시
-                                    },
-                                    isEnabled: !viewModel.isDeleting,
-                                    backgroundColor: Color("gray100"),
-                                    foregroundColor: Color("gray700"),
-                                    cornerRadius: 8
-                                )
-                                .padding(.horizontal, 16)
-                            }
-
-                            // 취소 버튼 (두 번째)
-                            CommonFilledButton(
-                                title: "취소",
-                                action: {
-                                    dismiss()
-                                },
-                                isEnabled: true,
-                                backgroundColor: Color("main"),
-                                foregroundColor: .white,
-                                cornerRadius: 8
-                            )
-                            .padding(.horizontal, 16)
-                            .frame(height: 55)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 48)
                     }
                 }
+                
+                // 하단 버튼: 취소 및 탈퇴하기
+                VStack(spacing: 12) {
+                    if viewModel.isDeleting {
+                        // 탈퇴 처리 중일 때는 프로그레스 뷰 표시 (첫 번째)
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(Color("gray100"))
+                            .cornerRadius(8)
+                            .padding(.horizontal, 16)
+                    } else {
+                        // 탈퇴하기 버튼 (첫 번째)
+                        CommonFilledButton(
+                            title: "탈퇴하기",
+                            action: {
+                                showDeleteConfirmModal = true // 모달 표시
+                            },
+                            isEnabled: !viewModel.isDeleting,
+                            backgroundColor: Color("gray100"),
+                            foregroundColor: Color("gray700"),
+                            cornerRadius: 8
+                        )
+                        .padding(.horizontal, 16)
+                    }
+
+                    // 취소 버튼 (두 번째)
+                    CommonFilledButton(
+                        title: "취소",
+                        action: {
+                            dismiss()
+                        },
+                        isEnabled: true,
+                        backgroundColor: Color("main"),
+                        foregroundColor: .white,
+                        cornerRadius: 8
+                    )
+                    .padding(.horizontal, 16)
+                    .frame(height: 55)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 48)
             }
             .ignoresSafeArea(edges: .bottom)
             

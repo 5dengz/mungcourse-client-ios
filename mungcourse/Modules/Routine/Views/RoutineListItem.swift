@@ -13,10 +13,10 @@ struct RoutineListItem: View {
                 ZStack {
                     Ellipse()
                         .stroke(Color(red: 0.15, green: 0.75, blue: 0), lineWidth: 0.5)
-                        .background(routine.isDone ? Ellipse().fill(Color(red: 0.15, green: 0.75, blue: 0)) : Ellipse().fill(Color.clear))
+                        .background(false ? Ellipse().fill(Color(red: 0.15, green: 0.75, blue: 0)) : Ellipse().fill(Color.clear))
                         .frame(width: 22, height: 22)
                     
-                    if routine.isDone {
+                    if false {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12))
                             .foregroundColor(.white)
@@ -26,8 +26,8 @@ struct RoutineListItem: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(routine.title)
                     .font(.custom("Pretendard", size: 17).weight(.semibold))
-                    .foregroundColor(routine.isDone ? Color(red: 0.62, green: 0.62, blue: 0.62) : .black)
-                    .strikethrough(routine.isDone)
+                    .foregroundColor(.black)
+                    .strikethrough(false)
                 Text(routine.time)
                     .font(.custom("Pretendard", size: 14))
                     .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.5))

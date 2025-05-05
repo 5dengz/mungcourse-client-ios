@@ -81,14 +81,23 @@ class RoutineViewModel: ObservableObject {
     
     // 루틴 완료 상태 토글 (API 호출)
     func toggleRoutineCompletion(routine: Routine) {
+        // 로컬 상태 즉시 토글 (옵티미스틱 업데이트)
+        if let index = routines.firstIndex(where: { $0.id == routine.id }) {
+            routines[index].isDone.toggle()
+        }
+        // 서버 상태도 토글
         RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
                     print("Error toggling routine check: \(error)")
+                    // 실패하면 로컬 상태 롤백
+                    if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
+                        self.routines[index].isDone.toggle()
+                    }
                 }
-            }, receiveValue: { [weak self] in
-                self?.fetchRoutines(for: self?.selectedDay ?? .monday)
+            }, receiveValue: { _ in
+                // 서버 토글 응답 후 추가 UI 변경 없음 (로컬 상태 유지)
             })
             .store(in: &cancellables)
     }

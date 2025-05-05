@@ -38,6 +38,8 @@ struct ContentView: View {
     @State private var showStartWalk = false
     @State private var showingDogSelection = false
     @State private var showWalkDogSelection = false // 산책용 강아지 선택 화면
+    enum WalkStartType { case direct, recommend }
+    @State private var walkStartType: WalkStartType = .direct
     @EnvironmentObject var dogVM: DogViewModel
 
     private let imageHeight: CGFloat = 24
@@ -56,20 +58,14 @@ struct ContentView: View {
                 switch backgroundTab {
                 case .home:
                     HomeView(
-                        selectedTab: $selectedTab,
-                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
-                        onSelectCourse: {
-                            showSelectWaypoint = true
-                        }
-                    ).environmentObject(dogVM)
+                        selectedTab: $selectedTab
+                    )
+                    .environmentObject(dogVM)
                 case .startWalk:
                     HomeView(
-                        selectedTab: $selectedTab,
-                        isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
-                        onSelectCourse: {
-                            showSelectWaypoint = true
-                        }
-                    ).environmentObject(dogVM)
+                        selectedTab: $selectedTab
+                    )
+                    .environmentObject(dogVM)
                 case .routine:
                     RoutineSettingsView()
                 case .history:
@@ -122,30 +118,39 @@ struct ContentView: View {
         .startWalkTabSheet(
             isPresented: $isStartWalkOverlayPresented,
             onSelectWaypoint: {
-                showWalkDogSelection = true // 경유지 선택 전에 강아지 선택 화면 표시
+                walkStartType = .direct
+                showWalkDogSelection = true
             },
             onRecommendCourse: {
-                showWalkDogSelection = true // AI 추천 코스 선택 전에 강아지 선택 화면 표시
+                walkStartType = .recommend
+                showWalkDogSelection = true
             }
         )
         .fullScreenCover(isPresented: $showWalkDogSelection) {
-            // 산책 강아지 선택 완료 후 선택한 모드에 따라 다른 화면 표시
             DogSelectionView(
                 isWalkMode: true,
-                onComplete: {
-                    if isStartWalkOverlayPresented {
-                        isStartWalkOverlayPresented = false
+                onComplete: { dogs in
+                    showWalkDogSelection = false
+                    isStartWalkOverlayPresented = false
+                    switch walkStartType {
+                    case .direct:
                         showStartWalk = true
+                    case .recommend:
+                        showRecommendCourse = true
                     }
                 },
-                onSkip: {
-                    if isStartWalkOverlayPresented {
-                        isStartWalkOverlayPresented = false
+                onSkip: { dogs in
+                    showWalkDogSelection = false
+                    isStartWalkOverlayPresented = false
+                    switch walkStartType {
+                    case .direct:
                         showStartWalk = true
+                    case .recommend:
+                        showRecommendCourse = true
                     }
                 },
                 onCancel: {
-                    // 취소 시 메인 화면으로 돌아감
+                    showWalkDogSelection = false
                 }
             )
             .environmentObject(dogVM)

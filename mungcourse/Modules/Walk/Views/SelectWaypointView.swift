@@ -4,6 +4,9 @@ struct SelectWaypointView: View {
     let onBack: () -> Void
     @StateObject private var viewModel = SelectWaypointViewModel()
     @State private var showRouteSelection = false
+    @State private var showRecommendFlow = false
+    @State private var selectedWaypoints: [DogPlace] = []
+    @EnvironmentObject var dogVM: DogViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -67,7 +70,8 @@ struct SelectWaypointView: View {
                 CommonFilledButton(
                     title: "선택 완료",
                     action: {
-                        showRouteSelection = true
+                        selectedWaypoints = viewModel.getSelectedPlaces()
+                        showRecommendFlow = true
                     },
                     isEnabled: viewModel.isCompleteButtonEnabled,
                     backgroundColor: Color("main")
@@ -81,22 +85,15 @@ struct SelectWaypointView: View {
             // 화면이 나타날 때 위치 업데이트 시작
             GlobalLocationManager.shared.startUpdatingLocation()
         }
-        .fullScreenCover(isPresented: $showRouteSelection) {
+        .fullScreenCover(isPresented: $showRecommendFlow) {
             if let currentLocation = viewModel.getCurrentLocation() {
                 NavigationStack {
-                    RouteSelectionView(
+                    RecommendCourseView(
+                        onBack: { showRecommendFlow = false },
                         startLocation: currentLocation,
-                        waypoints: viewModel.getSelectedPlaces(),
-                        onBack: {
-                            showRouteSelection = false
-                        },
-                        onSelectRoute: { selectedRoute in
-                            print("선택된 경로: \(selectedRoute.type.title), 거리: \(selectedRoute.formattedDistance)")
-                            // 여기서 경로를 시작하는 로직 추가
-                            showRouteSelection = false
-                            onBack() // 경로 선택 후 이전 화면으로 돌아가기
-                        }
+                        waypoints: selectedWaypoints
                     )
+                    .environmentObject(dogVM)
                 }
             }
         }

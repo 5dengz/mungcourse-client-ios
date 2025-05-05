@@ -3,13 +3,12 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var dogVM: DogViewModel
     @Binding var selectedTab: ContentView.Tab
-    @Binding var isStartWalkOverlayPresented: Bool
-    var onSelectCourse: () -> Void
-
     @State private var showingDogSelection: Bool = false
     @State private var showWalkHistoryDetail: Bool = false
     @State private var walkHistoryDate: Date? = nil
     @State private var showNoRecordToast = false
+    @State private var showStartWalk = false
+    @State private var showSelectRoute = false
 
     var body: some View {
         ScrollView {
@@ -21,8 +20,8 @@ struct HomeView: View {
                     dogs: dogVM.dogs
                 )
                 ButtonArea(
-                    isStartWalkOverlayPresented: $isStartWalkOverlayPresented,
-                    onSelectCourse: onSelectCourse
+                    onStartWalk: { showStartWalk = true },
+                    onSelectRoute: { showSelectRoute = true }
                 )
                 NearbyTrailsView()
                 PastRoutesView(onShowDetail: { date in
@@ -42,10 +41,20 @@ struct HomeView: View {
         }
         .navigationTitle("홈")
         .dogSelectionSheet(isPresented: $showingDogSelection)
-        // 중복 시트 표시 문제 해결을 위해 showingDogSelection에 대한 fullScreenCover 블록 제거
         .fullScreenCover(isPresented: $showWalkHistoryDetail) {
             if let date = walkHistoryDate {
                 WalkHistoryDetailView(viewModel: WalkHistoryViewModel(selectedDate: date))
+            }
+        }
+        .fullScreenCover(isPresented: $showStartWalk) {
+            NavigationStack {
+                StartWalkView()
+                    .environmentObject(dogVM)
+            }
+        }
+        .fullScreenCover(isPresented: $showSelectRoute) {
+            NavigationStack {
+                SelectWaypointView(onBack: { showSelectRoute = false })
             }
         }
         .overlay(
@@ -141,8 +150,8 @@ struct ProfileArea: View {
 }
 
 struct ButtonArea: View {
-    @Binding var isStartWalkOverlayPresented: Bool
-    var onSelectCourse: () -> Void
+    var onStartWalk: () -> Void
+    var onSelectRoute: () -> Void
     
     var body: some View {
         HStack(spacing: 9) {
@@ -151,18 +160,14 @@ struct ButtonArea: View {
                 imageName: "start_walk",
                 backgroundColor: Color("main"),
                 foregroundColor: Color("pointwhite"),
-                action: {
-                    isStartWalkOverlayPresented = true
-                }
+                action: onStartWalk
             )
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course",
                 backgroundColor: Color("pointwhite"),
                 foregroundColor: Color("main"),
-                action: {
-                    onSelectCourse()
-                }
+                action: onSelectRoute
             )
         }
     }

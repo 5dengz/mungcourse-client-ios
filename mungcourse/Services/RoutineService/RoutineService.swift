@@ -17,6 +17,10 @@ struct RoutineData: Decodable {
     let date: String
     let routineCheckId: Int
     let routineId: Int
+
+    enum CodingKeys: String, CodingKey {
+        case name, alarmTime, date, routineCheckId, routineId, isCompleted
+    }
 }
 
 struct CreateRoutineRequest: Encodable {
@@ -82,7 +86,8 @@ class RoutineService {
                     return
                 }
                 do {
-                    let wrapper = try JSONDecoder().decode(RoutineListResponse.self, from: data)
+                    let decoder = JSONDecoder()
+                    let wrapper = try decoder.decode(RoutineListResponse.self, from: data)
                     promise(.success(wrapper.data))
                 } catch {
                     promise(.failure(error))

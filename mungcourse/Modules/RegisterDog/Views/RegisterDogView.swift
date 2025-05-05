@@ -13,10 +13,6 @@ struct RegisterDogView: View {
     var onComplete: (() -> Void)? = nil
     // 뒤로가기 버튼 노출 여부
     var showBackButton: Bool = true
-    // 삭제 확인 팝업 표시 상태
-    @State private var showDeleteConfirmation = false
-    // 마지막 강아지 삭제 시도 알림 표시 상태
-    @State private var showLastDogAlert = false
     
     // 수정 모드 여부 계산
     private var isEditing: Bool {
@@ -68,32 +64,19 @@ struct RegisterDogView: View {
     
     // MARK: - Body
     var body: some View {
-        // NavigationStack might still be needed for the navigation context, 
-        // but header is now custom.
         NavigationStack { 
-            ZStack { // ZStack 추가: 일반 화면과 모달을 겹쳐서 표시
-                VStack(spacing: 0) { // Use spacing 0 if header shouldn't have gap below
-                    CommonHeaderView(
-                        leftIcon: showBackButton ? "arrow_back" : nil, // 조건부 노출
-                        leftAction: showBackButton ? { dismiss() } : nil, // 조건부 노출
-                        title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
-                    ) {
-                        // 수정 모드일 때만 삭제 버튼 표시
-                        if isEditing {
-                            Button(action: { 
-                                // 삭제 전 강아지 수 확인
-                                if dogVM.dogs.count <= 1 {
-                                    showLastDogAlert = true // 마지막 강아지 알림 표시
-                                } else {
-                                    showDeleteConfirmation = true // 삭제 확인 팝업 표시
-                                }
-                            }) {
-                                Text("삭제")
-                                    .font(.custom("Pretendard-Regular", size: 16))
-                                    .foregroundColor(Color("gray400"))
-                            }
-                        }
+            ZStack { // 투명 배경으로 키보드 내리기 제스처 추가
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        UIApplication.shared.endEditing()
                     }
+                VStack(spacing: 0) {
+                    CommonHeaderView(
+                        leftIcon: showBackButton ? "arrow_back" : nil,
+                        leftAction: showBackButton ? { dismiss() } : nil,
+                        title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
+                    )
                     
                     // ViewModel이 모든 상태를 관리하도록 변경
                     RegisterDogContentsView(
@@ -117,7 +100,7 @@ struct RegisterDogView: View {
                             return nil
                         }) : nil).map(String.init),
                         viewModel: viewModel,
-                        buttonTitle: (isEditing && viewModel.isModified) ? "수정하기" : "완료"
+                        buttonTitle: isEditing ? "수정하기" : "완료"
                     )
                     .padding(.horizontal, 20)
                     // Remove navigation modifiers from here
@@ -130,7 +113,8 @@ struct RegisterDogView: View {
                         ProgressView()
                     }
                 }
-                .navigationBarHidden(true) // Hide the default navigation bar
+                .navigationBarHidden(true)
+                .ignoresSafeArea(edges: .bottom)
                 .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
                     if isComplete {
                         // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
@@ -138,28 +122,7 @@ struct RegisterDogView: View {
                         onComplete?()
                     }
                 }
-                .alert("삭제 불가", isPresented: $showLastDogAlert) {
-                    Button("확인") { }
-                } message: {
-                    Text("다른 반려견을 먼저 등록해주세요.")
-                }
-
-                // 삭제 확인 모달 추가
-                if showDeleteConfirmation {
-                    CommonPopupModal(
-                        title: "반려견 정보 삭제",
-                        message: "정보 삭제 시 반려견 정보 및 산책 기록은\n모두 삭제되어 복구가 불가능해요.\n\n정말로 삭제하시겠어요?",
-                        cancelText: "취소",
-                        confirmText: "삭제",
-                        cancelAction: {
-                            showDeleteConfirmation = false
-                        },
-                        confirmAction: {
-                            deleteDog()
-                            showDeleteConfirmation = false
-                        }
-                    )
-                }
+                .ignoredSafeArea() // 기타 설정
             }
         }
     }
@@ -171,59 +134,12 @@ struct RegisterDogView: View {
 
     // MARK: - Actions (Registration logic stays in the main view)
     private func registerAction() {
-        if isEditing, let detail = initialDetail, let id = detail.id {
-            if viewModel.isModified {
-                viewModel.updateDog(dogId: id)
-            } else {
-                dismiss()
-            }
+        if isEditing, let id = initialDetail?.id {
+            print("[RegisterDogView] 디버그: 수정 모드, updateDog 호출 id=\(id)")
+            viewModel.updateDog(dogId: id)
         } else {
+            print("[RegisterDogView] 디버그: 신규 등록 모드, registerDog 호출")
             viewModel.registerDog()
-        }
-    }
-    
-    // 반려견 삭제 메서드
-    private func deleteDog() {
-        guard let dogDetail = initialDetail, let dogId = dogDetail.id else {
-            // id가 없는 경우 에러 처리
-            let errorResponse = ErrorResponse(
-                statusCode: 400,
-                message: "반려견 ID를 찾을 수 없습니다.",
-                error: "Invalid ID",
-                success: false,
-                timestamp: ""
-            )
-            viewModel.errorMessage = RegisterDogError(errorResponse: errorResponse)
-            return
-        }
-        
-        viewModel.isLoading = true
-        
-        // API 호출을 통한 반려견 정보 삭제
-        viewModel.deleteDog(dogId: dogId) { success in
-            viewModel.isLoading = false
-            
-            if success {
-                // 삭제 성공 시 DogViewModel 업데이트 후 화면 닫기
-                DispatchQueue.main.async {
-                    // DogViewModel의 dogs 배열을 업데이트하기 위해 fetchDogs 호출
-                    self.dogVM.fetchDogs()
-                    // 화면 닫기
-                    self.dismiss()
-                    // 완료 콜백 호출
-                    self.onComplete?()
-                }
-            } else {
-                // 삭제 실패 시 에러 메시지 표시
-                let errorResponse = ErrorResponse(
-                    statusCode: 500,
-                    message: "반려견 정보 삭제 중 오류가 발생했습니다.",
-                    error: "Unknown error",
-                    success: false,
-                    timestamp: ""
-                )
-                viewModel.errorMessage = RegisterDogError(errorResponse: errorResponse)
-            }
         }
     }
 }
@@ -232,4 +148,11 @@ struct RegisterDogView: View {
 #Preview {
     RegisterDogView()
         .environmentObject(DogViewModel()) // Preview에 DogViewModel 추가
+}
+
+// 키보드 해제용 Extension
+private extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
 }

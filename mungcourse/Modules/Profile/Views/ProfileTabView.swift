@@ -100,7 +100,10 @@ struct ProfileTabView: View {
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
     @State private var showSettings = false
     @State private var showSelectDog = false
+    @State private var showAddDog = false
     @State private var showEditDog = false
+    @State private var showDeleteConfirmation = false
+    @State private var showLastDogAlert = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -111,10 +114,31 @@ struct ProfileTabView: View {
                     leftAction: { /* 뒤로가기 액션 */ },
                     title: "프로필"
                 ) {
-                    Button(action: { showSettings = true }) {
-                        Image(systemName: "gearshape")
-                            .font(.title2)
-                            .foregroundColor(.primary)
+                    HStack(spacing: 16) {
+                        // 반려견 추가 버튼
+                        Button(action: { showAddDog = true }) {
+                            Image(systemName: "plus")
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                        }
+                        // 삭제(쓰레기통) 버튼
+                        Button(action: {
+                            if dogVM.dogs.count <= 1 {
+                                showLastDogAlert = true
+                            } else {
+                                showDeleteConfirmation = true
+                            }
+                        }) {
+                            Image(systemName: "trash")
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                        }
+                        // 설정 버튼
+                        Button(action: { showSettings = true }) {
+                            Image(systemName: "gearshape")
+                                .font(.title2)
+                                .foregroundColor(.primary)
+                        }
                     }
                 }
                 .padding(.top, 16)
@@ -141,6 +165,26 @@ struct ProfileTabView: View {
                 ProfileInfoSectionView(selectedTab: selectedTab)
                 Spacer()
             }
+            // 삭제 확인 팝업
+            if showDeleteConfirmation {
+                CommonPopupModal(
+                    title: "반려견 정보 삭제",
+                    message: "정보 삭제 시 반려견 정보 및 산책 기록은 모두 삭제되어 복구할 수 없습니다.\n\n정말 삭제하시겠어요?",
+                    cancelText: "취소",
+                    confirmText: "삭제",
+                    cancelAction: { showDeleteConfirmation = false },
+                    confirmAction: {
+                        deleteMainDog()
+                        showDeleteConfirmation = false
+                    }
+                )
+            }
+        }
+        // 유일한 프로필 삭제 불가 알림
+        .alert("삭제 불가", isPresented: $showLastDogAlert) {
+            Button("확인") {}
+        } message: {
+            Text("유일한 프로필은 삭제할 수 없습니다.")
         }
         .onAppear {
             viewModel.fetchUserInfo()
@@ -161,38 +205,29 @@ struct ProfileTabView: View {
                 }
             }
         }
+        // 설정 화면
         .fullScreenCover(isPresented: $showSettings) {
             SettingsView()
         }
+        // 반려견 추가 화면
+        .fullScreenCover(isPresented: $showAddDog) {
+            RegisterDogView(onComplete: {
+                dogVM.fetchDogs()
+            }, showBackButton: true)
+            .environmentObject(dogVM)
+        }
+        // 반려견 편집 화면
         .fullScreenCover(isPresented: $showEditDog) {
-            // 프로필 편집 (현재 강아지 정보로 초기화)
             if let detail = dogVM.dogDetail {
                 RegisterDogView(initialDetail: detail, onComplete: {
-                    // 완료 후 강아지 목록 새로고침 및 메인 강아지 재설정
                     dogVM.fetchDogs()
-                    // 삭제 후 남은 강아지가 있으면 첫 번째 강아지를 메인으로 설정
-                    if let firstDog = dogVM.dogs.first {
-                        dogVM.mainDog = firstDog
-                    } else {
-                        // 모든 강아지가 삭제된 경우 (이론상 RegisterDogView에서 막지만 방어 코드)
-                        // 필요하다면 사용자에게 알리거나 다른 처리
-                        print("모든 강아지가 삭제되었습니다.")
-                        dogVM.mainDog = nil
-                        // TODO: UI에서 안내 메시지 또는 등록 화면으로 이동 처리
-                    }
                 }, showBackButton: true)
-                    .environmentObject(dogVM)
+                .environmentObject(dogVM)
             } else {
-                RegisterDogView(onComplete: {
-                    // 신규 등록 후에도 목록 새로고침 및 메인 설정 (필요시)
-                    dogVM.fetchDogs()
-                    if let firstDog = dogVM.dogs.first, dogVM.mainDog == nil {
-                        dogVM.mainDog = firstDog
-                    }
-                }, showBackButton: true)
-                    .environmentObject(dogVM)
+                ProgressView()
             }
         }
+        // 반려견 선택 화면
         .fullScreenCover(isPresented: $showSelectDog) {
             DogSelectionView(
                 showHeader: false,
@@ -201,6 +236,25 @@ struct ProfileTabView: View {
                 immediateSelection: true
             )
                 .environmentObject(dogVM)
+        }
+    }
+    
+    // MARK: - 삭제 로직
+    private func deleteMainDog() {
+        guard let id = dogVM.mainDog?.id else { return }
+        Task {
+            do {
+                try await DogService.shared.deleteDog(dogId: id)
+                // 삭제 후 목록 갱신 및 메인 반려견 설정
+                dogVM.fetchDogs()
+                if let first = dogVM.dogs.first {
+                    dogVM.mainDog = first
+                } else {
+                    dogVM.mainDog = nil
+                }
+            } catch {
+                print("[ProfileTabView] delete error:", error)
+            }
         }
     }
 }

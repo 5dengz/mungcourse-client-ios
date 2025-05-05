@@ -4,6 +4,8 @@ import Combine
 
 struct RecommendCourseView: View {
     let onBack: () -> Void
+    @EnvironmentObject var dogVM: DogViewModel
+    @State private var showStartWalk = false
     @StateObject private var viewModel = RecommendCourseViewModel()
     @State private var showRouteWalk = false
     @State private var selectedRoute: RouteOption? = nil
@@ -100,25 +102,25 @@ struct RecommendCourseView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
                 } else {
-                    // 추천 요청 버튼
-                    Text("산책로 추천 받기")
+                    // 추천 혹은 자유 산책 옵션
+                    Text("원하시는 옵션을 선택하세요")
                         .font(.custom("Pretendard-Bold", size: 18))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                     
-                    Text("AI가 당신의 위치와 주변 환경을 분석하여 최적의 산책로를 추천해 드립니다.")
-                        .font(.custom("Pretendard-Regular", size: 14))
-                        .foregroundColor(Color.gray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                    
-                    CommonFilledButton(
-                        title: "코스 추천 받기",
-                        action: {
-                            viewModel.requestRecommendation()
-                        },
-                        backgroundColor: Color("main")
-                    )
+                    HStack(spacing: 12) {
+                        CommonFilledButton(
+                            title: "코스 추천 받기",
+                            action: { viewModel.requestRecommendation() },
+                            backgroundColor: Color("main")
+                        )
+                        MainButton(
+                            title: "자유 산책",
+                            action: { showStartWalk = true },
+                            backgroundColor: Color("pointwhite"),
+                            foregroundColor: Color("main")
+                        )
+                    }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)
                 }
@@ -138,6 +140,12 @@ struct RecommendCourseView: View {
                 NavigationStack {
                     RouteWalkView(route: route)
                 }
+            }
+        }
+        .fullScreenCover(isPresented: $showStartWalk) {
+            NavigationStack {
+                StartWalkView()
+                    .environmentObject(dogVM)
             }
         }
         .alert(isPresented: $viewModel.showAlert) {
