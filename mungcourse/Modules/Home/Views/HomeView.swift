@@ -42,12 +42,7 @@ struct HomeView: View {
         }
         .navigationTitle("홈")
         .dogSelectionSheet(isPresented: $showingDogSelection)
-        .fullScreenCover(isPresented: $showingDogSelection) {
-            RegisterDogView(onComplete: {
-                dogVM.fetchDogs()
-            }, showBackButton: true)
-            .environmentObject(dogVM)
-        }
+        // 중복 시트 표시 문제 해결을 위해 showingDogSelection에 대한 fullScreenCover 블록 제거
         .fullScreenCover(isPresented: $showWalkHistoryDetail) {
             if let date = walkHistoryDate {
                 WalkHistoryDetailView(viewModel: WalkHistoryViewModel(selectedDate: date))
