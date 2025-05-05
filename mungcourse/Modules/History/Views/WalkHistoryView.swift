@@ -90,7 +90,6 @@ class WalkHistoryViewModel: ObservableObject {
 struct WalkHistoryView: View {
     @StateObject private var viewModel = WalkHistoryViewModel()
     @State private var navigateToDetail: Bool = false
-    @State private var selectedDate: Date? = nil
     
     // 가로 간격 7.5로 설정된 그리드 아이템 정의
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 7.5), count: 7)
@@ -156,42 +155,86 @@ struct WalkHistoryView: View {
                     .padding(.horizontal, 32)
                     .padding(.vertical, 14)
                     
-                    // 날짜 그리드 - 가로 간격 7.5, 세로 간격 11.5로 설정
-                    LazyVGrid(columns: columns, spacing: 11.5) {
-                        // 첫번째 요일에 맞추어 빈 셀 추가
-                        ForEach(0..<viewModel.firstWeekdayOfMonth(), id: \.self) { _ in
-                            Text("")
-                                .frame(height: 40)
-                        }
-                        
-                        // 날짜들 표시
-                        ForEach(viewModel.daysInMonth(), id: \.self) { date in
-                            Button(action: {
-                                selectedDate = date
-                                navigateToDetail = true
-                            }) {
-                                Text(date.formatDay())
-                                    .font(.custom("Pretendard-Regular", size: 16))
-                                    .foregroundColor(date.isToday() ? .white : Color("gray400"))
-                                    .frame(width: 40, height: 40)
-                                    .background(
-                                        Circle()
-                                            .fill(date.isToday() ? Color("main") : Color("gray200"))
-                                    )
+                    // 로딩 중 표시
+                    if viewModel.isLoadingDates {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(.vertical, 100)
+                    } else {
+                        // 날짜 그리드 - 가로 간격 7.5, 세로 간격 11.5로 설정
+                        LazyVGrid(columns: columns, spacing: 11.5) {
+                            // 첫번째 요일에 맞추어 빈 셀 추가
+                            ForEach(0..<viewModel.firstWeekdayOfMonth(), id: \.self) { _ in
+                                Text("")
+                                    .frame(height: 40)
+                            }
+                            
+                            // 날짜들 표시
+                            ForEach(viewModel.daysInMonth(), id: \.self) { date in
+                                Button(action: {
+                                    viewModel.loadWalkRecords(for: date)
+                                    navigateToDetail = true
+                                }) {
+                                    Text(date.formatDay())
+                                        .font(.custom("Pretendard-Regular", size: 16))
+                                        .foregroundColor(getDateTextColor(date))
+                                        .frame(width: 40, height: 40)
+                                        .background(
+                                            Circle()
+                                                .fill(getDateBackgroundColor(date))
+                                        )
+                                        .overlay(
+                                            Circle()
+                                                .stroke(viewModel.hasWalkRecord(for: date) ? Color("main") : Color.clear, lineWidth: 2)
+                                        )
+                                }
+                                .disabled(date > Date()) // 미래 날짜 비활성화
                             }
                         }
+                        .padding(.horizontal, 28)
                     }
-                    .padding(.horizontal, 28)
+                    
+                    // 에러 메시지 표시
+                    if let error = viewModel.dateError {
+                        Text("데이터를 불러오는 중 오류가 발생했습니다.")
+                            .font(.custom("Pretendard-Regular", size: 14))
+                            .foregroundColor(.red)
+                            .padding()
+                    }
                     
                     Spacer()
                 }
             }
             .toolbar(.hidden) // 기본 내비게이션 바를 숨김
             .navigationDestination(isPresented: $navigateToDetail) {
-                if let date = selectedDate {
-                    WalkHistoryDetailView(date: date)
-                }
+                WalkHistoryDetailView(viewModel: viewModel)
             }
+            .onAppear {
+                // 화면이 나타날 때마다 현재 월의 데이터 새로고침
+                viewModel.loadWalkDatesForCurrentMonth()
+            }
+        }
+    }
+    
+    // 날짜 텍스트 색상 결정
+    private func getDateTextColor(_ date: Date) -> Color {
+        if date.isToday() {
+            return .white
+        } else if date > Date() {
+            return Color("gray300") // 미래 날짜는 더 밝은 회색
+        } else {
+            return Color("gray500")
+        }
+    }
+    
+    // 날짜 배경 색상 결정
+    private func getDateBackgroundColor(_ date: Date) -> Color {
+        if date.isToday() {
+            return Color("main")
+        } else if viewModel.hasWalkRecord(for: date) {
+            return Color("main25")
+        } else {
+            return Color("gray200")
         }
     }
 }
