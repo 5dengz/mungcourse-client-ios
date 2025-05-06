@@ -1,6 +1,20 @@
 import Foundation
 import NMapsMap
 
+// MARK: - 흡연 구역 API 응답 모델
+private struct SmokingZoneResponse: Codable {
+    let timestamp: String
+    let statusCode: Int
+    let message: String
+    let data: [Coordinate]
+    let success: Bool
+}
+
+private struct Coordinate: Codable {
+    let lat: Double
+    let lng: Double
+}
+
 class SmokingZoneService {
     static let shared = SmokingZoneService()
     private init() {}
@@ -10,14 +24,12 @@ class SmokingZoneService {
     }
 
     func fetchSmokingZones(currentLat: Double, currentLng: Double, radius: Int = 2000, completion: @escaping (Result<[NMGLatLng], Error>) -> Void) {
-        // DogPlaceService와 동일한 방식으로 NetworkManager 사용
         guard let url = URL(string: "\(baseURL)/v1/walks/smokingzone?currentLat=\(currentLat)&currentLng=\(currentLng)") else {
             completion(.failure(URLError(.badURL)))
             return
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        // JWT 토큰 추가
         if let token = TokenManager.shared.accessToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
@@ -37,8 +49,8 @@ class SmokingZoneService {
             print("🚭 [SmokingZoneService] 상태 코드: \(httpResponse.statusCode)")
             if httpResponse.statusCode == 200 {
                 do {
-                    let decoded = try JSONDecoder().decode(DogPlaceResponse.self, from: data)
-                    let zones = decoded.data.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
+                    let resp = try JSONDecoder().decode(SmokingZoneResponse.self, from: data)
+                    let zones = resp.data.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
                     completion(.success(zones))
                 } catch {
                     print("❌ [SmokingZoneService] 디코딩 오류: \(error)")

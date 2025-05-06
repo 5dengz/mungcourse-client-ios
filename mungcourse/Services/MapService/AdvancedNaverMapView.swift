@@ -195,37 +195,9 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         mapView.mapView.positionMode = trackingMode
         mapView.mapView.locationOverlay.hidden = false // 기본 내 위치 마커 항상 표시
         
-        // userLocation이 있을 때 effect 및 paw 마커 생성 또는 위치 업데이트
-        if let userLoc = userLocation {
-            print("🗺️ [AdvancedNaverMapView] userLocation 업데이트: \(userLoc)")
-            if context.coordinator.effectMarker == nil {
-                let effectImage = UIImage(named: "pinpoint_effect")
-                let effect = NMFMarker(position: userLoc)
-                if let img = effectImage { effect.iconImage = NMFOverlayImage(image: img) }
-                effect.width = 30; effect.height = 14; effect.anchor = CGPoint(x: 0.5, y: 0.5); effect.zIndex = 0
-                effect.mapView = mapView.mapView
-                context.coordinator.effectMarker = effect
-                Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { [weak effect] timer in
-                    guard let effect = effect else { timer.invalidate(); return }
-                    let scale = 0.8 + 0.5 * sin(Date.timeIntervalSinceReferenceDate)
-                    effect.width = 30 * scale; effect.height = 14 * scale
-                }
-            } else {
-                context.coordinator.effectMarker?.position = userLoc
-            }
-            if context.coordinator.pawMarker == nil {
-                let pawImage = UIImage(named: "pinpoint_paw")
-                let paw = NMFMarker(position: userLoc)
-                if let img = pawImage { paw.iconImage = NMFOverlayImage(image: img) }
-                paw.width = 20; paw.height = 27; paw.anchor = CGPoint(x: 0.5, y: 1.0); paw.zIndex = 1
-                paw.mapView = mapView.mapView
-                context.coordinator.pawMarker = paw
-            } else {
-                context.coordinator.pawMarker?.position = userLoc
-            }
-        } else {
-            print("⚠️ [AdvancedNaverMapView] userLocation이 nil입니다")
-        }
+        // 사용자 위치 커스텀 마커 대신 기본 MyLocationOverlay 사용
+        mapView.mapView.locationOverlay.hidden = false
+        mapView.mapView.positionMode = trackingMode
         
         // 경로 오버레이 업데이트 (방어 코드 추가)
         DispatchQueue.main.async {
@@ -245,8 +217,6 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         var dogPlaceMarkers: [NMFMarker] = []
         let parent: AdvancedNaverMapView
         weak var pathOverlay: NMFPath?
-        var pawMarker: NMFMarker?
-        var effectMarker: NMFMarker?
         
         init(_ parent: AdvancedNaverMapView) {
             self.parent = parent

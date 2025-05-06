@@ -22,7 +22,7 @@ struct NearbyTrailsView: View {
 
             if viewModel.isLoading {
                 ProgressView("장소를 불러오는 중...")
-                    .frame(height: 150)
+                    .frame(maxWidth: .infinity, maxHeight: 150, alignment: .center)
             } else if let error = viewModel.errorMessage {
                 Text(error)
                     .foregroundColor(.red)

@@ -18,7 +18,7 @@ struct WalkControllerView: View {
                 calories: calories,
                 isActive: state == .active // 산책 중일 때만 main 컬러
             )
-            .padding(.top, 30)
+            .padding(.top, 20)
             WalkControlButton(
                 state: state,
                 onStart: onStart,
@@ -39,21 +39,3 @@ struct WalkControllerView: View {
         .shadow(color: Color("black10").opacity(0.1), radius: 10, x: 0, y: -5)
     }
 }
-
-#if DEBUG
-struct WalkControllerView_Previews: PreviewProvider {
-    static var previews: some View {
-        WalkControllerView(
-            distance: "1.2",
-            duration: "00:05:10",
-            calories: "25",
-            state: .notStarted,
-            onStart: {},
-            onPause: {},
-            onResume: {},
-            onEnd: {}
-        )
-        .previewLayout(.sizeThatFits)
-    }
-}
-#endif
