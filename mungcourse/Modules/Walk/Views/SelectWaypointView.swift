@@ -2,6 +2,7 @@ import SwiftUI
 import NMapsMap
 import Combine
 import CoreLocation
+import UIKit
 
 
 struct SelectWaypointView: View {
@@ -12,6 +13,7 @@ struct SelectWaypointView: View {
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var routeOption: RouteOption? = nil
     @State private var isLoadingRecommendation = false
+    @FocusState private var isTextFieldFocused: Bool
     @State private var cancellables = Set<AnyCancellable>()  // Combine 구독 저장소
     @EnvironmentObject var dogVM: DogViewModel
     
@@ -22,6 +24,9 @@ struct SelectWaypointView: View {
                     onBack()
                 }, title: "경유지 선택") {
                     Button(action: {
+                        // 키보드 내리기
+                        isTextFieldFocused = false
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         isLoadingRecommendation = true
                         Task {
                             do {
@@ -58,6 +63,7 @@ struct SelectWaypointView: View {
                 // 검색 입력 필드
                 HStack {
                     TextField("가고 싶은 장소를 검색하세요", text: $viewModel.searchText)
+                        .focused($isTextFieldFocused)
                         .font(Font.custom("Pretendard-SemiBold", size: 15))
                         .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
                     
@@ -113,6 +119,9 @@ struct SelectWaypointView: View {
                         action: {
                             let places = viewModel.getSelectedPlaces()
                             let current = viewModel.getCurrentLocation()?.toNMGLatLng() ?? NMGLatLng(lat: 37.5666, lng: 126.9780)
+                            // 키보드 내리기
+                            isTextFieldFocused = false
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             isLoadingRecommendation = true
                             Task {
                                 do {
@@ -148,7 +157,7 @@ struct SelectWaypointView: View {
             }
             if isLoadingRecommendation {
                 Color.black.opacity(0.6).ignoresSafeArea()
-                LoadingView()
+                LoadingView(loadingText: "경로를 생성 중입니다..")
             }
         }
         .navigationBarHidden(true)
