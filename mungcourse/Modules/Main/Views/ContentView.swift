@@ -44,8 +44,6 @@ struct ContentView: View {
     @State private var userLocation: NMGLatLng? = nil
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var cancellables = Set<AnyCancellable>()
-    @State private var showStartWalkTab = false
-    @State private var selectedRouteOption: RouteOption? = nil
 
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
@@ -85,7 +83,7 @@ struct ContentView: View {
                     ForEach(Tab.allCases, id: \.self) { tab in
                         Button(action: {
                             if tab == .startWalk {
-                                showStartWalkTab = true
+                                showSelectWaypoint = true
                             } else {
                                 selectedTab = tab
                             }
@@ -173,12 +171,6 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showStartWalk) {
             NavigationStack {
                 StartWalkView(routeOption: selectedRouteOption)
-                    .environmentObject(dogVM)
-            }
-        }
-        .fullScreenCover(isPresented: $showStartWalkTab) {
-            NavigationStack {
-                StartWalkTabView()
                     .environmentObject(dogVM)
             }
         }
