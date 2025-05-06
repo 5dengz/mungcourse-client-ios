@@ -64,7 +64,7 @@ struct WalkCompleteHeader: View {
                 Spacer()
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 28)
         .padding(.top, 24)
         .padding(.bottom, 12)
         .frame(height: 160)

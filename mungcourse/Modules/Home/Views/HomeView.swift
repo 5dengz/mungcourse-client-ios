@@ -1,4 +1,6 @@
 import SwiftUI
+import CoreLocation
+import NMapsMap
 
 struct HomeView: View {
     @EnvironmentObject var dogVM: DogViewModel
@@ -11,6 +13,7 @@ struct HomeView: View {
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var showRecommendRoute = false
     @State private var selectedRouteOption: RouteOption? = nil
+    @State private var isStartWalkActive = false
 
     var body: some View {
         ScrollView {
@@ -82,7 +85,7 @@ struct HomeView: View {
                         showRecommendRoute = false
                         isStartWalkActive = true
                     },
-                    startLocation: GlobalLocationManager.shared.lastLocation?.toNMGLatLng() ?? NMGLatLng(lat: 0, lng: 0),
+                    startLocation: GlobalLocationManager.shared.lastLocation?.coordinate.toNMGLatLng() ?? NMGLatLng(lat: 0, lng: 0),
                     waypoints: selectedWaypoints
                 )
                 .environmentObject(dogVM)

@@ -45,6 +45,7 @@ struct ContentView: View {
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var cancellables = Set<AnyCancellable>()
     @State private var showStartWalkTab = false
+    @State private var selectedRouteOption: RouteOption? = nil
 
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
@@ -157,17 +158,21 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showRecommendCourse) {
             NavigationStack {
                 RecommendCourseView(
-                    onBack: {
+                    onBack: { showRecommendCourse = false },
+                    onRouteSelected: { route in
+                        selectedRouteOption = route
                         showRecommendCourse = false
+                        showStartWalk = true
                     },
                     startLocation: userLocation ?? NMGLatLng(lat: 37.5666, lng: 126.9780),
                     waypoints: selectedWaypoints
                 )
+                .environmentObject(dogVM)
             }
         }
         .fullScreenCover(isPresented: $showStartWalk) {
             NavigationStack {
-                StartWalkView(routeOption: nil)
+                StartWalkView(routeOption: selectedRouteOption)
                     .environmentObject(dogVM)
             }
         }
