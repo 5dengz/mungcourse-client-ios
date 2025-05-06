@@ -32,11 +32,14 @@ struct LogHandler {
 // MARK: - 네이버 맵 뷰 래퍼
 struct NaverMapWrapper: View {
     @ObservedObject var viewModel: StartWalkViewModel
+    // 추천 경로 시 경유지 좌표 전달
+    var routeWaypoints: [NMGLatLng]? = nil
     
     var body: some View {
         AdvancedNaverMapView(
             dangerCoordinates: $viewModel.smokingZones,
-            dogPlaceCoordinates: viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+            // 경유지 선택 플로우면 선택된 경유지, 아니면 전체 dogPlaces
+            dogPlaceCoordinates: routeWaypoints ?? viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
             centerCoordinate: $viewModel.centerCoordinate,
             zoomLevel: $viewModel.zoomLevel,
             pathCoordinates: $viewModel.pathCoordinates,
@@ -135,7 +138,10 @@ struct StartWalkView: View {
             // 메인 콘텐츠
             VStack(spacing: 0) {
                 // 맵 뷰 영역
-                NaverMapWrapper(viewModel: viewModel)
+                NaverMapWrapper(
+                    viewModel: viewModel,
+                    routeWaypoints: routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
+                )
             }
             
             // 하단 컨트롤러
