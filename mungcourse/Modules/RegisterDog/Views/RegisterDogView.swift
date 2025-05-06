@@ -77,6 +77,7 @@ struct RegisterDogView: View {
                         leftAction: showBackButton ? { dismiss() } : nil,
                         title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
                     )
+                    .padding(.top, 64)
                     
                     // ViewModel이 모든 상태를 관리하도록 변경
                     RegisterDogContentsView(
@@ -152,12 +153,6 @@ struct RegisterDogView: View {
             viewModel.registerDog()
         }
     }
-}
-
-// MARK: - Preview
-#Preview {
-    RegisterDogView()
-        .environmentObject(DogViewModel()) // Preview에 DogViewModel 추가
 }
 
 // 키보드 해제용 Extension

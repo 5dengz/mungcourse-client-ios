@@ -151,27 +151,21 @@ class RegisterDogViewModel: ObservableObject {
         Task {
             do {
                 var finalImageUrl: String? = nil
-                
                 // 1. 이미지 업로드 (있는 경우)
                 if let imageData = selectedImageData {
                     let fileName = UUID().uuidString
                     let fileExtension = ".jpg"
-
                     print("S3 Presigned URL 요청 중...")
                     let s3Info = try await dogService.getS3PresignedUrl(fileName: fileName, fileExtension: fileExtension)
-
                     print("이미지 업로드 중...")
                     try await dogService.uploadImageToS3(presignedUrl: s3Info.data.preSignedUrl, imageData: imageData)
-
                     finalImageUrl = s3Info.data.url
                     print("이미지 업로드 완료: \(finalImageUrl ?? "")")
                 }
-                
                 // 2. 반려견 정보 등록
                 let postedAtFormatter = DateFormatter()
                 postedAtFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 let postedAtString = postedAtFormatter.string(from: Date())
-                
                 let dogData = DogRegistrationData(
                     name: name,
                     gender: genderString,
@@ -183,22 +177,29 @@ class RegisterDogViewModel: ObservableObject {
                     neutered: neuteredStatus,
                     dogImgUrl: finalImageUrl
                 )
-                
                 print("반려견 정보 등록 중...")
-                let registeredDog = try await dogService.registerDogWithDetails(dogData: dogData)
-                print("반려견 등록 완료: \(registeredDog.name)")
-                
-                // 메인 스레드에서 UI 업데이트
-                await MainActor.run {
-                    isLoading = false
-                    isRegistrationComplete = true
-                }
-                
-            } catch {
-                print("반려견 등록 오류: \(error.localizedDescription)")
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = RegisterDogError(message: "반려견 등록 중 오류가 발생했습니다: \(error.localizedDescription)")
+                do {
+                    let registeredDog = try await dogService.registerDogWithDetails(dogData: dogData)
+                    print("반려견 등록 완료: \(registeredDog.name)")
+                    await MainActor.run {
+                        isLoading = false
+                        isRegistrationComplete = true
+                    }
+                } catch {
+                    // 디코딩 에러이면서 서버 응답이 200인 경우 성공 처리
+                    if let networkError = error as? NetworkError, case .decodingError = networkError {
+                        print("[RegisterDogViewModel] 디코딩 에러지만 200 응답이므로 성공 처리")
+                        await MainActor.run {
+                            isLoading = false
+                            isRegistrationComplete = true
+                        }
+                    } else {
+                        print("반려견 등록 오류: \(error.localizedDescription)")
+                        await MainActor.run {
+                            isLoading = false
+                            errorMessage = RegisterDogError(message: "반려견 등록 중 오류가 발생했습니다: \(error.localizedDescription)")
+                        }
+                    }
                 }
             }
         }

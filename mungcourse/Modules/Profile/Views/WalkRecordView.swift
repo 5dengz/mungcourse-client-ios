@@ -55,12 +55,3 @@ struct WalkRecordView: View {
         }
     }
 }
-
-#if DEBUG
-struct WalkRecordView_Previews: PreviewProvider {
-    static var previews: some View {
-        WalkRecordView()
-            .environmentObject(DogViewModel())
-    }
-}
-#endif

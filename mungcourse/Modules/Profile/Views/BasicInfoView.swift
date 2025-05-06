@@ -43,6 +43,18 @@ struct BasicInfoView: View {
                     Spacer()
                     Text(detail.hasArthritis ? "예" : "아니오")
                 }
+            } else if let error = dogVM.dogDetailError {
+                VStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .font(.system(size: 40))
+                        .padding(.bottom, 8)
+                    Text(error)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .frame(maxWidth: .infinity, minHeight: 200)
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 200)

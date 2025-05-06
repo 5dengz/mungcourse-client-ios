@@ -24,7 +24,9 @@ struct HomeView: View {
                             showingDogSelection = true
                         }
                     },
-                    onSelectRoute: { showSelectRoute = true }
+                    onSelectRoute: {
+                        showSelectRoute = true
+                    }
                 )
                 NearbyTrailsView()
                 PastRoutesView(onShowDetail: { date in

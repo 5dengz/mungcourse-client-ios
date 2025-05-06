@@ -1,5 +1,4 @@
 import SwiftUI
-import Charts
 import NMapsMap
 
 // 산책 데이터 모델 정의
@@ -11,72 +10,6 @@ struct WalkData: Identifiable, Equatable {
     // Equatable 프로토콜 구현 - UUID를 제외하고 day와 distance만 비교
     static func == (lhs: WalkData, rhs: WalkData) -> Bool {
         lhs.day == rhs.day && lhs.distance == rhs.distance
-    }
-}
-
-// 주간 산책 차트 뷰 - 별도 컴포넌트로 분리
-struct WeeklyWalkChartView: View {
-    let walkData: [WalkData]
-    
-    var body: some View {
-        Chart {
-            ForEach(walkData) { data in
-                makeBarMark(for: data)
-            }
-        }
-        .chartYAxis(content: configureYAxis)
-        .chartXAxis(content: configureXAxis)
-        .frame(height: 250)
-        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: walkData)
-    }
-    
-    // BarMark 생성 및 스타일링을 위한 메서드
-    private func makeBarMark(for data: WalkData) -> some ChartContent {
-        BarMark(
-            x: .value("요일", data.day),
-            y: .value("거리(km)", data.distance)
-        )
-        .foregroundStyle(
-            LinearGradient(
-                colors: [Color("main").opacity(0.8), Color("main")],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .cornerRadius(8)
-        .annotation(position: .top) {
-            Text("\(String(format: "%.1f", data.distance))")
-                .font(.custom("Pretendard-Regular", size: 12))
-                .foregroundColor(Color("gray600"))
-                .padding(.top, 4)
-        }
-    }
-    
-    // Y축 설정을 위한 메서드
-    private func configureYAxis() -> some AxisContent {
-        AxisMarks(position: .leading) { value in
-            AxisGridLine()
-            if let distance = value.as(Double.self) {
-                AxisValueLabel {
-                    Text("\(String(format: "%.1f", distance)) km")
-                        .font(.custom("Pretendard-Regular", size: 10))
-                        .foregroundColor(Color("gray400"))
-                }
-            }
-        }
-    }
-    
-    // X축 설정을 위한 메서드
-    private func configureXAxis() -> some AxisContent {
-        AxisMarks { value in
-            AxisValueLabel {
-                if let day = value.as(String.self) {
-                    Text(day)
-                        .font(.custom("Pretendard-Regular", size: 12))
-                        .foregroundColor(Color("gray400"))
-                }
-            }
-        }
     }
 }
 
@@ -178,7 +111,7 @@ struct WalkHistoryDetailView: View {
                             Text("하루 총 산책")
                                 .font(.custom("Pretendard-SemiBold", size: 18))
                                 .foregroundColor(Color("gray900"))
-                                .padding(.top, 8)
+                                .padding(.top, 12)
                                 .padding(.leading, 2)
 
                             // 하루 총합 통계 바
@@ -188,12 +121,6 @@ struct WalkHistoryDetailView: View {
                                 calories: totalCalories,
                                 isActive: true
                             )
-
-                            // 시간대별 산책 분 그래프
-                            WalkTimeChartView(hourlyMinutes: hourlyMinutes)
-                                .frame(height: 180)
-                                .padding(.top, 8)
-
                             // 산책 요약 섹션
                             Text("산책 요약")
                                 .font(.custom("Pretendard-SemiBold", size: 18))
@@ -225,7 +152,7 @@ struct WalkHistoryDetailView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 20)
-                        .padding(.bottom, 30)
+                        .padding(.bottom, 80)
                     }
                 }
             }
@@ -361,9 +288,9 @@ struct WalkDetailSheet: View {
                             .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                     )
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 12)
                 }
-                .padding(.bottom, 30)
+                .padding(.bottom, 64)
             }
         }
         .presentationDetents([.large, .medium])
@@ -398,42 +325,5 @@ struct InfoCard: View {
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
         )
-    }
-}
-
-// 시간대별 산책 분 그래프 뷰
-struct WalkTimeChartView: View {
-    let hourlyMinutes: [Int] // 0~23시, 각 시간대별 산책 분
-    var body: some View {
-        Chart {
-            ForEach(0..<hourlyMinutes.count, id: \.self) { hour in
-                BarMark(
-                    x: .value("시간", hour),
-                    y: .value("산책 분", hourlyMinutes[hour])
-                )
-                .foregroundStyle(Color("main"))
-            }
-        }
-        .chartXAxis {
-            AxisMarks(values: .stride(by: 2)) { value in
-                AxisValueLabel {
-                    if let hour = value.as(Int.self) {
-                        Text(String(format: "%02d시", hour))
-                            .font(.system(size: 10))
-                    }
-                }
-            }
-        }
-        .chartYAxis {
-            AxisMarks() { value in
-                AxisValueLabel()
-            }
-        }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        WalkHistoryDetailView(viewModel: WalkHistoryViewModel())
     }
 }

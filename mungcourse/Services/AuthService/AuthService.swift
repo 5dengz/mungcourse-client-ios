@@ -289,18 +289,14 @@ class AuthService: AuthServiceProtocol {
                 promise(.failure(AuthError.unknown))
                 return
             }
-            
+
             var request = URLRequest(url: url)
             request.httpMethod = "DELETE"
-            
-            if let accessToken = TokenManager.shared.getAccessToken() {
-                request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-            }
-            
+
             print("[AuthService] 회원 탈퇴 요청")
             print("URL: \(url.absoluteString)")
-            
-            URLSession.shared.dataTask(with: request) { data, response, error in
+
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
                 if let error = error {
                     print("[AuthService] 회원 탈퇴 통신 에러:", error)
                     DispatchQueue.main.async {
@@ -308,7 +304,7 @@ class AuthService: AuthServiceProtocol {
                     }
                     return
                 }
-                
+
                 guard let http = response as? HTTPURLResponse else {
                     print("[AuthService] 회원 탈퇴 응답이 HTTPURLResponse가 아님")
                     DispatchQueue.main.async {
@@ -316,13 +312,13 @@ class AuthService: AuthServiceProtocol {
                     }
                     return
                 }
-                
+
                 print("[AuthService] 회원 탈퇴 응답 코드:", http.statusCode)
-                
+
                 if let data = data, let bodyStr = String(data: data, encoding: .utf8) {
                     print("[AuthService] 회원 탈퇴 응답 바디:", bodyStr)
                 }
-                
+
                 switch http.statusCode {
                 case 200...299:
                     // 성공 시 토큰 삭제 및 전체 데이터 초기화
@@ -341,7 +337,7 @@ class AuthService: AuthServiceProtocol {
                         promise(.failure(AuthError.unknown))
                     }
                 }
-            }.resume()
+            }
         }.eraseToAnyPublisher()
     }
     
