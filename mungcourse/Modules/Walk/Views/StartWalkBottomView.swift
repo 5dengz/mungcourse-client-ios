@@ -50,6 +50,6 @@ struct StartWalkBottomView: View {
             .hidden()
         }
         .padding()
-        .background(Color.white)
+        .background(Color("pointwhite"))
     }
 } 

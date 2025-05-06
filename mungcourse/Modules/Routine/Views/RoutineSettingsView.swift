@@ -151,7 +151,7 @@ struct RoutineSettingsView: View {
     var body: some View {
         let routines = viewModel.filteredRoutines()
         ZStack {
-            Color.white.ignoresSafeArea()
+            Color("pointwhite").ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // 공통 헤더 (요일 선택 포함)

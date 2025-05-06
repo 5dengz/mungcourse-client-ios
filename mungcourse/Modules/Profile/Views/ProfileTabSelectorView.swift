@@ -40,7 +40,7 @@ struct ProfileTabSelectorView: View {
                         Text("기본 정보")
                             .font(Font.custom("Pretendard", size: 14))
                             .fontWeight(selectedTab == .basic ? .bold : .regular)
-                            .foregroundColor(selectedTab == .basic ? .white : Color("main"))
+                            .foregroundColor(selectedTab == .basic ? Color("pointwhite") : Color("main"))
                             .frame(width: 92, height: 40)
                     }
                     
@@ -53,7 +53,7 @@ struct ProfileTabSelectorView: View {
                         Text("산책 기록")
                             .font(Font.custom("Pretendard", size: 14))
                             .fontWeight(selectedTab == .walk ? .bold : .regular)
-                            .foregroundColor(selectedTab == .walk ? .white : Color("main"))
+                            .foregroundColor(selectedTab == .walk ? Color("pointwhite") : Color("main"))
                             .frame(width: 92, height: 40)
                     }
                 }

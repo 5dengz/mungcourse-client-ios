@@ -4,8 +4,8 @@ struct CommonFilledButton: View {
     let title: String
     let action: () -> Void
     var isEnabled: Bool = true
-    var backgroundColor: Color = Color.main
-    var foregroundColor: Color = .white
+    var backgroundColor: Color = Color("main")
+    var foregroundColor: Color = Color("pointwhite")
     var cornerRadius: CGFloat = 10
     var body: some View {
         Button(action: action) {

@@ -201,7 +201,12 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         
         // 경로 오버레이 업데이트 (방어 코드 추가)
         DispatchQueue.main.async {
-            context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
+            print("🚩 [AdvancedNaverMapView] 경로 오버레이 업데이트 시도 - 좌표 개수: \(pathCoordinates.count)")
+            if pathCoordinates.count >= 2 {
+                context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
+            } else {
+                print("🚩 [AdvancedNaverMapView] 경로 오버레이 업데이트 실패 - 좌표가 2개 미만")
+            }
         }
         
         print("🗺️ [AdvancedNaverMapView] updateUIView 완료")

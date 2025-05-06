@@ -31,7 +31,7 @@ struct SocialLoginButton<Icon: View>: View {
                     // 조건부 stroke
                     RoundedRectangle(cornerRadius: 28)
                         .stroke(
-                            backgroundColor == Color.white ? Color("gray400") : backgroundColor,
+                            backgroundColor == Color("pointwhite") ? Color("gray400") : backgroundColor,
                             lineWidth: 1
                         )
                 }

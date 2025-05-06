@@ -57,7 +57,7 @@ struct WalkHistoryDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             // 배경색을 상단 SafeArea까지 확장
-            Color.white
+            Color("pointwhite")
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -83,8 +83,8 @@ struct WalkHistoryDetailView: View {
                     .padding(.leading, 20)
                 }
                 .frame(height: 85)
-                .background(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .background(Color("pointwhite"))
+                .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2)
                 
                 ScrollView {
                     if viewModel.isLoadingRecords {
@@ -143,7 +143,7 @@ struct WalkHistoryDetailView: View {
                                     )
                                     .background(
                                         RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color.white)
+                                            .fill(Color("pointwhite"))
                                             .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                                     )
                                 }
@@ -226,7 +226,7 @@ struct WalkRecordCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
+                .fill(Color("pointwhite"))
                 .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
         )
     }
@@ -284,7 +284,7 @@ struct WalkDetailSheet: View {
                     .padding(16)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white)
+                            .fill(Color("pointwhite"))
                             .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                     )
                     .padding(.horizontal, 16)
@@ -322,7 +322,7 @@ struct InfoCard: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
+                .fill(Color("pointwhite"))
                 .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
         )
     }

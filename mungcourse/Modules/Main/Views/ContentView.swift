@@ -110,7 +110,7 @@ struct ContentView: View {
                     }
                 }
                 .frame(height: tabBarHeight)
-                .background(Color.white.ignoresSafeArea(edges: .bottom))
+                .background(Color("pointwhite").ignoresSafeArea(edges: .bottom))
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
             }
         }

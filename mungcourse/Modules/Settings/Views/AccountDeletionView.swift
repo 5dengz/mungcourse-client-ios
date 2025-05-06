@@ -101,7 +101,7 @@ struct ReasonItemView: View {
                             .resizable()
                             .renderingMode(.template)
                             .frame(width: 22, height: 22)
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                     }
                 }
             }
@@ -110,7 +110,7 @@ struct ReasonItemView: View {
         .frame(width: 330, height: 57)
         .background(
             Rectangle()
-                .foregroundColor(.white)
+                .foregroundColor(Color("pointwhite"))
                 .cornerRadius(12)
                 .shadow(
                     color: Color(red: 0, green: 0, blue: 0, opacity: 0.05), 

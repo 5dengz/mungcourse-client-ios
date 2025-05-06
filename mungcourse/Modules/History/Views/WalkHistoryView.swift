@@ -11,7 +11,7 @@ struct WalkHistoryView: View {
         NavigationStack {
             ZStack(alignment: .top) {
                 // 배경색을 상단 SafeArea까지 확장
-                Color.white
+                Color("pointwhite")
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -24,8 +24,8 @@ struct WalkHistoryView: View {
                             .multilineTextAlignment(.center)
                     }
                     .frame(height: 85)
-                    .background(Color.white) // 명시적으로 흰색 배경 지정
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
+                    .background(Color("pointwhite")) // 명시적으로 흰색 배경 지정
+                    .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
                     
                     // 년월 선택 및 좌우 이동 버튼
                     HStack {

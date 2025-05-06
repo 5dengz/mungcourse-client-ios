@@ -19,7 +19,7 @@ struct RoutineListItem: View {
                     if false {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                     }
                 }
             }

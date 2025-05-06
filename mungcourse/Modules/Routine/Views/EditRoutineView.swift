@@ -64,7 +64,7 @@ struct EditRoutineView: View {
                                 .overlay(
                                     Text(day.shortKor)
                                         .font(.custom("Pretendard-Bold", size: 14))
-                                        .foregroundColor(selectedDays.contains(day) ? .white : Color("gray700"))
+                                        .foregroundColor(selectedDays.contains(day) ? Color("pointwhite") : Color("gray700"))
                                 )
                                 .onTapGesture {
                                     if selectedDays.contains(day) {

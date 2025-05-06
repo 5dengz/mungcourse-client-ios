@@ -116,7 +116,9 @@ struct StartWalkView: View {
     private func useRouteOptionIfNeeded() {
         guard !didInitRoute, let route = routeOption else { return }
         LogHandler.log("추천 경로 사용: \(route.coordinates.count)개 좌표, \(route.totalDistance)m")
+        // 경로 좌표 설정
         viewModel.pathCoordinates = route.coordinates
+        // 중심 좌표 설정
         viewModel.centerCoordinate = route.coordinates.first ?? NMGLatLng(lat: 37.5665, lng: 126.9780)
         viewModel.zoomLevel = 15.0
         didInitRoute = true
@@ -184,9 +186,18 @@ struct StartWalkView: View {
             Text(viewModel.locationErrorMessage)
         }
         .onAppear {
+            // 경로 옵션 적용
             useRouteOptionIfNeeded()
             // 앱 실행 시 바로 산책 시작하여 위치 추적을 활성화
             viewModel.startWalk()
+            
+            // 경로가 보이도록 1초 후에 다시 한번 경로 설정 (타이밍 이슈 해결)
+            if let route = routeOption {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    LogHandler.log("1초 후 경로 재설정: \(route.coordinates.count)개 좌표")
+                    viewModel.pathCoordinates = route.coordinates
+                }
+            }
         }
         .task {
             logStatusAfterDelay()

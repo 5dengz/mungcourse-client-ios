@@ -17,7 +17,7 @@ struct RoutineAddButton: View {
                     Text("루틴 추가")
                         .font(.custom("Pretendard", size: 15).weight(.semibold))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(Color("pointwhite"))
             }
         }
     }

@@ -17,10 +17,10 @@ struct DayButton: View {
                 VStack(spacing: 2) {
                     Text(day.rawValue)
                         .font(.custom("Pretendard", size: 12).weight(isSelected ? .semibold : .regular))
-                        .foregroundColor(isSelected ? .white : Color(red: 0.62, green: 0.62, blue: 0.62))
+                        .foregroundColor(isSelected ? Color("pointwhite") : Color(red: 0.62, green: 0.62, blue: 0.62))
                     Text("\(dateNumber)")
                         .font(.custom("Pretendard", size: 14).weight(isSelected ? .semibold : .regular))
-                        .foregroundColor(isSelected ? .white : Color(red: 0.62, green: 0.62, blue: 0.62))
+                        .foregroundColor(isSelected ? Color("pointwhite") : Color(red: 0.62, green: 0.62, blue: 0.62))
                 }
             }
         }

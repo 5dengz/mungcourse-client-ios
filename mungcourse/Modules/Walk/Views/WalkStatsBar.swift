@@ -36,7 +36,7 @@ struct WalkStatsBar: View {
                 .background(Color("gray300"))
             StatItem(label: "칼로리", value: calories, valueColor: Color("pointblack"))
         }
-        .background(Color("white"))
+        .background(Color("pointwhite"))
         .padding(.vertical, 8)
     }
 }

@@ -16,7 +16,7 @@ struct SegmentedButton<T: Hashable>: View {
                 .font(.custom(isSelected ? "Pretendard-Bold" : "Pretendard-Regular", size: 14))
                 .frame(maxWidth: .infinity)
                 .frame(height: 41)
-                .foregroundColor(isSelected ? .white : Color("gray600")) // Use asset colors
+                .foregroundColor(isSelected ? Color("pointwhite") : Color("gray600")) // Use asset colors
                 .background(isSelected ? Color("main") : Color.clear) // Use asset colors
                 .cornerRadius(8)
                 .overlay(

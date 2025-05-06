@@ -34,7 +34,7 @@ struct RouteWalkView: View {
                             Text("경로 진행률: \(viewModel.formattedProgress)")
                                 .font(.caption)
                                 .padding(8)
-                                .background(Color.white.opacity(0.8))
+                                .background(Color("pointwhite").opacity(0.8))
                                 .cornerRadius(8)
                                 .padding(.top, 50)
                         }

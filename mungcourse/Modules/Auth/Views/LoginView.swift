@@ -46,20 +46,20 @@ struct LoginView: View {
                 
                 // 구글 로그인 버튼
                 SocialLoginButton(
-                    icon: { Image( "sns_google").foregroundColor(.black) },
+                    icon: { Image( "sns_google").foregroundColor(Color("pointblack")) },
                     text: "구글 로그인",
-                    textColor: .black,
-                    backgroundColor: .white,
+                    textColor: Color("pointblack"),
+                    backgroundColor: Color("pointwhite"),
                     isLoading: viewModel.isLoading,
                     action: { viewModel.loginWithGoogle() }
                 )
                 
                 // 애플 로그인 버튼
                 SocialLoginButton(
-                    icon: { Image( "sns_apple").foregroundColor(.white) },
+                    icon: { Image( "sns_apple").foregroundColor(Color("pointwhite")) },
                     text: "애플 로그인",
-                    textColor: .white,
-                    backgroundColor: .black,
+                    textColor: Color("pointwhite"),
+                    backgroundColor: Color("pointblack"),
                     isLoading: viewModel.isLoading,
                     action: { viewModel.loginWithApple() }
                 )

@@ -64,7 +64,7 @@ struct CommonPopupModal: View {
                     Button(action: confirmAction) {
                         Text(confirmText)
                             .font(.custom("Pretendard-Bold", size: 16))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .background(Color("main"))
@@ -74,7 +74,7 @@ struct CommonPopupModal: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 28)
             }
-            .background(Color.white)
+            .background(Color("pointwhite"))
             .cornerRadius(16)
             .padding(.horizontal, 40)
             .shadow(color: Color.black.opacity(0.1), radius: 10)

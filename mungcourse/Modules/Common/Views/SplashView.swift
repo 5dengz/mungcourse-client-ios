@@ -100,7 +100,7 @@ struct SplashView: View {
             .font(.custom("Pretendard-SemiBold", size: 26))
         + Text("와 함께라면\n오늘도 안심 산책!")
             .font(.custom("Pretendard-Regular", size: 26)))
-            .foregroundColor(.white)
+            .foregroundColor(Color("pointwhite"))
             .multilineTextAlignment(.center)
             .padding(.bottom, 20)
     }

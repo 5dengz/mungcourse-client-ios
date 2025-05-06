@@ -62,7 +62,7 @@ struct BasicInfoView: View {
         }
         .font(.custom("Pretendard-Regular", size: 14))
         .padding()
-        .background(Color.white)
+        .background(Color("pointwhite"))
     }
 }
 

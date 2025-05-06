@@ -149,11 +149,11 @@ struct SelectWaypointView: View {
             if isLoadingRecommendation {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 ProgressView("코스 생성 중...")
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color("pointwhite")))
                     .padding()
                     .background(Color.black.opacity(0.8))
                     .cornerRadius(10)
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("pointwhite"))
             }
         }
         .navigationBarHidden(true)
@@ -233,7 +233,7 @@ struct DogPlaceResultRow: View {
                             .resizable()
                             .renderingMode(.template)
                             .frame(width: 22, height: 22)
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                     }
                 }
             }

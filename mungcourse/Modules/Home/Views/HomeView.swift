@@ -93,7 +93,7 @@ struct HomeView: View {
                         .padding(.vertical, 10)
                         .padding(.horizontal, 24)
                         .background(Color.black.opacity(0.8))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color("pointwhite"))
                         .cornerRadius(16)
                         .transition(.opacity)
                         .zIndex(1)

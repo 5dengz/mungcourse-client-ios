@@ -60,7 +60,8 @@ class WalkTrackingService: NSObject, ObservableObject {
             locationManager.startUpdatingLocation()
         }
         print("[WalkTrackingService] startWalk() - 데이터 초기화 및 위치 추적 시작")
-        walkPath.removeAll()
+        // 기존 walkPath를 유지하고 산책 통계만 초기화
+        // walkPath.removeAll() // 경로를 초기화하지 않음
         distance = 0.0
         duration = 0.0
         calories = 0.0

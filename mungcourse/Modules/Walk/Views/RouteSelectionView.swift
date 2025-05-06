@@ -86,7 +86,7 @@ struct RouteSelectionView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .background(Color.white)
+            .background(Color("pointwhite"))
             .cornerRadius(20, corners: [.topLeft, .topRight])
         }
         .navigationBarHidden(true)
@@ -112,18 +112,18 @@ struct RouteOptionCard: View {
                 // 경로 타입 아이콘
                 Image(systemName: iconForRouteType(route.type))
                     .font(.system(size: 20))
-                    .foregroundColor(isSelected ? Color.white : Color("main"))
+                    .foregroundColor(isSelected ? Color("pointwhite") : Color("main"))
                 
                 Text(route.type.title)
                     .font(.custom("Pretendard-Bold", size: 16))
-                    .foregroundColor(isSelected ? .white : .black)
+                    .foregroundColor(isSelected ? Color("pointwhite") : Color("pointblack"))
                 
                 Spacer()
             }
             
             Text(route.type.description)
                 .font(.custom("Pretendard-Regular", size: 12))
-                .foregroundColor(isSelected ? .white.opacity(0.9) : Color.gray)
+                .foregroundColor(isSelected ? Color("pointwhite").opacity(0.9) : Color.gray)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
             
@@ -133,11 +133,11 @@ struct RouteOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("거리")
                         .font(.custom("Pretendard-Regular", size: 12))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color.gray)
+                        .foregroundColor(isSelected ? Color("pointwhite").opacity(0.8) : Color.gray)
                     
                     Text(route.formattedDistance)
                         .font(.custom("Pretendard-SemiBold", size: 16))
-                        .foregroundColor(isSelected ? .white : .black)
+                        .foregroundColor(isSelected ? Color("pointwhite") : Color("pointblack"))
                 }
                 
                 Spacer()
@@ -145,17 +145,17 @@ struct RouteOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("예상 시간")
                         .font(.custom("Pretendard-Regular", size: 12))
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : Color.gray)
+                        .foregroundColor(isSelected ? Color("pointwhite").opacity(0.8) : Color.gray)
                     
                     Text(route.formattedTime)
                         .font(.custom("Pretendard-SemiBold", size: 16))
-                        .foregroundColor(isSelected ? .white : .black)
+                        .foregroundColor(isSelected ? Color("pointwhite") : Color("pointblack"))
                 }
             }
         }
         .padding(16)
         .frame(width: 220, height: 140)
-        .background(isSelected ? Color("main") : Color.white)
+        .background(isSelected ? Color("main") : Color("pointwhite"))
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         .overlay(

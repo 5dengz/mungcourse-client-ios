@@ -24,7 +24,7 @@ struct NotificationSettingsView: View {
                         .labelsHidden()
                 }
                 .padding(.horizontal, 16)
-                .background(Color.white)
+                .background(Color("pointwhite"))
                 .padding(.bottom, 35)
                 HStack {
                     Text("산책 푸시 알림")
@@ -35,7 +35,7 @@ struct NotificationSettingsView: View {
                         .labelsHidden()
                 }
                 .padding(.horizontal, 16)
-                .background(Color.white)
+                .background(Color("pointwhite"))
                 .padding(.bottom, 35)
                 HStack {
                     Text("산책 중단 알림")
@@ -46,7 +46,7 @@ struct NotificationSettingsView: View {
                         .labelsHidden()
                 }
                 .padding(.horizontal, 16)
-                .background(Color.white)
+                .background(Color("pointwhite"))
             }
             Spacer()
         }

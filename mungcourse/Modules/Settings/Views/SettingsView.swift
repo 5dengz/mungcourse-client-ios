@@ -38,14 +38,14 @@ struct SettingsView: View {
                     HStack {
                         Text("문의하기")
                             .font(.custom("Pretendard-Regular", size: 16))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color("pointblack"))
                         Spacer()
                         Image("arrow_right")
                             .renderingMode(.template)
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 16)
-                    .background(Color.white)
+                    .background(Color("pointwhite"))
                     .padding(.bottom, 35)
                 }
                 Button(action: {
@@ -56,28 +56,28 @@ struct SettingsView: View {
                     HStack {
                         Text("이용약관")
                             .font(.custom("Pretendard-Regular", size: 16))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color("pointblack"))
                         Spacer()
                         Image("arrow_right")
                             .renderingMode(.template)
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 16)
-                    .background(Color.white)
+                    .background(Color("pointwhite"))
                     .padding(.bottom, 35)
                 }
                 NavigationLink(destination: AccountDeletionView().navigationBarHidden(true)) {
                     HStack {
                         Text("회원 탈퇴")
                             .font(.custom("Pretendard-Regular", size: 16))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color("pointblack"))
                         Spacer()
                         Image("arrow_right")
                             .renderingMode(.template)
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 16)
-                    .background(Color.white)
+                    .background(Color("pointwhite"))
                     .padding(.bottom, 35)
                 }
                 Button(action: {
@@ -87,7 +87,7 @@ struct SettingsView: View {
                     HStack {
                         Text("로그아웃")
                             .font(.custom("Pretendard-Regular", size: 16))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color("pointblack"))
                         Spacer()
                     }
                     .padding(.horizontal, 16)

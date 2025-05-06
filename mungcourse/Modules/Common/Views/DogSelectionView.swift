@@ -211,7 +211,7 @@ struct DogSelectionView: View {
             }
             .padding(.top, 20)
         }
-        .background(Color.white)
+        .background(Color("pointwhite"))
         .ignoresSafeArea(edges: .bottom)
         .onAppear {
             dogVM.fetchDogs()

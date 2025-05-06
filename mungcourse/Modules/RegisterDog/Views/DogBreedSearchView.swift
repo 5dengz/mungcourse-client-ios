@@ -118,13 +118,13 @@ struct BreedResultRow: View {
                             .resizable()
                             .renderingMode(.template)
                             .frame(width: 22, height: 22)
-                            .foregroundColor(.white)
+                            .foregroundColor(Color("pointwhite"))
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.white)
+        .background(Color("pointwhite"))
         .cornerRadius(12)
     }
 }

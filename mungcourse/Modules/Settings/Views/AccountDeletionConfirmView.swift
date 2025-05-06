@@ -143,7 +143,7 @@ struct AccountDeletionConfirmView: View {
                         },
                         isEnabled: true,
                         backgroundColor: Color("main"),
-                        foregroundColor: .white,
+                        foregroundColor: Color("pointwhite"),
                         cornerRadius: 8
                     )
                     .padding(.horizontal, 16)
@@ -202,7 +202,7 @@ struct StatisticItemView: View {
         HStack(spacing: 16) {
             Text(title)
                 .font(Font.custom("Pretendard-Regular", size: 16))
-                .foregroundColor(.black)
+                .foregroundColor(Color("pointblack"))
                 .padding(.leading, 16)
             
             Spacer()
@@ -215,7 +215,7 @@ struct StatisticItemView: View {
         .frame(width: 330, height: 57)
         .background(
             Rectangle()
-                .foregroundColor(.white)
+                .foregroundColor(Color("pointwhite"))
                 .cornerRadius(12)
                 .shadow(
                     color: Color(red: 0, green: 0, blue: 0, opacity: 0.05), 

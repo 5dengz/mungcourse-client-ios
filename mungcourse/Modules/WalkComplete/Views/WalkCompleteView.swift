@@ -32,7 +32,7 @@ struct WalkCompleteView: View {
                 .padding(16)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white)
+                        .fill(Color("pointwhite"))
                         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                 )
                 .padding(.horizontal, 20)
@@ -51,7 +51,7 @@ struct WalkCompleteView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
-        .background(Color("white").ignoresSafeArea())
+        .background(Color("pointwhite").ignoresSafeArea())
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
     }
