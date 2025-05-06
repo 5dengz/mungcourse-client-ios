@@ -8,6 +8,9 @@ struct HomeView: View {
     @State private var walkHistoryDate: Date? = nil
     @State private var showNoRecordToast = false
     @State private var showSelectRoute = false
+    @State private var selectedWaypoints: [DogPlace] = []
+    @State private var showRecommendRoute = false
+    @State private var selectedRouteOption: RouteOption? = nil
 
     var body: some View {
         ScrollView {
@@ -59,7 +62,41 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $showSelectRoute) {
             NavigationStack {
-                SelectWaypointView(onBack: { showSelectRoute = false }, onSelect: { _ in showSelectRoute = false })
+                SelectWaypointView(
+                    onBack: { showSelectRoute = false },
+                    onSelect: { places in
+                        selectedWaypoints = places
+                        showSelectRoute = false
+                        showRecommendRoute = true
+                    }
+                )
+                .environmentObject(dogVM)
+            }
+        }
+        .fullScreenCover(isPresented: $showRecommendRoute) {
+            NavigationStack {
+                RecommendCourseView(
+                    onBack: { showRecommendRoute = false },
+                    onRouteSelected: { route in
+                        selectedRouteOption = route
+                        showRecommendRoute = false
+                        isStartWalkActive = true
+                    },
+                    startLocation: GlobalLocationManager.shared.lastLocation?.toNMGLatLng() ?? NMGLatLng(lat: 0, lng: 0),
+                    waypoints: selectedWaypoints
+                )
+                .environmentObject(dogVM)
+            }
+        }
+        .fullScreenCover(isPresented: $isStartWalkActive) {
+            NavigationStack {
+                StartWalkView(
+                    routeOption: selectedRouteOption,
+                    onForceHome: {
+                        isStartWalkActive = false // 홈으로 이동 콜백 시 완전 해제
+                    }
+                )
+                .environmentObject(dogVM)
             }
         }
         .overlay(
@@ -177,9 +214,12 @@ struct ButtonArea: View {
             .buttonStyle(.plain)
             .fullScreenCover(isPresented: $isStartWalkActive) {
                 NavigationStack {
-                    StartWalkView(routeOption: nil, onForceHome: {
-                        isStartWalkActive = false // 홈으로 이동 콜백 시 완전 해제
-                    })
+                    StartWalkView(
+                        routeOption: nil,
+                        onForceHome: {
+                            isStartWalkActive = false // 홈으로 이동 콜백 시 완전 해제
+                        }
+                    )
                     .environmentObject(dogVM)
                 }
             }

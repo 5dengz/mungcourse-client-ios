@@ -4,11 +4,10 @@ import Combine
 
 struct RecommendCourseView: View {
     let onBack: () -> Void
+    let onRouteSelected: (RouteOption) -> Void
     let startLocation: NMGLatLng
     let waypoints: [DogPlace]
     @StateObject private var viewModel = RecommendCourseViewModel()
-    @State private var showRouteWalk = false
-    @State private var selectedRoute: RouteOption? = nil
     
     var body: some View {
         VStack(spacing: 0) {
@@ -25,8 +24,7 @@ struct RecommendCourseView: View {
                 title: "산책 시작",
                 action: {
                     if let route = viewModel.recommendedRoute {
-                        selectedRoute = route
-                        showRouteWalk = true
+                        onRouteSelected(route)
                     }
                 },
                 backgroundColor: Color("main")
@@ -36,13 +34,6 @@ struct RecommendCourseView: View {
         .navigationBarHidden(true)
         .onAppear {
             viewModel.initialize(startLocation: startLocation, waypoints: waypoints)
-        }
-        .fullScreenCover(isPresented: $showRouteWalk) {
-            if let route = selectedRoute {
-                NavigationStack {
-                    RouteWalkView(route: route)
-                }
-            }
         }
         .alert(isPresented: $viewModel.showAlert) {
             Alert(

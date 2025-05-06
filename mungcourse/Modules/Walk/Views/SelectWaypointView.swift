@@ -93,6 +93,7 @@ struct SelectWaypointView: View {
                 NavigationStack {
                     RecommendCourseView(
                         onBack: { showRecommendFlow = false },
+                        onRouteSelected: { _ in showRecommendFlow = false },
                         startLocation: currentLocation.toNMGLatLng(),
                         waypoints: selectedWaypoints
                     )

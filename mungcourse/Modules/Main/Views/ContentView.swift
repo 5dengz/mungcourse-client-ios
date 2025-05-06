@@ -33,8 +33,6 @@ struct ContentView: View {
     }
 
     @State private var selectedTab: Tab = .home
-    @State private var overlayBackgroundTab: Tab? = nil
-    @State private var isStartWalkOverlayPresented = false
     @State private var showSelectWaypoint = false
     @State private var showRecommendCourse = false
     @State private var showStartWalk = false
@@ -46,6 +44,7 @@ struct ContentView: View {
     @State private var userLocation: NMGLatLng? = nil
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var cancellables = Set<AnyCancellable>()
+    @State private var showStartWalkTab = false
 
     private let imageHeight: CGFloat = 24
     private let imageToBorder: CGFloat = 10
@@ -59,8 +58,7 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
-                let backgroundTab = overlayBackgroundTab ?? selectedTab
-                switch backgroundTab {
+                switch selectedTab {
                 case .home:
                     HomeView(
                         selectedTab: $selectedTab
@@ -86,11 +84,9 @@ struct ContentView: View {
                     ForEach(Tab.allCases, id: \.self) { tab in
                         Button(action: {
                             if tab == .startWalk {
-                                overlayBackgroundTab = selectedTab
-                                isStartWalkOverlayPresented = true
+                                showStartWalkTab = true
                             } else {
                                 selectedTab = tab
-                                overlayBackgroundTab = nil
                             }
                         }) {
                             VStack(spacing: 0) {
@@ -120,23 +116,11 @@ struct ContentView: View {
                 .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
             }
         }
-        .startWalkTabSheet(
-            isPresented: $isStartWalkOverlayPresented,
-            onSelectWaypoint: {
-                walkStartType = .direct
-                showWalkDogSelection = true
-            },
-            onRecommendCourse: {
-                walkStartType = .recommend
-                showWalkDogSelection = true
-            }
-        )
         .fullScreenCover(isPresented: $showWalkDogSelection) {
             DogSelectionView(
                 isWalkMode: true,
                 onComplete: { dogs in
                     showWalkDogSelection = false
-                    isStartWalkOverlayPresented = false
                     switch walkStartType {
                     case .direct:
                         showStartWalk = true
@@ -146,7 +130,6 @@ struct ContentView: View {
                 },
                 onSkip: { dogs in
                     showWalkDogSelection = false
-                    isStartWalkOverlayPresented = false
                     switch walkStartType {
                     case .direct:
                         showStartWalk = true
@@ -176,7 +159,6 @@ struct ContentView: View {
                 RecommendCourseView(
                     onBack: {
                         showRecommendCourse = false
-                        isStartWalkOverlayPresented = true
                     },
                     startLocation: userLocation ?? NMGLatLng(lat: 37.5666, lng: 126.9780),
                     waypoints: selectedWaypoints
@@ -186,6 +168,12 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showStartWalk) {
             NavigationStack {
                 StartWalkView(routeOption: nil)
+                    .environmentObject(dogVM)
+            }
+        }
+        .fullScreenCover(isPresented: $showStartWalkTab) {
+            NavigationStack {
+                StartWalkTabView()
                     .environmentObject(dogVM)
             }
         }
