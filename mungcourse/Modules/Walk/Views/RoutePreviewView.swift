@@ -18,7 +18,8 @@ struct RoutePreviewView: View {
                 pathWidth: 5
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea(edges: .all)
+            .ignoresSafeArea(edges: [.leading, .trailing, .bottom])
+            .layoutPriority(1)
 
             VStack(spacing: 0) {
                 NavigationLink(destination: StartWalkView(routeOption: RouteOption(type: .recommended, totalDistance: distance, estimatedTime: estimatedTime, waypoints: waypoints, coordinates: coordinates)), isActive: $goToStartWalk) {
@@ -34,7 +35,7 @@ struct RoutePreviewView: View {
                         .background(Color("main"))
                         .cornerRadius(12)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 36)
                 .padding(.vertical, 16)
             }
             .frame(maxWidth: .infinity)
@@ -43,6 +44,8 @@ struct RoutePreviewView: View {
         }
         .navigationBarTitle("추천 경로 미리보기", displayMode: .inline)
         .navigationBarBackButtonHidden(false)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbarBackground(Color.white, for: .navigationBar)
+        .toolbarColorScheme(.light, for: .navigationBar)
     }
 }
