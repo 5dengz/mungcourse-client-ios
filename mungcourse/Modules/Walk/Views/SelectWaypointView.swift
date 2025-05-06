@@ -157,7 +157,7 @@ struct SelectWaypointView: View {
             }
             if isLoadingRecommendation {
                 Color.black.opacity(0.6).ignoresSafeArea()
-                LoadingView(loadingText: "경로를 생성 중입니다..")
+                LoadingView(loadingText: "경로를 생성 중입니다.")
             }
         }
         .navigationBarHidden(true)

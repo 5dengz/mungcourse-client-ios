@@ -40,9 +40,9 @@ struct LoadingView: View {
                 // 로딩 텍스트 영역 추가
                 if !loadingText.isEmpty {
                     Text(loadingText)
-                        .font(Font.custom("Pretendard-Medium", size: 16))
+                        .font(Font.custom("Pretendard-SemiBold", size: 16))
                         .foregroundColor(Color("pointwhite"))
-                        .padding(.top, 10)
+                        .padding(.top, 28)
                 }
             }
         }

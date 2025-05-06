@@ -1,5 +1,23 @@
 
 import SwiftUI
+import UIKit
+
+// MARK: - 키보드 숨김 수정자
+struct DismissKeyboardOnTap: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .contentShape(Rectangle())
+            .onTapGesture {
+                UIApplication.shared.endEditing()
+            }
+    }
+}
+
+extension View {
+    func dismissKeyboardOnTap() -> some View {
+        modifier(DismissKeyboardOnTap())
+    }
+}
 
 // MARK: - Extracted Content View
 struct RegisterDogContentsView: View {
@@ -31,12 +49,23 @@ struct RegisterDogContentsView: View {
     
     var body: some View {
         ZStack {
+            // 배경 영역 - 터치하면 키보드가 내려감
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture {
                     UIApplication.shared.endEditing()
                 }
+                .ignoresSafeArea(.all, edges: .all)
+            
             ScrollView {
+                // 스크롤 배경 - 터치하면 키보드가 내려감
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        UIApplication.shared.endEditing()
+                    }
+                    .allowsHitTesting(true)
             VStack(spacing: 24) {
                 ProfileImageView(
                     image: $profileImage,
@@ -68,8 +97,15 @@ struct RegisterDogContentsView: View {
             }
             .padding(.bottom)
         }
-        .scrollDismissesKeyboard(.interactively) // 스크롤 시 키보드 내림
+        .scrollDismissesKeyboard(.immediately) // 스크롤 시 키보드 즉시 내림
         .scrollIndicators(.hidden) // 스크롤바 숨김 처리
+        .dismissKeyboardOnTap() // 커스텀 수정자 적용
+        .simultaneousGesture(
+            TapGesture()
+                .onEnded { _ in
+                    UIApplication.shared.endEditing()
+                }
+        )
     }
 }
 }
