@@ -3,7 +3,7 @@ import SwiftUI
 struct NearbyTrailsListView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = NearbyTrailsViewModel()
-    @State private var categories: [String] = ["전체", "공원", "산책로", "카페"]
+    @State private var categories: [String] = ["전체", "문예회관", "미술관", "박물관", "식당", "공원", "여행지", "해수욕장"]
     @State private var selectedCategory: String? = nil
     @State private var selectedPlace: DogPlace? = nil
     @State private var showDetail = false

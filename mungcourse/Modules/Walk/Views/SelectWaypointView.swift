@@ -1,6 +1,8 @@
 import SwiftUI
 import NMapsMap
 import Combine
+import CoreLocation
+
 
 struct SelectWaypointView: View {
     let onBack: () -> Void
@@ -145,13 +147,8 @@ struct SelectWaypointView: View {
                 }
             }
             if isLoadingRecommendation {
-                Color.black.opacity(0.4).ignoresSafeArea()
-                ProgressView("코스 생성 중...")
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color("pointwhite")))
-                    .padding()
-                    .background(Color.black.opacity(0.8))
-                    .cornerRadius(10)
-                    .foregroundColor(Color("pointwhite"))
+                Color.black.opacity(0.6).ignoresSafeArea()
+                LoadingView()
             }
         }
         .navigationBarHidden(true)
