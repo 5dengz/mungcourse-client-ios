@@ -182,7 +182,7 @@ class StartWalkViewModel: ObservableObject {
                     let category = dict["category"] as? String ?? ""
                     let openingHours = dict["openingHours"] as? String ?? ""
                     let imgUrl = dict["dogPlaceImgUrl"] as? String
-                    return DogPlace(id: id, name: name, dogPlaceImgUrl: imgUrl, distance: distance, category: category, openingHours: openingHours, lat: lat, lng: lng)
+                    return DogPlace(id: id, name: name, dogPlaceImgUrl: imgUrl, distance: Double(distance), category: category, openingHours: openingHours, lat: lat, lng: lng)
                 } ?? []
                 DispatchQueue.main.async {
                     self.dogPlaces = places
@@ -192,24 +192,7 @@ class StartWalkViewModel: ObservableObject {
             }
         }.resume()
     }
-        let urlString = "\(Self.apiBaseURL)/v1/walks/smokingzone?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
-        guard let url = URL(string: urlString) else { return }
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self, let data = data, error == nil else { return }
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Double]]
-                let zones = json?.compactMap { dict -> NMGLatLng? in
-                    guard let lat = dict["lat"], let lng = dict["lng"] else { return nil }
-                    return NMGLatLng(lat: lat, lng: lng)
-                } ?? []
-                DispatchQueue.main.async {
-                    self.smokingZones = zones
-                }
-            } catch {
-                print("흡연구역 파싱 실패: \(error)")
-            }
-        }.resume()
-    }
+
     
     func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
         print("📤 산책 데이터 업로드 시작")
@@ -235,4 +218,5 @@ class StartWalkViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
+    
 }

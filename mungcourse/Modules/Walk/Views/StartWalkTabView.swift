@@ -15,7 +15,7 @@ struct StartWalkTabView: View {
                     .padding(.leading, 29)
                     .padding(.bottom, 15)
                 
-                NavigationLink(destination: StartWalkView().environmentObject(dogVM)) {
+                NavigationLink(destination: StartWalkView(routeOption: nil).environmentObject(dogVM)) {
                     HStack {
                         Text("산책 시작")
                             .font(.custom("Pretendard-SemiBold", size: 18))

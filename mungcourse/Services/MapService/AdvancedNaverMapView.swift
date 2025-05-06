@@ -185,7 +185,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         }
         context.coordinator.dogPlaceMarkers.removeAll()
         // danger 마커 다시 추가
-        for coord in parent.dangerCoordinates {
+        for coord in self.dangerCoordinates {
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
             marker.width = 25
@@ -195,7 +195,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             context.coordinator.dangerMarkers.append(marker)
         }
         // dogPlaces 마커 다시 추가
-        for coord in parent.dogPlaceCoordinates {
+        for coord in self.dogPlaceCoordinates {
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
             marker.width = 31

@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import NMapsMap
 
 class WalkService {
     static let shared = WalkService()
@@ -146,6 +147,55 @@ class WalkService {
                 } else {
                     print("❌ 산책 데이터 업로드 실패: 응답 데이터 없음")
                     promise(.failure(URLError(.zeroByteResource)))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    // 추천 경로 가져오기
+    func fetchRecommendRoute(currentLat: Double, currentLng: Double, dogPlaceIds: [Int]) -> AnyPublisher<(coordinates: [NMGLatLng], totalDistance: Double, estimatedTime: Int), Error> {
+        guard let url = URL(string: "\(baseURL)/v1/walks/recommend") else {
+            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = [
+            "currentLat": currentLat,
+            "currentLng": currentLng,
+            "dogPlaceIds": dogPlaceIds
+        ]
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: body)
+            request.httpBody = jsonData
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+        return Future<(coordinates: [NMGLatLng], totalDistance: Double, estimatedTime: Int), Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode),
+                      let data = data else {
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let coordsArr = json["coordinates"] as? [[Double]],
+                       let totalDistance = json["totalDistance"] as? Double,
+                       let estimatedTime = json["estimatedTime"] as? Int {
+                        let coordinates = coordsArr.map { NMGLatLng(lat: $0[0], lng: $0[1]) }
+                        promise(.success((coordinates: coordinates, totalDistance: totalDistance, estimatedTime: estimatedTime)))
+                    } else {
+                        promise(.failure(URLError(.cannotParseResponse)))
+                    }
+                } catch {
+                    promise(.failure(error))
                 }
             }
         }

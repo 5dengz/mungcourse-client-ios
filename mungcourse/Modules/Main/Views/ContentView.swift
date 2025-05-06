@@ -185,7 +185,7 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $showStartWalk) {
             NavigationStack {
-                StartWalkView()
+                StartWalkView(routeOption: nil)
                     .environmentObject(dogVM)
             }
         }
