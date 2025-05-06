@@ -17,35 +17,26 @@ struct WalkCompleteView: View {
             .padding(.bottom, 8)
 
             ScrollView {
-                VStack(spacing: 32) {
-                    // 산책 경로 섹션
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("산책 경로")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        WalkStatsBar(
-                            distance: viewModel.distance,
-                            duration: viewModel.duration,
-                            calories: viewModel.calories,
-                            isActive: false
-                        )
-                        // 네이버 지도 (경로 표시)
-                        AdvancedNaverMapView(
-                            dangerCoordinates: .constant(viewModel.dangerCoordinates),
-                            centerCoordinate: .constant(viewModel.centerCoordinate),
-                            zoomLevel: .constant(viewModel.zoomLevel),
-                            pathCoordinates: .constant(viewModel.pathCoordinates),
-                            userLocation: .constant(nil),
-                            showUserLocation: false,
-                            trackingMode: .direction
-                        )
-                        .frame(height: 180)
-                        .cornerRadius(12)
-                    }
-                    .padding(.horizontal, 20)
-                }
-                .padding(.top, 8)
-                .padding(.bottom, 32)
+                // 산책 경로 지도+통계 통합 뷰
+                WalkRouteSummaryView(
+                    coordinates: viewModel.pathCoordinates,
+                    distance: viewModel.distance,
+                    duration: viewModel.duration,
+                    calories: viewModel.calories,
+                    isLoading: false,
+                    errorMessage: nil,
+                    emptyMessage: "저장된 경로 정보가 없습니다",
+                    boundingBox: nil,
+                    mapHeight: 300
+                )
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
+                )
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
             }
 
             Spacer(minLength: 0)
