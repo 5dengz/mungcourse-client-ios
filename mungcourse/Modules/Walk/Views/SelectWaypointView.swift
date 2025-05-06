@@ -9,7 +9,9 @@ struct SelectWaypointView: View {
     @State private var showRouteSelection = false // RecommendCourseView 표시 토글
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var routeOption: RouteOption? = nil
+    @State private var aiRouteOption: RouteOption? = nil
     @State private var isLoadingRecommendation = false
+    @State private var showAIRecommend = false
     @State private var cancellables = Set<AnyCancellable>()  // Combine 구독 저장소
     @EnvironmentObject var dogVM: DogViewModel
     
@@ -18,7 +20,40 @@ struct SelectWaypointView: View {
             VStack(spacing: 0) {
                 CommonHeaderView(leftIcon: "arrow_back", leftAction: {
                     onBack()
-                }, title: "경유지 선택")
+                }, title: "경유지 선택") {
+                    Button(action: {
+                        isLoadingRecommendation = true
+                        Task {
+                            do {
+                                let current = viewModel.getCurrentLocation()?.toNMGLatLng() ?? NMGLatLng(lat: 37.5666, lng: 126.9780)
+                                let result: (coordinates: [NMGLatLng], totalDistance: Double, estimatedTime: Int) = try await withCheckedThrowingContinuation { continuation in
+                                    var cancellable: AnyCancellable?
+                                    cancellable = WalkService.shared.fetchRecommendRoute(currentLat: current.lat, currentLng: current.lng, dogPlaceIds: [])
+                                        .sink { completion in
+                                            if case .failure(let error) = completion {
+                                                continuation.resume(throwing: error)
+                                            }
+                                            cancellable?.cancel()
+                                        } receiveValue: { output in
+                                            continuation.resume(returning: output)
+                                            cancellable?.cancel()
+                                        }
+                                }
+                                let (coords, dist, time) = result
+                                let route = RouteOption(type: .recommended, totalDistance: dist, estimatedTime: time, waypoints: [], coordinates: coords)
+                                aiRouteOption = route
+                                showAIRecommend = true
+                            } catch {
+                                viewModel.errorMessage = error.localizedDescription
+                            }
+                            isLoadingRecommendation = false
+                        }
+                    }) {
+                        Text("AI 추천")
+                            .font(Font.custom("Pretendard-Regular", size: 14))
+                            .foregroundColor(Color("main"))
+                    }
+                }
                 
                 // 검색 입력 필드
                 HStack {
@@ -142,6 +177,21 @@ struct SelectWaypointView: View {
                     )
                     .environmentObject(dogVM)
                 }
+            }
+        }
+        .fullScreenCover(isPresented: $showAIRecommend) {
+            if let route = aiRouteOption {
+                RecommendCourseView(
+                    onBack: {
+                        showAIRecommend = false
+                    },
+                    onRouteSelected: { selectedRoute in
+                        showAIRecommend = false
+                        onFinish(selectedRoute)
+                    },
+                    routeOption: route
+                )
+                .environmentObject(dogVM)
             }
         }
     }
