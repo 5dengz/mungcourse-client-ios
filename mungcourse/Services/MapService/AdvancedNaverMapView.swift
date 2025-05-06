@@ -75,8 +75,8 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             print("🗺️ [AdvancedNaverMapView] dogPlace 마커 #\(index): (\(coord.lat), \(coord.lng))")
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
-            marker.width = 31
-            marker.height = 39
+            marker.width = 25
+            marker.height = 32
             marker.zIndex = 99
             marker.mapView = mapView.mapView
             context.coordinator.dogPlaceMarkers.append(marker)
@@ -169,8 +169,8 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             print("🗺️ [AdvancedNaverMapView] dogPlace 마커 #\(index): (\(coord.lat), \(coord.lng))")
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
-            marker.width = 31
-            marker.height = 39
+            marker.width = 25
+            marker.height = 32
             marker.zIndex = 99
             marker.mapView = mapView.mapView
             context.coordinator.dogPlaceMarkers.append(marker)
@@ -217,7 +217,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
                 let pawImage = UIImage(named: "pinpoint_paw")
                 let paw = NMFMarker(position: userLoc)
                 if let img = pawImage { paw.iconImage = NMFOverlayImage(image: img) }
-                paw.width = 25; paw.height = 32; paw.anchor = CGPoint(x: 0.5, y: 1.0); paw.zIndex = 1
+                paw.width = 20; paw.height = 27; paw.anchor = CGPoint(x: 0.5, y: 1.0); paw.zIndex = 1
                 paw.mapView = mapView.mapView
                 context.coordinator.pawMarker = paw
             } else {
