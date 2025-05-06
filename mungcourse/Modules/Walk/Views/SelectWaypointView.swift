@@ -133,7 +133,8 @@ struct SelectWaypointView: View {
                         coordinates: route.coordinates,
                         distance: route.totalDistance,
                         estimatedTime: route.estimatedTime,
-                        waypoints: route.waypoints
+                        waypoints: route.waypoints,
+                        onForceHome: { showRouteSelection = false }
                     )
                     .environmentObject(dogVM)
                 }

@@ -19,15 +19,14 @@ struct StartWalkBottomView: View {
                 onPause: { viewModel.pauseWalk() },
                 onResume: { viewModel.resumeWalk() },
                 onEnd: {
+                    // 산책 종료 후 즉시 내비게이션 활성화
                     completedSession = viewModel.endWalk()
-                    if let session = completedSession {
-                        if let mainId = dogVM.mainDog?.id {
-                            let dogIds = [mainId]
-                            viewModel.uploadWalkSession(session, dogIds: dogIds) { _ in
-                                isCompleteActive = true
-                            }
-                        } else {
-                            isCompleteActive = true
+                    isCompleteActive = true
+                    // 백그라운드로 세션 업로드
+                    if let session = completedSession, let mainId = dogVM.mainDog?.id {
+                        let dogIds = [mainId]
+                        viewModel.uploadWalkSession(session, dogIds: dogIds) { _ in
+                            // 업로드 완료, UI 이미 이동
                         }
                     }
                 }

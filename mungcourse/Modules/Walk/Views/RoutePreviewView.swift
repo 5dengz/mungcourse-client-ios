@@ -6,8 +6,12 @@ struct RoutePreviewView: View {
     let distance: Double
     let estimatedTime: Int
     let waypoints: [DogPlace]
+    // 홈 복귀 콜백 (경유지 선택 플로우 해제)
+    var onForceHome: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var showStartWalk = false
+    // 환경객체 전달
+    @EnvironmentObject var dogVM: DogViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -38,15 +42,22 @@ struct RoutePreviewView: View {
         }
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showStartWalk) {
-            StartWalkView(
-                routeOption: RouteOption(
-                    type: .recommended,
-                    totalDistance: distance,
-                    estimatedTime: estimatedTime,
-                    waypoints: waypoints,
-                    coordinates: coordinates
+            NavigationStack {
+                StartWalkView(
+                    routeOption: RouteOption(
+                        type: .recommended,
+                        totalDistance: distance,
+                        estimatedTime: estimatedTime,
+                        waypoints: waypoints,
+                        coordinates: coordinates
+                    ),
+                    onForceHome: {
+                        showStartWalk = false
+                        onForceHome?()
+                    }
                 )
-            )
+                .environmentObject(dogVM)
+            }
         }
     }
 }
