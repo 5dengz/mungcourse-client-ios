@@ -34,6 +34,8 @@ struct NaverMapWrapper: View {
     @ObservedObject var viewModel: StartWalkViewModel
     // 추천 경로 시 경유지 좌표 전달
     var routeWaypoints: [NMGLatLng]? = nil
+    // 프리뷰 경로 전달
+    var plannedPathCoordinates: [NMGLatLng]? = nil
     
     var body: some View {
         AdvancedNaverMapView(
@@ -42,7 +44,10 @@ struct NaverMapWrapper: View {
             dogPlaceCoordinates: routeWaypoints ?? viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
             centerCoordinate: $viewModel.centerCoordinate,
             zoomLevel: $viewModel.zoomLevel,
-            pathCoordinates: $viewModel.pathCoordinates,
+            // AI 경로가 있으면 표시, 없으면 실시간 경로
+            pathCoordinates: plannedPathCoordinates != nil
+                ? .constant(plannedPathCoordinates!)
+                : $viewModel.pathCoordinates,
             userLocation: $viewModel.userLocation,
             showUserLocation: true,
             trackingMode: .direction
@@ -140,7 +145,8 @@ struct StartWalkView: View {
                 // 맵 뷰 영역
                 NaverMapWrapper(
                     viewModel: viewModel,
-                    routeWaypoints: routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
+                    routeWaypoints: routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                    plannedPathCoordinates: routeOption?.coordinates
                 )
             }
             
