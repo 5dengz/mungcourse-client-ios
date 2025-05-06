@@ -3,6 +3,8 @@ import NMapsMap
 
 struct SimpleNaverMapView: UIViewRepresentable {
     var coordinates: [NMGLatLng]
+    // 선택된 dog place 좌표
+    var placeCoordinates: [NMGLatLng] = []
     var boundingBox: NMGLatLngBounds?
     var pathColor: UIColor = UIColor(named: "main") ?? .systemBlue
     var pathWidth: CGFloat = 5.0
@@ -11,6 +13,8 @@ struct SimpleNaverMapView: UIViewRepresentable {
         var pathOverlay: NMFPath?
         var startMarker: NMFMarker?
         var endMarker: NMFMarker?
+        // dog place 마커 저장
+        var placeMarkers: [NMFMarker] = []
     }
     
     func makeUIView(context: Context) -> NMFMapView {
@@ -52,10 +56,18 @@ struct SimpleNaverMapView: UIViewRepresentable {
             context.coordinator.overlayHolder?.endMarker = nil
         }
         
+        // 기존 dog place 마커 제거
+        if let old = context.coordinator.overlayHolder?.placeMarkers {
+            old.forEach { $0.mapView = nil }
+            context.coordinator.overlayHolder?.placeMarkers.removeAll()
+        }
+        
         // 좌표가 있을 때만 경로 표시
         if !coordinates.isEmpty {
             drawPath(on: mapView, context: context)
             addMarkers(on: mapView, context: context)
+            // dog place 마커 추가
+            addPlaceMarkers(on: mapView, context: context)
             
             // 경로에 맞게 지도 영역 조정
             if let firstCoord = coordinates.first {
@@ -124,6 +136,17 @@ struct SimpleNaverMapView: UIViewRepresentable {
             endMarker.captionColor = UIColor(named: "main")!
             endMarker.mapView = mapView
             context.coordinator.overlayHolder?.endMarker = endMarker
+        }
+    }
+    
+    // dog place 마커 추가
+    private func addPlaceMarkers(on mapView: NMFMapView, context: Context) {
+        for coord in placeCoordinates {
+            let marker = NMFMarker(position: coord)
+            marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
+            marker.width = 25; marker.height = 32
+            marker.mapView = mapView
+            context.coordinator.overlayHolder?.placeMarkers.append(marker)
         }
     }
 }

@@ -19,6 +19,7 @@ struct RoutePreviewView: View {
 
             SimpleNaverMapView(
                 coordinates: coordinates,
+                placeCoordinates: waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
                 boundingBox: nil,
                 pathColor: UIColor(named: "main") ?? .systemBlue,
                 pathWidth: 5
