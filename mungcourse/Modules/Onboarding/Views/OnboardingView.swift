@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
     @State private var currentPage = 0
+    @State private var showPrivacyConsent = false
     
     // 온보딩 페이지 데이터
     private let pages: [(mainTitle: String, subTitle: String, imageName: String)] = [
@@ -66,7 +67,7 @@ struct OnboardingView: View {
                         if currentPage < pages.count - 1 {
                             currentPage += 1
                         } else {
-                            completeOnboarding()
+                            showPrivacyConsent = true
                         }
                     }
                 )
@@ -76,7 +77,7 @@ struct OnboardingView: View {
             
             // 건너뛰기 버튼 - 최상위 레이어로 설정
             Button(action: {
-                completeOnboarding()
+                showPrivacyConsent = true
             }) {
                 Text("건너뛰기")
                     .font(.custom("Pretendard-SemiBold", size: 15))
@@ -87,6 +88,12 @@ struct OnboardingView: View {
             .zIndex(100) // z-인덱스를 높여서 항상 최상단에 표시
         }
         
+        .fullScreenCover(isPresented: $showPrivacyConsent) {
+            PrivacyConsentView(onAccept: {
+                showPrivacyConsent = false
+                completeOnboarding()
+            })
+        }
     }
     
     // 온보딩 완료 처리를 위한 함수

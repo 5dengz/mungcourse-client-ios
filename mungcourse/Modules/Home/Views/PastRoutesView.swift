@@ -14,16 +14,16 @@ struct PastRoutesView: View {
                 Text("지난 경로") 
                     .font(.custom("Pretendard-SemiBold", size: 18))
                 Spacer()
-                Button("더보기") {
-                    if let walk = viewModel.recentWalk {
-                        // startedAt(String) -> Date 변환
-                        if let date = Self.parseDate(from: walk.startedAt) {
-                            onShowDetail?(date)
-                        }
-                    } else {
-                        onShowEmptyDetail?()
-                    }
-                }
+                // Button("더보기") {
+                //     if let walk = viewModel.recentWalk {
+                //         // startedAt(String) -> Date 변환
+                //         if let date = Self.parseDate(from: walk.startedAt) {
+                //             onShowDetail?(date)
+                //         }
+                //     } else {
+                //         onShowEmptyDetail?()
+                //     }
+                // }
                 .font(.custom("Pretendard-Regular", size: 14))
                 .fontWeight(.light)
                 .foregroundColor(Color("gray800"))

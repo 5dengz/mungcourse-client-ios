@@ -1,67 +1,144 @@
 import SwiftUI
 import NMapsMap
-// Common 모듈에서 가져옴
 import Foundation
 
+// MARK: - 디버그 로그 핸들러
+struct LogHandler {
+    // 일반 로그
+    static func log(_ message: String) {
+        print("🧭 [StartWalkView] \(message)")
+    }
+    
+    // 사용자 위치 로그
+    static func logUserLocation(_ location: NMGLatLng?) {
+        let locationText = location?.description ?? "nil"
+        log("위치: \(locationText)")
+    }
+    
+    // 상태 변경 로그
+    static func logStateChange(type: String, from: Any, to: Any) {
+        log("\(type) 변경: \(from) → \(to)")
+    }
+    
+    // 상태 확인 로그
+    static func logState(title: String, vm: StartWalkViewModel) {
+        log("\(title):")
+        log("  - smokingZones: \(vm.smokingZones.count)개")
+        log("  - dogPlaces: \(vm.dogPlaces.count)개")
+        log("  - userLocation: \(vm.userLocation?.description ?? "nil")")
+    }
+}
+
+// MARK: - 네이버 맵 뷰 래퍼
+struct NaverMapWrapper: View {
+    @ObservedObject var viewModel: StartWalkViewModel
+    
+    var body: some View {
+        AdvancedNaverMapView(
+            dangerCoordinates: $viewModel.smokingZones,
+            dogPlaceCoordinates: viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+            centerCoordinate: $viewModel.centerCoordinate,
+            zoomLevel: $viewModel.zoomLevel,
+            pathCoordinates: $viewModel.pathCoordinates,
+            userLocation: $viewModel.userLocation,
+            showUserLocation: true,
+            trackingMode: .direction
+        )
+        .onAppear { 
+            LogHandler.log("NaverMapView appear") 
+        }
+        .onChange(of: viewModel.centerCoordinate) { oldCoord, newCoord in
+            LogHandler.log("중심좌표 변경: (\(oldCoord.lat), \(oldCoord.lng)) → (\(newCoord.lat), \(newCoord.lng))")
+        }
+        .onChange(of: viewModel.userLocation) { oldLocation, newLocation in
+            if let location = newLocation {
+                LogHandler.log("사용자위치 변경: (\(location.lat), \(location.lng))")
+            } else {
+                LogHandler.log("사용자위치 변경: nil")
+            }
+        }
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+
+// MARK: - 상태 감시 컴포넌트
+struct StateObserver: View {
+    @ObservedObject var viewModel: StartWalkViewModel
+    
+    var body: some View {
+        Color.clear
+            .onAppear {
+                LogHandler.log("onAppear")
+                LogHandler.log("초기 상태: smokingZones=\(viewModel.smokingZones.count)개, dogPlaces=\(viewModel.dogPlaces.count)개")
+                LogHandler.logUserLocation(viewModel.userLocation)
+            }
+            .onChange(of: viewModel.isWalking) { oldValue, newValue in
+                LogHandler.log("산책상태 변경: \(oldValue) → \(newValue)")
+            }
+            .onChange(of: viewModel.pathCoordinates.count) { oldCount, newCount in
+                LogHandler.log("경로좌표 개수 변경: \(oldCount) → \(newCount)")
+            }
+            .onChange(of: viewModel.smokingZones.count) { oldCount, newCount in
+                LogHandler.log("흡연구역 개수 변경: \(oldCount) → \(newCount)")
+            }
+            .onChange(of: viewModel.dogPlaces.count) { oldCount, newCount in
+                LogHandler.log("반려견장소 개수 변경: \(oldCount) → \(newCount)")
+            }
+    }
+}
+
+// MARK: - 메인 뷰
 struct StartWalkView: View {
+    // MARK: - 프로퍼티
     let routeOption: RouteOption?
     var onForceHome: (() -> Void)? = nil
+    
     @StateObject private var viewModel = StartWalkViewModel()
-
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var dogVM: DogViewModel
+    
     @State private var showCompleteAlert = false
     @State private var completedSession: WalkSession? = nil
-    @State private var isCompleteActive = false // WalkCompleteView로 이동 네비게이션링크 State
+    @State private var isCompleteActive = false
     @State private var effectScale: CGFloat = 0.5
     @State private var effectOpacity: Double = 1.0
-    @EnvironmentObject var dogVM: DogViewModel // 강아지 뷰모델 주입
     @State private var didInitRoute: Bool = false
     
-    // 추천 경로가 있으면 pathCoordinates, centerCoordinate 등 초기화
+    // MARK: - 헬퍼 메서드
     private func useRouteOptionIfNeeded() {
         guard !didInitRoute, let route = routeOption else { return }
+        LogHandler.log("추천 경로 사용: \(route.coordinates.count)개 좌표, \(route.totalDistance)m")
         viewModel.pathCoordinates = route.coordinates
         viewModel.centerCoordinate = route.coordinates.first ?? NMGLatLng(lat: 37.5665, lng: 126.9780)
         viewModel.zoomLevel = 15.0
         didInitRoute = true
     }
     
+    private func logStatusAfterDelay() {
+        LogHandler.log("초기 API 로드 확인")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            LogHandler.logState(title: "1초 후 상태", vm: viewModel)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            LogHandler.logState(title: "5초 후 상태", vm: viewModel)
+        }
+    }
+    
+    // MARK: - 바디
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Debug: view appear
-            Color.clear
-            .onAppear {
-                print("[디버그] StartWalkView onAppear")
-                useRouteOptionIfNeeded()
-            }
-            .onChange(of: viewModel.isWalking) { newValue, oldValue in
-                print("[디버그] isWalking changed: \(newValue)")
-            }
-            .onChange(of: viewModel.pathCoordinates) { newPath, oldPath in
-                print("[디버그] StartWalkView pathCoordinates: \(newPath)")
-            }
-            // Content area
+            // 상태 관찰 컴포넌트
+            StateObserver(viewModel: viewModel)
+            
+            // 메인 콘텐츠
             VStack(spacing: 0) {
-                // Map View
-                ZStack {
-                    AdvancedNaverMapView(
-                        dangerCoordinates: $viewModel.smokingZones,
-                        dogPlaceCoordinates: viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
-                        centerCoordinate: $viewModel.centerCoordinate,
-                        zoomLevel: $viewModel.zoomLevel,
-                        pathCoordinates: $viewModel.pathCoordinates,
-                        userLocation: $viewModel.userLocation,
-                        showUserLocation: true, // 무조건 true로 고정
-                        trackingMode: .direction
-                    )
-                    .onAppear { print("[디버그] NaverMapView appear in StartWalkView") }
-                    .onChange(of: viewModel.centerCoordinate) { newCoord, oldCoord in
-                        print("[디버그] viewModel.centerCoordinate: \(newCoord)")
-                    }
-                    .edgesIgnoringSafeArea(.all)
-                }
+                // 맵 뷰 영역
+                NaverMapWrapper(viewModel: viewModel)
             }
-            // Bottom controller panel (분리된 서브뷰)
+            
+            // 하단 컨트롤러
             StartWalkBottomView(
                 viewModel: viewModel,
                 completedSession: $completedSession,
@@ -69,6 +146,9 @@ struct StartWalkView: View {
                 onForceHome: onForceHome
             )
             .environmentObject(dogVM)
+            .onAppear {
+                LogHandler.log("BottomView appear")
+            }
         }
         .ignoresSafeArea(.container, edges: .bottom)
         .navigationBarHidden(true)
@@ -91,9 +171,13 @@ struct StartWalkView: View {
         } message: {
             Text(viewModel.locationErrorMessage)
         }
+        .onAppear {
+            useRouteOptionIfNeeded()
+            // 앱 실행 시 바로 산책 시작하여 위치 추적을 활성화
+            viewModel.startWalk()
+        }
+        .task {
+            logStatusAfterDelay()
+        }
     }
 }
-
-
-// RoundedCorner 구조체와 View extension은 Common/Utils/CommonViewExtensions.swift 로 이동했습니다.
-// 사용하려면 해당 파일이 프로젝트에 포함되어 있어야 합니다.

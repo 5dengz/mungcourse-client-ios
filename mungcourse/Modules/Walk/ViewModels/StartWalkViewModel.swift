@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import NMapsMap
 import Combine
+import CoreLocation
 
 class StartWalkViewModel: ObservableObject {
     @Published var smokingZones: [NMGLatLng] = []
@@ -39,10 +40,31 @@ class StartWalkViewModel: ObservableObject {
     
     // MARK: - User Actions
     init(walkTrackingService: WalkTrackingService = WalkTrackingService()) {
-        print("[StartWalkViewModel] init 호출")
+        print("[StartWalkViewModel] init 진입")
         self.walkTrackingService = walkTrackingService
         // Default to Seoul coordinates if no location is available yet
         self.centerCoordinate = NMGLatLng(lat: 37.5665, lng: 126.9780)
+        
+        // 앱 실행 시 GlobalLocationManager를 통해 위치 업데이트 시작
+        GlobalLocationManager.shared.startUpdatingLocation()
+        GlobalLocationManager.shared.$lastLocation
+            .compactMap { $0 }
+            .sink { [weak self] location in
+                let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
+                print("[StartWalkViewModel] GlobalLocationManager lastLocation 갱신: \(coord)")
+                self?.userLocation = coord
+                // 첫 위치 수신 시 흡연구역 및 dogPlaces 조회
+                if (self?.smokingZones.isEmpty ?? true) {
+                    print("🚭 [StartWalkViewModel] 첫 위치 수신, 흡연구역 조회")
+                    self?.fetchSmokingZones(center: coord)
+                }
+                if (self?.dogPlaces.isEmpty ?? true) {
+                    print("🐶 [StartWalkViewModel] 첫 위치 수신, 반려견 장소 조회")
+                    self?.fetchDogPlaces(center: coord)
+                }
+            }
+            .store(in: &cancellables)
+        
         walkTrackingService.$currentLocation
             .sink { [weak self] location in
                 print("[StartWalkViewModel] currentLocation 변경: \(String(describing: location))")
@@ -51,6 +73,12 @@ class StartWalkViewModel: ObservableObject {
                     let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
                     print("[StartWalkViewModel] userLocation 갱신: \(coord)")
                     self.userLocation = coord
+                    // 산책 중일 때만 장소 조회
+                    if self.isWalking {
+                        print("🚭 [StartWalkViewModel] 산책 중 위치 수신, 흡연구역 및 장소 재조회")
+                        self.fetchSmokingZones(center: coord)
+                        self.fetchDogPlaces(center: coord)
+                    }
                 } else {
                     print("[StartWalkViewModel] userLocation nil")
                     self.userLocation = nil
@@ -89,12 +117,27 @@ class StartWalkViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         setupLocationErrorObserver()
+        // 초기 위치 기준 장소 조회 (DogPlaceService 사용)
+        print("[StartWalkViewModel] 초기 장소 조회 (center: \(centerCoordinate.lat), \(centerCoordinate.lng))")
+        fetchSmokingZones(center: centerCoordinate)
+        // DogPlaceService를 사용한 반려견 장소 조회
+        DogPlaceService.shared.fetchDogPlaces(currentLat: centerCoordinate.lat, currentLng: centerCoordinate.lng) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let places): self?.dogPlaces = places
+                case .failure: self?.dogPlaces = []
+                }
+            }
+        }
+        print("[StartWalkViewModel] init 완료")
     }
     
     func startWalk() {
         // 산책 시작 위치 기준 흡연구역/장소 조회
         if let startLocation = userLocation {
+            print("🚭 [StartWalkViewModel] 흡연구역 데이터 요청 (위치: \(startLocation.lat), \(startLocation.lng))")
             fetchSmokingZones(center: startLocation)
+            print("🐶 [StartWalkViewModel] 반려견 장소 데이터 요청 (위치: \(startLocation.lat), \(startLocation.lng))")
             fetchDogPlaces(center: startLocation)
         }
 
@@ -144,58 +187,43 @@ class StartWalkViewModel: ObservableObject {
         Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
     }
     
-    // MARK: - 흡연구역 조회 (2km 반경)
+    // MARK: - 흡연구역 조회 (SmokingZoneService 사용)
     func fetchSmokingZones(center: NMGLatLng) {
-        let urlString = "\(Self.apiBaseURL)/v1/walks/smokingzone?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
-        guard let url = URL(string: urlString) else { return }
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self, let data = data, error == nil else { return }
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Double]]
-                let zones = json?.compactMap { dict -> NMGLatLng? in
-                    guard let lat = dict["lat"], let lng = dict["lng"] else { return nil }
-                    return NMGLatLng(lat: lat, lng: lng)
-                } ?? []
-                DispatchQueue.main.async {
-                    self.smokingZones = zones
+        print("🚭 [StartWalkViewModel] SmokingZoneService로 흡연구역 조회 중 (위치: \(center.lat), \(center.lng))")
+        SmokingZoneService.shared.fetchSmokingZones(currentLat: center.lat, currentLng: center.lng) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let zones):
+                    print("✅ [StartWalkViewModel] SmokingZoneService 성공: \(zones.count)개")
+                    self?.smokingZones = zones
+                case .failure(let error):
+                    print("❌ [StartWalkViewModel] SmokingZoneService 실패: \(error.localizedDescription)")
+                    self?.smokingZones = []
                 }
-            } catch {
-                print("흡연구역 파싱 실패: \(error)")
             }
-        }.resume()
+        }
     }
 
-    // MARK: - 2km 반경 dogPlaces 조회
+    // MARK: - 2km 반경 dogPlaces 조회 (DogPlaceService 사용)
     func fetchDogPlaces(center: NMGLatLng) {
-        let urlString = "\(Self.apiBaseURL)/v1/dogPlaces?lat=\(center.lat)&lng=\(center.lng)&radius=2000"
-        guard let url = URL(string: urlString) else { return }
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self, let data = data, error == nil else { return }
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]]
-                let places = json?.compactMap { dict -> DogPlace? in
-                    guard let id = dict["id"] as? Int,
-                          let name = dict["name"] as? String,
-                          let lat = dict["lat"] as? Double,
-                          let lng = dict["lng"] as? Double else { return nil }
-                    let distance = dict["distance"] as? Int ?? 0
-                    let category = dict["category"] as? String ?? ""
-                    let openingHours = dict["openingHours"] as? String ?? ""
-                    let imgUrl = dict["dogPlaceImgUrl"] as? String
-                    return DogPlace(id: id, name: name, dogPlaceImgUrl: imgUrl, distance: Double(distance), category: category, openingHours: openingHours, lat: lat, lng: lng)
-                } ?? []
-                DispatchQueue.main.async {
-                    self.dogPlaces = places
+        print("🐶 [StartWalkViewModel] DogPlaceService로 반려견 장소 조회 중 (위치: \(center.lat), \(center.lng))")
+        DogPlaceService.shared.fetchDogPlaces(currentLat: center.lat, currentLng: center.lng) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let places):
+                    print("✅ [StartWalkViewModel] DogPlaceService 성공: \(places.count)개")
+                    self?.dogPlaces = places
+                case .failure(let error):
+                    print("❌ [StartWalkViewModel] DogPlaceService 실패: \(error.localizedDescription)")
+                    self?.dogPlaces = []
                 }
-            } catch {
-                print("dogPlaces 파싱 실패: \(error)")
             }
-        }.resume()
+        }
     }
 
     
     func uploadWalkSession(_ session: WalkSession, dogIds: [Int], completion: @escaping (Bool) -> Void) {
-        print("📤 산책 데이터 업로드 시작")
+        print("📤 [StartWalkViewModel] 산책 데이터 업로드 시작")
         
         WalkService.shared.uploadWalkSession(session, dogIds: dogIds)
             .receive(on: DispatchQueue.main)

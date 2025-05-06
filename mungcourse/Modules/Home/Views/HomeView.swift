@@ -10,8 +10,6 @@ struct HomeView: View {
     @State private var walkHistoryDate: Date? = nil
     @State private var showNoRecordToast = false
     @State private var showSelectRoute = false
-    @State private var selectedWaypoints: [DogPlace] = []
-    @State private var showRecommendRoute = false
     @State private var selectedRouteOption: RouteOption? = nil
     @State private var isStartWalkActive = false
 
@@ -67,26 +65,11 @@ struct HomeView: View {
             NavigationStack {
                 SelectWaypointView(
                     onBack: { showSelectRoute = false },
-                    onSelect: { places in
-                        selectedWaypoints = places
-                        showSelectRoute = false
-                        showRecommendRoute = true
-                    }
-                )
-                .environmentObject(dogVM)
-            }
-        }
-        .fullScreenCover(isPresented: $showRecommendRoute) {
-            NavigationStack {
-                RecommendCourseView(
-                    onBack: { showRecommendRoute = false },
-                    onRouteSelected: { route in
+                    onFinish: { route in
                         selectedRouteOption = route
-                        showRecommendRoute = false
+                        showSelectRoute = false
                         isStartWalkActive = true
-                    },
-                    startLocation: GlobalLocationManager.shared.lastLocation?.coordinate.toNMGLatLng() ?? NMGLatLng(lat: 0, lng: 0),
-                    waypoints: selectedWaypoints
+                    }
                 )
                 .environmentObject(dogVM)
             }

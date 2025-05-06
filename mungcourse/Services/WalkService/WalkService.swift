@@ -186,10 +186,23 @@ class WalkService {
                 }
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let coordsArr = json["coordinates"] as? [[Double]],
-                       let totalDistance = json["totalDistance"] as? Double,
-                       let estimatedTime = json["estimatedTime"] as? Int {
-                        let coordinates = coordsArr.map { NMGLatLng(lat: $0[0], lng: $0[1]) }
+                       let dataArr = json["data"] as? [[String: Any]],
+                       let first = dataArr.first,
+                       let routeArr = first["route"] as? [[String: Any]] {
+                        let coordinates: [NMGLatLng] = routeArr.compactMap { item -> NMGLatLng? in
+                            guard let lat = item["lat"] as? Double,
+                                  let lng = item["lng"] as? Double else { return nil }
+                            return NMGLatLng(lat: lat, lng: lng)
+                        }
+                        let totalDistance: Double
+                        if let length = first["route_length"] as? Double {
+                            totalDistance = length
+                        } else if let lengthInt = first["route_length"] as? Int {
+                            totalDistance = Double(lengthInt)
+                        } else {
+                            totalDistance = 0
+                        }
+                        let estimatedTime = 0
                         promise(.success((coordinates: coordinates, totalDistance: totalDistance, estimatedTime: estimatedTime)))
                     } else {
                         promise(.failure(URLError(.cannotParseResponse)))
@@ -216,22 +229,22 @@ class WalkService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         return NetworkManager.shared.requestWithTokenPublisher(request)
-    .tryMap { data, response -> Data in
-        if let httpResponse = response as? HTTPURLResponse {
-            print("[fetchWalkDates] statusCode: \(httpResponse.statusCode)")
-        }
-        if let bodyString = String(data: data, encoding: .utf8) {
-            print("[fetchWalkDates] response body: \(bodyString)")
-        }
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
-        }
-        return data
-    }
-    .decode(type: WalkDatesResponse.self, decoder: JSONDecoder())
-    .map { $0.data ?? [] }
-    .eraseToAnyPublisher()
+            .tryMap { data, response -> Data in
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("[fetchWalkDates] statusCode: \(httpResponse.statusCode)")
+                }
+                if let bodyString = String(data: data, encoding: .utf8) {
+                    print("[fetchWalkDates] response body: \(bodyString)")
+                }
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode) else {
+                    throw URLError(.badServerResponse)
+                }
+                return data
+            }
+            .decode(type: WalkDatesResponse.self, decoder: JSONDecoder())
+            .map { $0.data ?? [] }
+            .eraseToAnyPublisher()
     }
     
     // 특정 날짜의 산책 기록 목록 조회

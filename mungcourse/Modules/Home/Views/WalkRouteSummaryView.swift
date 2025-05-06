@@ -71,26 +71,8 @@ struct WalkRouteSummaryView: View {
                 calories: calories,
                 isActive: false
             )
+            .padding(.vertical, 12)
         }
     }
 }
 
-// 미리보기용 더미 데이터
-#if DEBUG
-import NMapsGeometry
-struct WalkRouteSummaryView_Previews: PreviewProvider {
-    static var previews: some View {
-        WalkRouteSummaryView(
-            coordinates: [NMGLatLng(lat: 37.5665, lng: 126.9780), NMGLatLng(lat: 37.567, lng: 126.979)],
-            distance: "1.25",
-            duration: "10:30",
-            calories: "120",
-            isLoading: false,
-            errorMessage: nil,
-            emptyMessage: nil,
-            boundingBox: nil
-        )
-        .padding()
-    }
-}
-#endif

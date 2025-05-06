@@ -1,13 +1,16 @@
 import SwiftUI
 import NMapsMap
+import Combine
 
 struct SelectWaypointView: View {
     let onBack: () -> Void
-    let onSelect: ([DogPlace]) -> Void
+    let onFinish: (RouteOption) -> Void
     @StateObject private var viewModel = SelectWaypointViewModel()
-    @State private var showRouteSelection = false
-    @State private var showRecommendFlow = false
+    @State private var showRouteSelection = false // RecommendCourseView 표시 토글
     @State private var selectedWaypoints: [DogPlace] = []
+    @State private var routeOption: RouteOption? = nil
+    @State private var isLoadingRecommendation = false
+    @State private var cancellables = Set<AnyCancellable>()  // Combine 구독 저장소
     @EnvironmentObject var dogVM: DogViewModel
     
     var body: some View {
@@ -68,15 +71,39 @@ struct SelectWaypointView: View {
                     .padding(.vertical, 12)
                 }
                 
-                // 선택 완료 버튼
+                // 선택 완료 버튼: API 호출
                 CommonFilledButton(
                     title: "선택 완료",
                     action: {
-                        selectedWaypoints = viewModel.getSelectedPlaces()
-                        onSelect(selectedWaypoints)
-                        showRecommendFlow = true
+                        let places = viewModel.getSelectedPlaces()
+                        let current = viewModel.getCurrentLocation()?.toNMGLatLng() ?? NMGLatLng(lat: 37.5666, lng: 126.9780)
+                        isLoadingRecommendation = true
+                        Task {
+                            do {
+                                let result: (coordinates: [NMGLatLng], totalDistance: Double, estimatedTime: Int) = try await withCheckedThrowingContinuation { continuation in
+                                    var cancellable: AnyCancellable?
+                                    cancellable = WalkService.shared.fetchRecommendRoute(currentLat: current.lat, currentLng: current.lng, dogPlaceIds: places.map { $0.id })
+                                        .sink { completion in
+                                            if case .failure(let error) = completion {
+                                                continuation.resume(throwing: error)
+                                            }
+                                            cancellable?.cancel()
+                                        } receiveValue: { output in
+                                            continuation.resume(returning: output)
+                                            cancellable?.cancel()
+                                        }
+                                }
+                                let (coords, dist, time) = result
+                                let route = RouteOption(type: .recommended, totalDistance: dist, estimatedTime: time, waypoints: places, coordinates: coords)
+                                routeOption = route
+                                showRouteSelection = true
+                            } catch {
+                                viewModel.errorMessage = error.localizedDescription
+                            }
+                            isLoadingRecommendation = false
+                        }
                     },
-                    isEnabled: viewModel.isCompleteButtonEnabled,
+                    isEnabled: viewModel.isCompleteButtonEnabled && !isLoadingRecommendation,
                     backgroundColor: Color("main")
                 )
                 .padding(.horizontal, 20)
@@ -88,14 +115,21 @@ struct SelectWaypointView: View {
             // 화면이 나타날 때 위치 업데이트 시작
             GlobalLocationManager.shared.startUpdatingLocation()
         }
-        .fullScreenCover(isPresented: $showRecommendFlow) {
-            if let currentLocation = viewModel.getCurrentLocation() {
+        // RecommendCourseView 표시: API 결과 전달
+        .fullScreenCover(isPresented: $showRouteSelection) {
+            if let route = routeOption {
                 NavigationStack {
                     RecommendCourseView(
-                        onBack: { showRecommendFlow = false },
-                        onRouteSelected: { _ in showRecommendFlow = false },
-                        startLocation: currentLocation.toNMGLatLng(),
-                        waypoints: selectedWaypoints
+                        onBack: {
+                            showRouteSelection = false
+                            routeOption = nil
+                        },
+                        onRouteSelected: { selected in
+                            showRouteSelection = false
+                            routeOption = nil
+                            onFinish(selected)
+                        },
+                        routeOption: route
                     )
                     .environmentObject(dogVM)
                 }
@@ -172,10 +206,6 @@ struct EmptyResultView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
     }
-}
-
-#Preview {
-    SelectWaypointView(onBack: { }, onSelect: { _ in })
 }
 
 // CLLocationCoordinate2D → NMGLatLng 변환 확장

@@ -33,8 +33,7 @@ struct ContentView: View {
     }
 
     @State private var selectedTab: Tab = .home
-    @State private var showSelectWaypoint = false
-    @State private var showRecommendCourse = false
+    @State private var showSelectWaypoint = false  // 경유지 선택 및 추천 흐름은 SelectWaypointView 내에서 처리
     @State private var showStartWalk = false
     @State private var showingDogSelection = false
     @State private var showWalkDogSelection = false // 산책용 강아지 선택 화면
@@ -42,7 +41,7 @@ struct ContentView: View {
     @State private var walkStartType: WalkStartType = .direct
     @EnvironmentObject var dogVM: DogViewModel
     @State private var userLocation: NMGLatLng? = nil
-    @State private var selectedWaypoints: [DogPlace] = []
+    @State private var selectedRouteOption: RouteOption? = nil
     @State private var cancellables = Set<AnyCancellable>()
 
     private let imageHeight: CGFloat = 24
@@ -124,7 +123,7 @@ struct ContentView: View {
                     case .direct:
                         showStartWalk = true
                     case .recommend:
-                        showRecommendCourse = true
+                        showSelectWaypoint = true
                     }
                 },
                 onSkip: { dogs in
@@ -133,7 +132,7 @@ struct ContentView: View {
                     case .direct:
                         showStartWalk = true
                     case .recommend:
-                        showRecommendCourse = true
+                        showSelectWaypoint = true
                     }
                 },
                 onCancel: {
@@ -146,24 +145,11 @@ struct ContentView: View {
             NavigationStack {
                 SelectWaypointView(
                     onBack: { showSelectWaypoint = false },
-                    onSelect: { waypoints in
-                        selectedWaypoints = waypoints
-                        showSelectWaypoint = false
-                    }
-                )
-            }
-        }
-        .fullScreenCover(isPresented: $showRecommendCourse) {
-            NavigationStack {
-                RecommendCourseView(
-                    onBack: { showRecommendCourse = false },
-                    onRouteSelected: { route in
+                    onFinish: { route in
                         selectedRouteOption = route
-                        showRecommendCourse = false
+                        showSelectWaypoint = false
                         showStartWalk = true
-                    },
-                    startLocation: userLocation ?? NMGLatLng(lat: 37.5666, lng: 126.9780),
-                    waypoints: selectedWaypoints
+                    }
                 )
                 .environmentObject(dogVM)
             }

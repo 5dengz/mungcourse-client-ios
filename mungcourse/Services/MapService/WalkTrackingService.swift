@@ -43,17 +43,21 @@ class WalkTrackingService: NSObject, ObservableObject {
     }
     private func requestLocationPermission() {
         print("[WalkTrackingService] requestLocationPermission() 호출")
-        locationManager.requestAlwaysAuthorization()
+        locationManager.requestWhenInUseAuthorization()
     }
     
     // MARK: - Walk Session Management
     func startWalk(onPermissionDenied: (() -> Void)? = nil) {
         let status = locationManager.authorizationStatus
         print("[WalkTrackingService] startWalk() called, 권한 상태: \(status.rawValue)")
-        guard status == .authorizedAlways || status == .authorizedWhenInUse else {
+        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
             print("[WalkTrackingService] 위치 권한이 없습니다. 안내 필요.")
             onPermissionDenied?()
             return
+        }
+        // 오히려 startWalk 전에 위치 업데이트를 항상 시작하도록 푸시
+        if status == .authorizedWhenInUse || status == .authorizedAlways {
+            locationManager.startUpdatingLocation()
         }
         print("[WalkTrackingService] startWalk() - 데이터 초기화 및 위치 추적 시작")
         walkPath.removeAll()
@@ -190,18 +194,25 @@ class WalkTrackingService: NSObject, ObservableObject {
 extension WalkTrackingService: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         print("[WalkTrackingService] didUpdateLocations 호출: \(locations.map { $0.coordinate }) isTracking=\(isTracking)")
-        guard let location = locations.last, isTracking else { return }
+        guard let location = locations.last else { return }
+        
+        // currentLocation은 항상 업데이트
         currentLocation = location
+        
         let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
-        walkPath.append(coord)
-        print("[WalkTrackingService] walkPath에 추가된 좌표: \(coord.lat), \(coord.lng)")
-        if let lastLocation = lastLocation {
-            let distanceInMeters = location.distance(from: lastLocation)
-            distance += distanceInMeters / 1000 // Convert to kilometers
-            print("[WalkTrackingService] distance 누적: \(distance)")
-            updateCalories() // Update calories based on new distance
+        
+        // 트래킹 중일 때만 경로 및 거리 업데이트
+        if isTracking {
+            walkPath.append(coord)
+            print("[WalkTrackingService] walkPath에 추가된 좌표: \(coord.lat), \(coord.lng)")
+            if let last = lastLocation {
+                let dist = location.distance(from: last)
+                distance += dist / 1000
+                print("[WalkTrackingService] distance 누적: \(distance)")
+                updateCalories()
+            }
+            lastLocation = location
         }
-        lastLocation = location
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("[WalkTrackingService] Location manager failed with error: \(error)")
