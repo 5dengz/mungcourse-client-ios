@@ -4,7 +4,10 @@ import NMapsMap
 struct WalkCompleteView: View {
     @StateObject private var viewModel = WalkCompleteViewModel()
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var dogVM: DogViewModel
+    @State private var isGoHome = false
     
+    var onForceDismiss: (() -> Void)? = nil
     var body: some View {
         VStack(spacing: 0) {
             // 상단 헤더 (날짜 데이터 ViewModel에서 사용)
@@ -40,26 +43,6 @@ struct WalkCompleteView: View {
                         .cornerRadius(12)
                     }
                     .padding(.horizontal, 20)
-
-                    // 오늘의 총 산책 섹션
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("오늘의 총 산책")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        WalkStatsBar(
-                            distance: viewModel.distance,
-                            duration: viewModel.duration,
-                            calories: viewModel.calories,
-                            isActive: false
-                        )
-                        // 그래프 영역 (추후 구현)
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.1))
-                            .frame(height: 80)
-                            .overlay(Text("그래프 영역").foregroundColor(.gray))
-                            .cornerRadius(12)
-                    }
-                    .padding(.horizontal, 20)
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 32)
@@ -69,19 +52,24 @@ struct WalkCompleteView: View {
 
             // 홈으로 이동 버튼
             CommonFilledButton(title: "홈으로 이동", action: {
-                // 바로 홈으로 이동
-                dismiss()
+                dismiss() // 1차 해제
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    onForceDismiss?() // 2차 해제(최상위)
+                }
             })
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
         }
         .background(Color("white").ignoresSafeArea())
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
     }
     
     // 사용자 정의 이니셜라이저로 ViewModel 초기화 가능
-    init(walkData: WalkSessionData? = nil) {
+    init(walkData: WalkSessionData? = nil, onForceDismiss: (() -> Void)? = nil) {
         let vm = WalkCompleteViewModel(walkData: walkData)
         _viewModel = StateObject(wrappedValue: vm)
+        self.onForceDismiss = onForceDismiss
     }
 }
 

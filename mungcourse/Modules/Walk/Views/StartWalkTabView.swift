@@ -5,6 +5,8 @@ struct StartWalkTabView: View {
     var onRecommendCourse: () -> Void
     var onDismiss: (() -> Void)? = nil
     @EnvironmentObject var dogVM: DogViewModel
+    @State private var showWalkComplete: Bool = false
+    @State private var walkData: WalkSessionData? = nil
     
     var body: some View {
         NavigationStack {
@@ -70,7 +72,8 @@ extension View {
     func startWalkTabSheet(
         isPresented: Binding<Bool>,
         onSelectWaypoint: @escaping () -> Void,
-        onRecommendCourse: @escaping () -> Void
+        onRecommendCourse: @escaping () -> Void,
+        onForceDismiss: (() -> Void)? = nil
     ) -> some View {
         self.sheet(isPresented: isPresented) {
             StartWalkTabView(
@@ -83,7 +86,8 @@ extension View {
                     isPresented.wrappedValue = false
                 },
                 onDismiss: {
-                    // 시트가 사라질 때 필요한 작업이 있다면 여기에 추가
+                    isPresented.wrappedValue = false
+                    onForceDismiss?()
                 }
             )
             .environmentObject(DogViewModel())

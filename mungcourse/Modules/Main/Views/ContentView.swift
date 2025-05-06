@@ -15,7 +15,7 @@ struct ContentView: View {
         var title: String {
             switch self {
             case .home: return "홈"
-            case .startWalk: return "산책 시작"
+            case .startWalk: return "코스 선택"
             case .routine: return "루틴 설정"
             case .history: return "산책 기록"
             case .profile: return "프로필"

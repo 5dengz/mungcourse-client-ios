@@ -6,6 +6,7 @@ struct StartWalkBottomView: View {
     @EnvironmentObject var dogVM: DogViewModel
     @Binding var completedSession: WalkSession?
     @Binding var isCompleteActive: Bool
+    var onForceHome: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,7 +41,7 @@ struct StartWalkBottomView: View {
                         date: session.endTime,
                         coordinates: session.path
                     )
-                    WalkCompleteView(walkData: walkData)
+                    WalkCompleteView(walkData: walkData, onForceDismiss: onForceHome)
                 } else {
                     EmptyView()
                 }

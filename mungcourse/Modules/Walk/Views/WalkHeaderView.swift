@@ -11,8 +11,8 @@ struct WalkHeaderView: View {
                     .padding(.horizontal)
                     .frame(height: 75)
                     .padding(.top, topInset)
-                    .background(Color("white"))
-                    .shadow(color: Color("black").opacity(0.1), radius: 5, x: 0, y: 2)
+                    .background(Color("pointwhite"))
+                    .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2)
                 Spacer()
             }
             .edgesIgnoringSafeArea(.top)

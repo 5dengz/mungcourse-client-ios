@@ -16,7 +16,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     var onUserLocationUpdated: ((NMGLatLng) -> Void)?
     
     var showUserLocation: Bool = true
-    var trackingMode: NMFMyPositionMode = .direction
+    var trackingMode: NMFMyPositionMode = .direction // 기본값: 위치 추적 활성화(NMFMyPositionDirection)
     
     // 명시적인 public initializer 추가
     init(dangerCoordinates: Binding<[NMGLatLng]>,
@@ -229,7 +229,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         }
         // 기본 My-LocationOverlay 숨김 및 마커 위치 업데이트
         mapView.mapView.positionMode = trackingMode
-        mapView.mapView.locationOverlay.hidden = true // positionMode 설정 후 반드시 숨김 처리
+        mapView.mapView.locationOverlay.hidden = false // 기본 내 위치 마커 항상 표시
         // 마커와 이펙트 위치를 userLocation 기준으로 업데이트
         if let userLocation = userLocation {
             context.coordinator.pawMarker?.position = userLocation

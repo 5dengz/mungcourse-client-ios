@@ -5,6 +5,7 @@ import Foundation
 
 struct StartWalkView: View {
     let routeOption: RouteOption?
+    var onForceHome: (() -> Void)? = nil
     @StateObject private var viewModel = StartWalkViewModel()
 
     @Environment(\.dismiss) private var dismiss
@@ -51,7 +52,7 @@ struct StartWalkView: View {
                         pathCoordinates: $viewModel.pathCoordinates,
                         userLocation: $viewModel.userLocation,
                         showUserLocation: true, // 무조건 true로 고정
-                        trackingMode: .normal
+                        trackingMode: .direction
                     )
                     .onAppear { print("[디버그] NaverMapView appear in StartWalkView") }
                     .onChange(of: viewModel.centerCoordinate) { newCoord, oldCoord in
@@ -64,7 +65,8 @@ struct StartWalkView: View {
             StartWalkBottomView(
                 viewModel: viewModel,
                 completedSession: $completedSession,
-                isCompleteActive: $isCompleteActive
+                isCompleteActive: $isCompleteActive,
+                onForceHome: onForceHome
             )
             .environmentObject(dogVM)
         }

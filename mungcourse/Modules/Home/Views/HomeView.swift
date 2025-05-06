@@ -162,25 +162,27 @@ struct ButtonArea: View {
 
     var body: some View {
         HStack(spacing: 9) {
-            NavigationLink(
-                destination: StartWalkView(routeOption: nil).environmentObject(dogVM),
-                isActive: $isStartWalkActive
-            ) {
-                MainButton(
-                    title: "산책 시작",
-                    imageName: "start_walk",
-                    backgroundColor: Color("main"),
-                    foregroundColor: Color("pointwhite"),
-                    action: {
-                        onStartWalk()
-                        if dogVM.selectedDog != nil {
-                            isStartWalkActive = true
-                        }
+            MainButton(
+                title: "산책 시작",
+                imageName: "start_walk",
+                backgroundColor: Color("main"),
+                foregroundColor: Color("pointwhite"),
+                action: {
+                    onStartWalk()
+                    if dogVM.selectedDog != nil {
+                        isStartWalkActive = true
                     }
-                )
-            }
+                }
+            )
             .buttonStyle(.plain)
-
+            .fullScreenCover(isPresented: $isStartWalkActive) {
+                NavigationStack {
+                    StartWalkView(routeOption: nil, onForceHome: {
+                        isStartWalkActive = false // 홈으로 이동 콜백 시 완전 해제
+                    })
+                    .environmentObject(dogVM)
+                }
+            }
             MainButton(
                 title: "코스 선택",
                 imageName: "select_course",
