@@ -13,12 +13,12 @@ enum AuthResult {
 }
 
 // 인증 관련 에러 정의
-enum AuthError: Error {
+enum AuthError: LocalizedError {
     case networkError
     case invalidCredentials
     case unknown
-    
-    var localizedDescription: String {
+
+    var errorDescription: String? {
         switch self {
         case .networkError:
             return "네트워크 연결에 문제가 있습니다."
