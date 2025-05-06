@@ -6,12 +6,10 @@ struct SelectWaypointView: View {
     let onBack: () -> Void
     let onFinish: (RouteOption) -> Void
     @StateObject private var viewModel = SelectWaypointViewModel()
-    @State private var showRouteSelection = false // RecommendCourseView 표시 토글
+    @State private var showRouteSelection = false // RoutePreviewView 표시 토글
     @State private var selectedWaypoints: [DogPlace] = []
     @State private var routeOption: RouteOption? = nil
-    @State private var aiRouteOption: RouteOption? = nil
     @State private var isLoadingRecommendation = false
-    @State private var showAIRecommend = false
     @State private var cancellables = Set<AnyCancellable>()  // Combine 구독 저장소
     @EnvironmentObject var dogVM: DogViewModel
     
@@ -41,8 +39,8 @@ struct SelectWaypointView: View {
                                 }
                                 let (coords, dist, time) = result
                                 let route = RouteOption(type: .recommended, totalDistance: dist, estimatedTime: time, waypoints: [], coordinates: coords)
-                                aiRouteOption = route
-                                showAIRecommend = true
+                                routeOption = route
+                                showRouteSelection = true
                             } catch {
                                 viewModel.errorMessage = error.localizedDescription
                             }
@@ -50,7 +48,7 @@ struct SelectWaypointView: View {
                         }
                     }) {
                         Text("AI 추천")
-                            .font(Font.custom("Pretendard-Regular", size: 14))
+                            .font(Font.custom("Pretendard-SemiBold", size: 15))
                             .foregroundColor(Color("main"))
                     }
                 }
@@ -179,21 +177,7 @@ struct SelectWaypointView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $showAIRecommend) {
-            if let route = aiRouteOption {
-                RecommendCourseView(
-                    onBack: {
-                        showAIRecommend = false
-                    },
-                    onRouteSelected: { selectedRoute in
-                        showAIRecommend = false
-                        onFinish(selectedRoute)
-                    },
-                    routeOption: route
-                )
-                .environmentObject(dogVM)
-            }
-        }
+
     }
 }
 

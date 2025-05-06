@@ -66,6 +66,12 @@ struct HomeView: View {
                 SelectWaypointView(
                     onBack: { showSelectRoute = false },
                     onFinish: { route in
+                        print("🌍 [HomeView] 경로 전달 받음:")
+                        print("🌍 [HomeView] 총 좌표 개수: \(route.coordinates.count)")
+                        if !route.coordinates.isEmpty {
+                            print("🌍 [HomeView] 첫 번째 좌표: lat=\(route.coordinates[0].lat), lng=\(route.coordinates[0].lng)")
+                            print("🌍 [HomeView] 마지막 좌표: lat=\(route.coordinates.last!.lat), lng=\(route.coordinates.last!.lng)")
+                        }
                         selectedRouteOption = route
                         showSelectRoute = false
                         isStartWalkActive = true
@@ -76,6 +82,14 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $isStartWalkActive) {
             NavigationStack {
+                let _ = print("🌍 [HomeView] StartWalkView로 전달하는 경로 데이터:")
+                let _ = print("🌍 [HomeView] selectedRouteOption 존재 여부: \(selectedRouteOption != nil)")
+                if let route = selectedRouteOption {
+                    let _ = print("🌍 [HomeView] 총 좌표 개수: \(route.coordinates.count)")
+                    if !route.coordinates.isEmpty {
+                        let _ = print("🌍 [HomeView] 첫 번째 좌표: lat=\(route.coordinates[0].lat), lng=\(route.coordinates[0].lng)")
+                    }
+                }
                 StartWalkView(
                     routeOption: selectedRouteOption,
                     onForceHome: {
