@@ -17,11 +17,10 @@ struct RoutePreviewView: View {
                 pathColor: UIColor(named: "main") ?? .systemBlue,
                 pathWidth: 5
             )
-            .edgesIgnoringSafeArea(.all)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(edges: .all)
 
             VStack(spacing: 0) {
-                Spacer()
-
                 NavigationLink(destination: StartWalkView(routeOption: RouteOption(type: .recommended, totalDistance: distance, estimatedTime: estimatedTime, waypoints: waypoints, coordinates: coordinates)), isActive: $goToStartWalk) {
                     EmptyView()
                 }
@@ -38,6 +37,8 @@ struct RoutePreviewView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
             }
+            .frame(maxWidth: .infinity)
+            .ignoresSafeArea(edges: .bottom)
             .background(Color.white)
         }
         .navigationBarTitle("추천 경로 미리보기", displayMode: .inline)
