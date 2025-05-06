@@ -134,7 +134,11 @@ struct SelectWaypointView: View {
                         distance: route.totalDistance,
                         estimatedTime: route.estimatedTime,
                         waypoints: route.waypoints,
-                        onForceHome: { showRouteSelection = false }
+                        onForceHome: {
+                            // 추천 경로, 산책 화면까지 모두 닫기
+                            showRouteSelection = false
+                            onBack()
+                        }
                     )
                     .environmentObject(dogVM)
                 }
