@@ -1,9 +1,14 @@
 import SwiftUI
 
 struct NearbyTrailsView: View {
-    @StateObject private var viewModel = NearbyTrailsViewModel()
+    // 외부에서 ViewModel을 주입받을 수 있도록 변경
+    @ObservedObject var viewModel: NearbyTrailsViewModel
     @State private var showNearbyTrailsListView = false
     @State private var selectedPlace: DogPlace? = nil
+    
+    init(viewModel: NearbyTrailsViewModel = NearbyTrailsViewModel()) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

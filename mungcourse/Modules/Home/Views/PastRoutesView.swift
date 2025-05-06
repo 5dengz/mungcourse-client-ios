@@ -3,9 +3,16 @@ import UIKit
 import NMapsGeometry
 
 struct PastRoutesView: View {
-    @StateObject private var viewModel = PastRoutesViewModel()
+    // 외부에서 ViewModel을 주입받을 수 있도록 변경
+    @ObservedObject var viewModel: PastRoutesViewModel
     var onShowDetail: ((Date) -> Void)? = nil
     var onShowEmptyDetail: (() -> Void)? = nil
+    
+    init(viewModel: PastRoutesViewModel = PastRoutesViewModel(), onShowDetail: ((Date) -> Void)? = nil, onShowEmptyDetail: (() -> Void)? = nil) {
+        self.viewModel = viewModel
+        self.onShowDetail = onShowDetail
+        self.onShowEmptyDetail = onShowEmptyDetail
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

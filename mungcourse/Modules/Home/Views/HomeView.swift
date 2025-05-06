@@ -12,6 +12,11 @@ struct HomeView: View {
     @State private var showSelectRoute = false
     @State private var selectedRouteOption: RouteOption? = nil
     @State private var isStartWalkActive = false
+    @State private var isRefreshing = false
+    
+    // 뷰모델 참조 생성
+    @StateObject private var nearbyTrailsVM = NearbyTrailsViewModel()
+    @StateObject private var pastRoutesVM = PastRoutesViewModel()
 
     var body: some View {
         ScrollView {
@@ -32,8 +37,8 @@ struct HomeView: View {
                         showSelectRoute = true
                     }
                 )
-                NearbyTrailsView()
-                PastRoutesView(onShowDetail: { date in
+                NearbyTrailsView(viewModel: nearbyTrailsVM)
+                PastRoutesView(viewModel: pastRoutesVM, onShowDetail: { date in
                     self.walkHistoryDate = date
                     self.showWalkHistoryDetail = true
                 }, onShowEmptyDetail: {
@@ -49,12 +54,19 @@ struct HomeView: View {
             .padding(.top, 20)
         }
         .navigationTitle("홈")
+        .refreshable {
+            await refreshData()
+        }
         .dogSelectionSheet(isPresented: $showingDogSelection)
         .onChange(of: showingDogSelection) { newValue in
             // 강아지 선택 시트가 닫히고 강아지가 선택되어 있으면 산책 시작 화면으로 이동
             if newValue == false && dogVM.selectedDog != nil {
                 // Do nothing
             }
+        }
+        .task {
+            // 화면이 처음 나타날 때 데이터 로드
+            await refreshData()
         }
         .fullScreenCover(isPresented: $showWalkHistoryDetail) {
             if let date = walkHistoryDate {
@@ -115,6 +127,33 @@ struct HomeView: View {
                 }
             }, alignment: .bottom
         )
+    }
+    
+    /// 홈 화면의 모든 데이터를 새로고침하는 메서드
+    @MainActor
+    private func refreshData() async {
+        isRefreshing = true
+        
+        // 병렬로 데이터 로드 작업 실행
+        await withTaskGroup(of: Void.self) { group in
+            // 주변 산책로 데이터 로드
+            group.addTask {
+                await MainActor.run {
+                    nearbyTrailsVM.fetchNearbyDogPlaces()
+                }
+            }
+            
+            // 최근 산책 기록 로드
+            group.addTask {
+                await MainActor.run {
+                    pastRoutesVM.loadRecentWalk()
+                }
+            }
+            
+            // 필요한 경우 다른 데이터 로드 작업도 여기에 추가
+        }
+        
+        isRefreshing = false
     }
 }
 
