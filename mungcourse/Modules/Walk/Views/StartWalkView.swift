@@ -40,8 +40,8 @@ struct NaverMapWrapper: View {
     var body: some View {
         AdvancedNaverMapView(
             dangerCoordinates: $viewModel.smokingZones,
-            // 경유지 선택 플로우면 선택된 경유지, 아니면 전체 dogPlaces
-            dogPlaceCoordinates: routeWaypoints ?? viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+            // 경유지가 있는 경우에만 dogPlaceCoordinates 전달, 아니면 빈 배열
+            dogPlaceCoordinates: routeWaypoints ?? [],
             centerCoordinate: $viewModel.centerCoordinate,
             zoomLevel: $viewModel.zoomLevel,
             // AI 경로가 있으면 표시, 없으면 실시간 경로
@@ -116,12 +116,16 @@ struct StartWalkView: View {
     private func useRouteOptionIfNeeded() {
         guard !didInitRoute, let route = routeOption else { return }
         LogHandler.log("추천 경로 사용: \(route.coordinates.count)개 좌표, \(route.totalDistance)m")
-        // 경로 좌표 설정
-        viewModel.pathCoordinates = route.coordinates
+        // 경로 좌표 설정 - 직접 설정하지 않고 NaverMapWrapper에서 plannedPathCoordinates로 전달
+        // viewModel.pathCoordinates = route.coordinates
         // 중심 좌표 설정
         viewModel.centerCoordinate = route.coordinates.first ?? NMGLatLng(lat: 37.5665, lng: 126.9780)
         viewModel.zoomLevel = 15.0
         didInitRoute = true
+        
+        // 디버그 로그
+        LogHandler.log("현재 경로 좌표 개수: \(viewModel.pathCoordinates.count)")
+        LogHandler.log("프리뷰 경로 좌표 개수: \(route.coordinates.count)")
     }
     
     private func logStatusAfterDelay() {
@@ -147,7 +151,9 @@ struct StartWalkView: View {
                 // 맵 뷰 영역
                 NaverMapWrapper(
                     viewModel: viewModel,
-                    routeWaypoints: routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                    // 경유지가 있는 경우에만 경유지 마커 표시, 아니면 빈 배열 전달
+                    routeWaypoints: (routeOption?.waypoints.isEmpty ?? true) ? [] : routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                    // AI 추천 경로는 반드시 plannedPathCoordinates로 전달
                     plannedPathCoordinates: routeOption?.coordinates
                 )
             }
@@ -193,8 +199,19 @@ struct StartWalkView: View {
             
             // 경로가 보이도록 1초 후에 다시 한번 경로 설정 (타이밍 이슈 해결)
             if let route = routeOption {
+                // 1초, 2초, 3초 후에 경로 재설정 (여러번 시도하여 확실하게 적용)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     LogHandler.log("1초 후 경로 재설정: \(route.coordinates.count)개 좌표")
+                    viewModel.pathCoordinates = route.coordinates
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    LogHandler.log("2초 후 경로 재설정: \(route.coordinates.count)개 좌표")
+                    viewModel.pathCoordinates = route.coordinates
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    LogHandler.log("3초 후 경로 재설정: \(route.coordinates.count)개 좌표")
                     viewModel.pathCoordinates = route.coordinates
                 }
             }
