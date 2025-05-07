@@ -18,7 +18,7 @@ public enum AuthError: LocalizedError {
     case invalidCredentials
     case unknown
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .networkError:
             return "네트워크 연결에 문제가 있습니다."
@@ -110,7 +110,7 @@ public class AuthService: AuthServiceProtocol {
                 }
             }
         }
-        .eraseToAnyPublisher()
+        .setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
     // 서버로 idToken 전달 (POST /v1/auth/google/login)
@@ -190,7 +190,7 @@ public class AuthService: AuthServiceProtocol {
                 authorizationController.performRequests()
             }
         }
-        .eraseToAnyPublisher()
+        .setFailureType(to: Error.self).eraseToAnyPublisher()
     }
     
     // 서버로 identityToken 전달 (POST /v1/auth/apple/login)

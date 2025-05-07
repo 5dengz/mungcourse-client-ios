@@ -1,125 +1,4 @@
 import SwiftUI
-import Combine
-
-// 루틴 뷰모델
-class RoutineViewModel: ObservableObject {
-    @Published var routines: [Routine] = []
-    @Published var selectedDay: DayOfWeek = .today
-    @Published var showAddRoutine: Bool = false
-    @Published var editingRoutine: Routine? = nil
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    init() {
-        fetchRoutines(for: selectedDay)
-        $selectedDay
-            .sink { [weak self] day in
-                self?.fetchRoutines(for: day)
-            }
-            .store(in: &cancellables)
-    }
-    
-    /// 특정 요일의 루틴을 API로 가져옵니다.
-    func fetchRoutines(for day: DayOfWeek) {
-        let dateStr = dateString(for: day)
-        RoutineService.shared.fetchRoutines(date: dateStr)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("Error fetching routines: \(error.localizedDescription)")
-                }
-            }, receiveValue: { [weak self] dataList in
-                self?.routines = dataList.map {
-                    Routine(routineId: $0.routineId, routineCheckId: $0.routineCheckId, title: $0.name, time: $0.alarmTime, isDone: $0.isCompleted, days: [day])
-                }
-            })
-            .store(in: &cancellables)
-    }
-    
-    /// DayOfWeek를 기반으로 yyyy-MM-dd 형식의 날짜 문자열을 생성합니다.
-    private func dateString(for day: DayOfWeek) -> String {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.firstWeekday = 2
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else {
-            return ""
-        }
-        let dates = (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
-        if let index = DayOfWeek.allCases.firstIndex(of: day), index < dates.count {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            formatter.locale = Locale(identifier: "ko_KR")
-            return formatter.string(from: dates[index])
-        }
-        return ""
-    }
-    
-    // 선택된 요일에 해당하는 루틴들만 필터링 (fetch에서 이미 필터링됨)
-    func filteredRoutines() -> [Routine] {
-        routines.filter { $0.days.contains(selectedDay) }
-    }
-    
-    // 루틴 완료 상태 토글 (API 호출)
-    func toggleRoutineCompletion(routine: Routine) {
-        // 로컬 상태 즉시 토글 (옵티미스틱 업데이트)
-        if let index = routines.firstIndex(where: { $0.id == routine.id }) {
-            routines[index].isDone.toggle()
-        }
-        // 서버 상태도 토글
-        RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("Error toggling routine check: \(error)")
-                    // 실패하면 로컬 상태 롤백
-                    if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
-                        self.routines[index].isDone.toggle()
-                    }
-                }
-            }, receiveValue: { _ in
-                // 서버 토글 응답 후 추가 UI 변경 없음 (로컬 상태 유지)
-            })
-            .store(in: &cancellables)
-    }
-    
-    // 루틴 삭제 (API 호출)
-    func deleteRoutine(_ routine: Routine) {
-        RoutineService.shared.deleteRoutine(routineId: routine.routineId)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("Error deleting routine: \(error)")
-                }
-            }, receiveValue: { [weak self] in
-                self?.fetchRoutines(for: self?.selectedDay ?? .monday)
-            })
-            .store(in: &cancellables)
-    }
-    
-    // 새 루틴 등록 (API 호출)
-    func addRoutine(title: String, time: String, days: Set<DayOfWeek>) {
-        let repeatDays = days.map { $0.apiValue }
-        let request = CreateRoutineRequest(name: title, alarmTime: time, repeatDays: repeatDays, isAlarmActive: true)
-        RoutineService.shared.createRoutine(requestBody: request)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("Error creating routine: \(error.localizedDescription)")
-                }
-            }, receiveValue: { [weak self] _ in
-                // 등록 후 현재 선택된 요일의 루틴 목록 리프레시
-                self?.fetchRoutines(for: self?.selectedDay ?? .monday)
-            })
-            .store(in: &cancellables)
-    }
-    
-    // 오늘 날짜 포맷
-    func formattedDate() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 M월 d일"
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter.string(from: Date())
-    }
-}
 
 struct RoutineSettingsView: View {
     var tabBarHeight: CGFloat
@@ -129,8 +8,12 @@ struct RoutineSettingsView: View {
     @State private var showEditRoutine = false
     
     var body: some View {
-        let routines = viewModel.filteredRoutines()
         GeometryReader { fullProxy in
+            let allRoutines: [Routine] = viewModel.routines
+            let routines: [Routine] = allRoutines.filter { (routine: Routine) -> Bool in
+                routine.days.contains(viewModel.selectedDay)
+            }
+
             ZStack {
                 Color("pointwhite").ignoresSafeArea()
                 
@@ -152,7 +35,7 @@ struct RoutineSettingsView: View {
                             if routines.isEmpty {
                                 EmptyRoutineView()
                             } else {
-                                ForEach(routines.indices, id: \.self) { index in
+                                ForEach(Array(routines.indices), id: \Int.self) { index in
                                     let routine = routines[index]
                                     RoutineListItem(
                                         routine: routine,
@@ -164,7 +47,7 @@ struct RoutineSettingsView: View {
                                             viewModel.deleteRoutine(routine)
                                         }
                                     )
-                                    if index < routines.count - 1 {
+                                    if index < viewModel.routines.count - 1 {
                                         Divider()
                                             .padding(.horizontal)
                                     }
