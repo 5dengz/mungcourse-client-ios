@@ -35,10 +35,7 @@
 		<string>location</string>
 	</array>
 	<key>UILaunchScreen</key>
-	<dict>
-		<key>UILaunchScreenView</key>
-		<string>LaunchScreenView</string>
-	</dict>
+	<dict/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Pretendard-SemiBold.otf</string>

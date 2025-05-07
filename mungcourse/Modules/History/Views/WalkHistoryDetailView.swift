@@ -128,7 +128,7 @@ struct WalkHistoryDetailView: View {
                                 .padding(.top, 16)
                                 .padding(.leading, 2)
 
-                            VStack(spacing: 20) {
+                            VStack(spacing: 25) {
                                 ForEach(viewModel.walkRecords) { record in
                                     WalkRouteSummaryView(
                                         coordinates: record.gpsData.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
@@ -152,7 +152,7 @@ struct WalkHistoryDetailView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 20)
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 85)
                     }
                 }
             }

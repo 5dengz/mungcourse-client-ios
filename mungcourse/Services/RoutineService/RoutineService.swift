@@ -37,6 +37,11 @@ struct CreateRoutineResponse: Decodable {
     let isAlarmActive: Bool
 }
 
+// Wrapper for CreateRoutineResponse to match API response structure
+struct CreateRoutineResponseWrapper: Decodable {
+    let data: CreateRoutineResponse
+}
+
 // MARK: - Update Routine
 struct UpdateRoutineRequest: Encodable {
     let name: String
@@ -125,8 +130,8 @@ class RoutineService {
                     return
                 }
                 do {
-                    let decoded = try JSONDecoder().decode(CreateRoutineResponse.self, from: data)
-                    promise(.success(decoded))
+                    let wrapper = try JSONDecoder().decode(CreateRoutineResponseWrapper.self, from: data)
+                    promise(.success(wrapper.data))
                 } catch {
                     promise(.failure(error))
                 }

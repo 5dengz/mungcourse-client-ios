@@ -192,7 +192,7 @@ struct RoutineSettingsView: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, maxHeight:350)
                 .padding(.top, 16)
 
                 Spacer()
