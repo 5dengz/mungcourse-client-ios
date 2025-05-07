@@ -212,7 +212,10 @@ struct RoutineSettingsView: View {
             }
         }
         .sheet(isPresented: $viewModel.showAddRoutine) {
-            AddRoutineView()
+            AddRoutineView(onAdd: {
+                viewModel.showAddRoutine = false
+                viewModel.fetchRoutines(for: viewModel.selectedDay)
+            })
         }
         .sheet(item: $viewModel.editingRoutine) { routine in
             EditRoutineView(routine: routine) {

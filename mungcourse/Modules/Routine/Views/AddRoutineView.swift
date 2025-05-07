@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct AddRoutineView: View {
-    @Environment(\.presentationMode) var presentationMode
+    var onAdd: () -> Void
     @State private var title: String = ""
     @State private var selectedDays: Set<DayOfWeek> = []
     @State private var isAM: Bool = true
@@ -19,7 +19,7 @@ struct AddRoutineView: View {
         VStack(spacing: 0) {
             CommonHeaderView(
                 leftIcon: "",
-                leftAction: { presentationMode.wrappedValue.dismiss() },
+                leftAction: { },
                 title: "루틴 추가"
             )
             .padding(.bottom, 12)
@@ -135,14 +135,11 @@ struct AddRoutineView: View {
         RoutineService.shared.createRoutine(requestBody: request)
             .receive(on: RunLoop.main)
             .sink { completion in
-                switch completion {
-                case .finished:
-                    break
-                case .failure(let error):
+                if case .failure(let error) = completion {
                     print("Failed to create routine:", error)
                 }
             } receiveValue: { _ in
-                presentationMode.wrappedValue.dismiss()
+                onAdd()
             }
             .store(in: &cancellables)
     }
