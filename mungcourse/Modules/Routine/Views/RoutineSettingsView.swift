@@ -164,7 +164,7 @@ struct RoutineSettingsView: View {
                 .padding(.top, 16)
                 
                 RoutineDaySelector(selectedDay: $viewModel.selectedDay)
-                    .padding(.top, 8)
+                .padding(.top, 2)
                 
                 // 루틴 리스트
                 ScrollView {
@@ -192,8 +192,8 @@ struct RoutineSettingsView: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight:350)
-                .padding(.top, 16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.top, 12)
 
                 Spacer()
             }
