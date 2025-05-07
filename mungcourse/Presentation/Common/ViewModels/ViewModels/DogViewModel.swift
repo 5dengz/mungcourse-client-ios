@@ -22,11 +22,11 @@ class DogViewModel: ObservableObject {
         }
     }
 
-    func fetchDogs() {
+    func fetchDogs(completion: (() -> Void)? = nil) {
         DogService.shared.fetchDogs()
             .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
+            .sink { completionState in
+                if case let .failure(error) = completionState {
                     print("[DogViewModel] fetchDogs error: \(error)")
                 }
             } receiveValue: { [weak self] dogs in
@@ -36,6 +36,7 @@ class DogViewModel: ObservableObject {
                     self?.selectedDog = main
                     self?.selectedDogName = main.name
                 }
+                completion?()
             }
             .store(in: &cancellables)
     }

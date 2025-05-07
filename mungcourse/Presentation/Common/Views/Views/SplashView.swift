@@ -85,8 +85,7 @@ struct SplashView: View {
             RegisterDogView(onComplete: {
                 // 강아지 등록 완료 후 강아지 목록을 새로 fetch한 뒤 홈 화면으로 이동
                 resetCovers()
-                dogVM.fetchDogs()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                dogVM.fetchDogs {
                     shouldShowMain = true
                 }
             }, showBackButton: false)

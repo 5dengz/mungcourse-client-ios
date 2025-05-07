@@ -91,7 +91,7 @@ struct RegisterDogContentsView: View {
                     action: registerAction,
                     isEnabled: isFormValid && !isLoading
                 )
-                .padding(.top, 8)
+                .padding(.top, 16)
 
                 Spacer() // Keep spacer if needed within the scroll content
             }
