@@ -42,8 +42,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				"Modules/Walk/NaverMapView_분석.md",
-				"Modules/Walk/WalkAPI연동_구현정리.md",
 			);
 			target = 56F1230B2DA2C33500632733 /* mungcourse */;
 		};
