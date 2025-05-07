@@ -7,13 +7,13 @@ import UIKit  // UIApplication 사용을 위해 추가
 import CryptoKit  // SHA256 해싱을 위해 추가
 
 // 인증 서비스 결과 타입
-enum AuthResult {
+public enum AuthResult {
     case success(token: String)
     case failure(error: Error)
 }
 
 // 인증 관련 에러 정의
-enum AuthError: LocalizedError {
+public enum AuthError: LocalizedError {
     case networkError
     case invalidCredentials
     case unknown
@@ -31,21 +31,22 @@ enum AuthError: LocalizedError {
 }
 
 // 인증 서비스 프로토콜 - 테스트를 위한 모킹이 쉬워짐
-protocol AuthServiceProtocol {
-    func loginWithGoogle() -> AnyPublisher<AuthResult, Never>
-    func loginWithApple() -> AnyPublisher<AuthResult, Never>
+public protocol AuthServiceProtocol {
+    func loginWithKakao() -> AnyPublisher<AuthResult, Error>
+    func loginWithGoogle() -> AnyPublisher<AuthResult, Error>
+    func loginWithApple() -> AnyPublisher<AuthResult, Error>
     func logout()
 }
 
 // 실제 인증 서비스 구현
-class AuthService: AuthServiceProtocol {
+public class AuthService: AuthServiceProtocol {
     // Singleton 패턴 (앱 전체에서 하나의 인스턴스만 사용)
-    static let shared = AuthService()
+    public static let shared = AuthService()
     private let keychain = Keychain(service: "com.mungcourse.app")
     private var appleSignInDelegate: AppleSignInDelegate?  // Apple 로그인 대리자 보관
     private var currentNonce: String?  // Apple Sign-In을 위한 nonce 저장
     
-    private init() {}
+    public init() {}
     
     private static var apiBaseURL: String {
         Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
@@ -77,8 +78,13 @@ class AuthService: AuthServiceProtocol {
         return hashedData.map { String(format: "%02x", $0) }.joined()
     }
     
+    // 카카오 로그인 메소드
+    public func loginWithKakao() -> AnyPublisher<AuthResult, Error> {
+        // 실제 구현 필요
+        return Fail<AuthResult, Error>(error: AuthError.unknown).eraseToAnyPublisher()
+    }
     // 구글 로그인 메소드
-    func loginWithGoogle() -> AnyPublisher<AuthResult, Never> {
+    public func loginWithGoogle() -> AnyPublisher<AuthResult, Error> {
         return Future<AuthResult, Never> { promise in
             DispatchQueue.main.async {
                 guard let rootViewController = UIApplication.shared.connectedScenes
@@ -155,7 +161,7 @@ class AuthService: AuthServiceProtocol {
     }
     
     // 애플 로그인 메소드
-    func loginWithApple() -> AnyPublisher<AuthResult, Never> {
+    public func loginWithApple() -> AnyPublisher<AuthResult, Error> {
         return Future<AuthResult, Never> { [weak self] promise in
             guard let self = self else { return }
             let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -365,7 +371,7 @@ class AuthService: AuthServiceProtocol {
     }
     
     // 로그아웃 메소드
-    func logout() {
+    public func logout() {
         print("로그아웃 처리")
         performFullAppDataReset()
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/logout") else {
