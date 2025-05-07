@@ -36,11 +36,19 @@ extension CommonHeaderView {
     var body: some View {
         ZStack(alignment: .center) {
             HStack {
-                Button(action: { leftAction?() }) {
-                    Image(leftIcon ?? "")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 18, height: 18)
+                if leftIcon != nil {
+                    Button(action: { leftAction?() }) {
+                        Image(leftIcon ?? "")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .contentShape(Rectangle())
+                            .frame(width: 44, height: 44) // 넓은 터치 영역 제공
+                    }
+                    .buttonStyle(PlainButtonStyle()) // 기본 버튼 스타일 사용
+                } else {
+                    // 왼쪽 아이콘이 없는 경우에도 동일한 공간 유지
+                    Color.clear.frame(width: 44, height: 44)
                 }
                 Spacer()
                 rightContent()

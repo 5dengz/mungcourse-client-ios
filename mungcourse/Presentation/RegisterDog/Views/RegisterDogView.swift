@@ -13,6 +13,8 @@ struct RegisterDogView: View {
     var onComplete: (() -> Void)? = nil
     // 뒤로가기 버튼 노출 여부
     var showBackButton: Bool = true
+    // 상단 SafeArea 높이를 저장하는 변수
+    @State private var topSafeAreaHeight: CGFloat = 0
     
     // 수정 모드 여부 계산
     private var isEditing: Bool {
@@ -76,7 +78,7 @@ struct RegisterDogView: View {
                     leftAction: showBackButton ? { dismiss() } : nil,
                     title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
                 )
-                .padding(.top, 60)
+                .padding(.top, topSafeAreaHeight > 0 ? topSafeAreaHeight : 16)
                 
                 // ViewModel이 모든 상태를 관리하도록 변경
                 RegisterDogContentsView(
@@ -115,6 +117,21 @@ struct RegisterDogView: View {
             }
             .navigationBarHidden(true)
             .ignoresSafeArea(edges: .bottom)
+            .overlay(
+                GeometryReader { _ in
+                    Color.clear
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                // iOS 15 이상에서 권장되는 방식 사용
+                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                   let window = windowScene.windows.first {
+                                    topSafeAreaHeight = window.safeAreaInsets.top
+                                    print("[RegisterDogView] measured topSafeAreaHeight: \(topSafeAreaHeight)")
+                                }
+                            }
+                        }
+                }
+            )
             .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
                 if isComplete {
                     // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
