@@ -119,7 +119,7 @@ struct ProfileTabView: View {
                         Button(action: { showAddDog = true }) {
                             Image(systemName: "plus")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color("gray700"))
                         }
                         // 삭제(쓰레기통) 버튼
                         Button(action: {
@@ -131,13 +131,13 @@ struct ProfileTabView: View {
                         }) {
                             Image(systemName: "trash")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color("gray700"))
                         }
                         // 설정 버튼
                         Button(action: { showSettings = true }) {
                             Image(systemName: "gearshape")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color("gray700"))
                         }
                     }
                 }
