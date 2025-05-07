@@ -66,12 +66,8 @@ struct RegisterDogView: View {
     
     // MARK: - Body
     var body: some View {
-        ZStack { // 투명 배경으로 키보드 내리기 제스처 추가
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    UIApplication.shared.endEditing()
-                }
+        ZStack {
+            // 키보드 내리기 제스처는 VStack 내부에 추가하여 헤더와 충돌하지 않게 함
             VStack(spacing: 0) {
                 CommonHeaderView(
                     leftIcon: showBackButton ? "arrow_back" : nil,
@@ -79,6 +75,7 @@ struct RegisterDogView: View {
                     title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
                 )
                 .padding(.top, topSafeAreaHeight > 0 ? topSafeAreaHeight : 16)
+                .zIndex(1) // 헤더가 터치 이벤트를 우선 받도록 합니다
                 
                 // ViewModel이 모든 상태를 관리하도록 변경
                 RegisterDogContentsView(
@@ -108,6 +105,11 @@ struct RegisterDogView: View {
                 // Remove navigation modifiers from here
                 
                 Spacer() // Pushes content up if needed, depending on ScrollView behavior
+            }
+            // 키보드 내리기 제스처 구현
+            .contentShape(Rectangle())
+            .onTapGesture {
+                UIApplication.shared.endEditing()
             }
             .overlay { // Apply overlay to the VStack
                 if viewModel.isLoading {
