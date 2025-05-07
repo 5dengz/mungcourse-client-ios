@@ -146,8 +146,14 @@ struct StartWalkView: View {
                 // 맵 뷰 영역
                 NaverMapWrapper(
                     viewModel: viewModel,
-                    // 경유지가 있는 경우에만 경유지 마커 표시, 아니면 빈 배열 전달
-                    routeWaypoints: (routeOption?.waypoints.isEmpty ?? true) ? [] : routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) },
+                    // 바로 시작하기면 dogPlaces, 추천경로면 기존대로
+                    routeWaypoints: {
+                        if routeOption == nil {
+                            return viewModel.dogPlaces.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
+                        } else {
+                            return (routeOption?.waypoints.isEmpty ?? true) ? [] : routeOption?.waypoints.map { NMGLatLng(lat: $0.lat, lng: $0.lng) }
+                        }
+                    }(),
                     // AI 추천 경로는 반드시 plannedPathCoordinates로 전달
                     plannedPathCoordinates: {
                         // 좌표 로그 출력
