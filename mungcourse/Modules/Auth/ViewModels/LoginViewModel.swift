@@ -85,7 +85,12 @@ class LoginViewModel: ObservableObject {
                 case .success(_):
                     self.checkDogs()
                 case .failure(let error):
-                    self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    let desc = error.localizedDescription.lowercased()
+                    if desc.contains("cancel") {
+                        self.errorMessage = IdentifiableError(message: "로그인이 취소되었습니다.")
+                    } else {
+                        self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -105,7 +110,12 @@ class LoginViewModel: ObservableObject {
                 case .success(_):
                     self.checkDogs()
                 case .failure(let error):
-                    self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    let desc = error.localizedDescription.lowercased()
+                    if desc.contains("cancel") {
+                        self.errorMessage = IdentifiableError(message: "로그인이 취소되었습니다.")
+                    } else {
+                        self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -125,7 +135,12 @@ class LoginViewModel: ObservableObject {
                 case .success(_):
                     self.checkDogs()
                 case .failure(let error):
-                    self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    let desc = error.localizedDescription.lowercased()
+                    if desc.contains("cancel") {
+                        self.errorMessage = IdentifiableError(message: "로그인이 취소되었습니다.")
+                    } else {
+                        self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    }
                 }
             }
             .store(in: &cancellables)
