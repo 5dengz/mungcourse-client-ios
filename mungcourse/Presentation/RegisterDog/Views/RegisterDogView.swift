@@ -64,67 +64,65 @@ struct RegisterDogView: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationStack { 
-            ZStack { // 투명 배경으로 키보드 내리기 제스처 추가
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        UIApplication.shared.endEditing()
-                    }
-                VStack(spacing: 0) {
-                    CommonHeaderView(
-                        leftIcon: showBackButton ? "arrow_back" : nil,
-                        leftAction: showBackButton ? { dismiss() } : nil,
-                        title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
-                    )
-                    .padding(.top, 64)
-                    
-                    // ViewModel이 모든 상태를 관리하도록 변경
-                    RegisterDogContentsView(
-                        profileImage: $viewModel.profileImage,
-                        selectedImageData: $viewModel.selectedImageData,
-                        name: $viewModel.name,
-                        gender: $viewModel.gender,
-                        breed: $viewModel.breed,
-                        dateOfBirth: $viewModel.dateOfBirth,
-                        weight: $viewModel.weight,
-                        isNeutered: $viewModel.isNeutered,
-                        hasPatellarLuxationSurgery: $viewModel.hasPatellarLuxationSurgery,
-                        errorMessage: viewModel.errorMessage?.message,
-                        isFormValid: viewModel.isFormValid,
-                        isLoading: viewModel.isLoading,
-                        registerAction: registerAction,
-                        isEditing: isEditing,
-                        objectKey: (isEditing ? (initialDetail?.dogImgUrl.flatMap { url in
-                            // S3 object key만 추출 (URL path에서 host 이후 부분)
-                            if let u = URL(string: url) { return u.path.dropFirst() }
-                            return nil
-                        }) : nil).map(String.init),
-                        viewModel: viewModel,
-                        buttonTitle: isEditing ? "수정하기" : "완료"
-                    )
-                    .padding(.horizontal, 20)
-                    // Remove navigation modifiers from here
-                    
-                    Spacer() // Pushes content up if needed, depending on ScrollView behavior
+        ZStack { // 투명 배경으로 키보드 내리기 제스처 추가
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    UIApplication.shared.endEditing()
                 }
-                .overlay { // Apply overlay to the VStack
-                    if viewModel.isLoading {
-                        Color.black.opacity(0.1).ignoresSafeArea()
-                        ProgressView()
-                    }
-                }
-                .navigationBarHidden(true)
-                .ignoresSafeArea(edges: .bottom)
-                .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
-                    if isComplete {
-                        // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
-                        dismiss()
-                        onComplete?()
-                    }
-                }
-                .ignoresSafeArea() // 기타 설정
+            VStack(spacing: 0) {
+                CommonHeaderView(
+                    leftIcon: showBackButton ? "arrow_back" : nil,
+                    leftAction: showBackButton ? { dismiss() } : nil,
+                    title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
+                )
+                .padding(.top, 28)
+                
+                // ViewModel이 모든 상태를 관리하도록 변경
+                RegisterDogContentsView(
+                    profileImage: $viewModel.profileImage,
+                    selectedImageData: $viewModel.selectedImageData,
+                    name: $viewModel.name,
+                    gender: $viewModel.gender,
+                    breed: $viewModel.breed,
+                    dateOfBirth: $viewModel.dateOfBirth,
+                    weight: $viewModel.weight,
+                    isNeutered: $viewModel.isNeutered,
+                    hasPatellarLuxationSurgery: $viewModel.hasPatellarLuxationSurgery,
+                    errorMessage: viewModel.errorMessage?.message,
+                    isFormValid: viewModel.isFormValid,
+                    isLoading: viewModel.isLoading,
+                    registerAction: registerAction,
+                    isEditing: isEditing,
+                    objectKey: (isEditing ? (initialDetail?.dogImgUrl.flatMap { url in
+                        // S3 object key만 추출 (URL path에서 host 이후 부분)
+                        if let u = URL(string: url) { return u.path.dropFirst() }
+                        return nil
+                    }) : nil).map(String.init),
+                    viewModel: viewModel,
+                    buttonTitle: isEditing ? "수정하기" : "완료"
+                )
+                .padding(.horizontal, 20)
+                // Remove navigation modifiers from here
+                
+                Spacer() // Pushes content up if needed, depending on ScrollView behavior
             }
+            .overlay { // Apply overlay to the VStack
+                if viewModel.isLoading {
+                    Color.black.opacity(0.1).ignoresSafeArea()
+                    ProgressView()
+                }
+            }
+            .navigationBarHidden(true)
+            .ignoresSafeArea(edges: .bottom)
+            .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
+                if isComplete {
+                    // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
+                    dismiss()
+                    onComplete?()
+                }
+            }
+            .ignoresSafeArea() // 기타 설정
         }
     }
     
