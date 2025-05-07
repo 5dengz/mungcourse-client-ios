@@ -67,12 +67,3 @@ struct BasicInfoView: View {
             .background(Color("pointwhite"))
     }
 }
-
-#if DEBUG
-struct BasicInfoView_Previews: PreviewProvider {
-    static var previews: some View {
-        BasicInfoView()
-            .environmentObject(DogViewModel())
-    }
-}
-#endif 
