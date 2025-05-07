@@ -17,24 +17,33 @@ struct DogSelectionSheet: View {
                     ForEach(dogVM.dogs) { dog in
                         VStack(alignment: .center, spacing: 9) {
                             ZStack {
-                                AsyncImage(url: URL(string: dog.dogImgUrl ?? "")) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        image.resizable()
-                                            .scaledToFill()
-                                    case .empty:
-                                        ProgressView()
-                                    case .failure:
-                                        Image("profile_empty")
-                                            .resizable()
-                                            .scaledToFill()
-                                    @unknown default:
-                                        EmptyView()
+                                if let urlString = dog.dogImgUrl, !urlString.isEmpty, let url = URL(string: urlString) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .success(let image):
+                                            image.resizable()
+                                                .scaledToFill()
+                                        case .empty:
+                                            ProgressView()
+                                        case .failure:
+                                            Image("profile_empty")
+                                                .resizable()
+                                                .scaledToFill()
+                                        @unknown default:
+                                            EmptyView()
+                                        }
                                     }
+                                    .frame(width: 68, height: 68)
+                                    .clipShape(Circle())
+                                    .opacity(dogVM.selectedDog?.id == dog.id ? 0.6 : 1.0)
+                                } else {
+                                    Image("profile_empty")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 68, height: 68)
+                                        .clipShape(Circle())
+                                        .opacity(dogVM.selectedDog?.id == dog.id ? 0.6 : 1.0)
                                 }
-                                .frame(width: 68, height: 68)
-                                .clipShape(Circle())
-                                .opacity(dogVM.selectedDog?.id == dog.id ? 0.6 : 1.0)
                                 
                                 if dogVM.selectedDog?.id == dog.id {
                                     Image("icon_check")
