@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import Domain
 
 // MARK: - 데이터 모델
 // DogRegistrationData는 이제 RegisterDog/Models/DogRegistrationData.swift에서 import하여 사용합니다.
@@ -27,25 +28,25 @@ class LoginViewModel: ObservableObject {
     // 로그인 상태는 TokenManager.shared.accessToken으로 관리합니다
     
     // MARK: - 서비스
-    private let authService: AuthServiceProtocol
+    private let loginUseCase: LoginUseCaseProtocol
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - 초기화
-    init(authService: AuthServiceProtocol = AuthService.shared) {
-        self.authService = authService
+    init(loginUseCase: LoginUseCaseProtocol = LoginUseCase()) {
+        self.loginUseCase = loginUseCase
     }
     
     // MARK: - 로그인 관련 메서드
     func checkLoginStatus() {
         guard let token = TokenManager.shared.getAccessToken(), !token.isEmpty else {
             // 토큰 없음: 로그아웃 처리
-            authService.logout()
+            // authService.logout()
             print("로그인 정보 없음: 재로그인 필요")
             return
         }
         if !isTokenValid(token) {
             // 토큰 만료: 로그아웃 처리
-            authService.logout()
+            // authService.logout()
             print("토큰 만료: 재로그인 필요")
         }
     }
@@ -75,19 +76,18 @@ class LoginViewModel: ObservableObject {
         errorMessage = nil
         
         print("카카오 로그인 시도")
-        authService.loginWithApple() // 임시 구현
+        loginUseCase.login(provider: .kakao)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
+            .sink { [weak self] completion in
                 guard let self = self else { return }
                 self.isLoading = false
-                
-                switch result {
-                case .success(_):
+                switch completion {
+                case .finished:
                     self.checkDogs()
                 case .failure(let error):
-                    let desc = error.localizedDescription.lowercased()
+                    self.errorMessage = IdentifiableError(message: error.localizedDescription)
                 }
-            }
+            } receiveValue: { _ in }
             .store(in: &cancellables)
     }
     
@@ -95,20 +95,18 @@ class LoginViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        authService.loginWithGoogle()
+        loginUseCase.login(provider: .google)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
+            .sink { [weak self] completion in
                 guard let self = self else { return }
                 self.isLoading = false
-                
-                switch result {
-                case .success(_):
+                switch completion {
+                case .finished:
                     self.checkDogs()
                 case .failure(let error):
-                    let desc = error.localizedDescription.lowercased()
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
                 }
-            }
+            } receiveValue: { _ in }
             .store(in: &cancellables)
     }
     
@@ -116,23 +114,18 @@ class LoginViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        authService.loginWithApple()
+        loginUseCase.login(provider: .apple)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
+            .sink { [weak self] completion in
                 guard let self = self else { return }
                 self.isLoading = false
-                
-                switch result {
-                case .success(_):
+                switch completion {
+                case .finished:
                     self.checkDogs()
                 case .failure(let error):
-                    let desc = error.localizedDescription.lowercased()
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
-                    // 로그인 실패 시에도 반려견 등록 화면으로 이동하려면 아래 코드 유지
-                    // self.needsDogRegistration = true
-                    // print("반려견 등록 화면으로 이동")
                 }
-            }
+            } receiveValue: { _ in }
             .store(in: &cancellables)
     }
     
@@ -233,6 +226,6 @@ class LoginViewModel: ObservableObject {
     
     // MARK: - 로그아웃 메서드
     func logout() {
-        authService.logout()
+        // authService.logout()
     }
 }
