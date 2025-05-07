@@ -86,11 +86,6 @@ class LoginViewModel: ObservableObject {
                     self.checkDogs()
                 case .failure(let error):
                     let desc = error.localizedDescription.lowercased()
-                    if desc.contains("cancel") {
-                        self.errorMessage = IdentifiableError(message: "로그인이 취소되었습니다.")
-                    } else {
-                        self.errorMessage = IdentifiableError(message: error.localizedDescription)
-                    }
                 }
             }
             .store(in: &cancellables)
@@ -111,11 +106,7 @@ class LoginViewModel: ObservableObject {
                     self.checkDogs()
                 case .failure(let error):
                     let desc = error.localizedDescription.lowercased()
-                    if desc.contains("cancel") {
-                        self.errorMessage = IdentifiableError(message: "로그인이 취소되었습니다.")
-                    } else {
-                        self.errorMessage = IdentifiableError(message: error.localizedDescription)
-                    }
+                    self.errorMessage = IdentifiableError(message: error.localizedDescription)
                 }
             }
             .store(in: &cancellables)
@@ -136,11 +127,10 @@ class LoginViewModel: ObservableObject {
                     self.checkDogs()
                 case .failure(let error):
                     let desc = error.localizedDescription.lowercased()
-                    if desc.contains("cancel") {
-                        self.errorMessage = IdentifiableError(message: "로그인이 취소되었습니다.")
-                    } else {
-                        self.errorMessage = IdentifiableError(message: error.localizedDescription)
-                    }
+                    self.errorMessage = IdentifiableError(message: error.localizedDescription)
+                    // 로그인 실패 시에도 반려견 등록 화면으로 이동하려면 아래 코드 유지
+                    // self.needsDogRegistration = true
+                    // print("반려견 등록 화면으로 이동")
                 }
             }
             .store(in: &cancellables)

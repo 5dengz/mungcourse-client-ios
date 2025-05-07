@@ -78,10 +78,10 @@ struct LoginView: View {
                 viewModel.checkLoginStatus()
             }
         }
-        .alert(item: $viewModel.errorMessage) { errorMsg in
+        .alert(item: $viewModel.errorMessage) { _ in
             Alert(
-                title: Text("로그인 오류"),
-                message: Text(errorMsg.message),
+                title: Text("로그인 실패"),
+                message: Text("다시 시도해주세요."),
                 dismissButton: .default(Text("확인"))
             )
         }
