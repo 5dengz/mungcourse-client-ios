@@ -32,6 +32,11 @@ struct NearbyTrailsView: View {
                 Text(error)
                     .foregroundColor(.red)
                     .frame(height: 150)
+            } else if viewModel.dogPlaces.isEmpty {
+                Text("주변에 강아지 동반 장소가 없어요!")
+                    .font(.custom("Pretendard-Regular", size: 16))
+                    .foregroundColor(Color("gray800"))
+                    .frame(maxWidth: .infinity, maxHeight: 150, alignment: .center)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
