@@ -76,7 +76,7 @@ struct RegisterDogView: View {
                     leftAction: showBackButton ? { dismiss() } : nil,
                     title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
                 )
-                .padding(.top, 28)
+                .padding(.top, 60)
                 
                 // ViewModel이 모든 상태를 관리하도록 변경
                 RegisterDogContentsView(
