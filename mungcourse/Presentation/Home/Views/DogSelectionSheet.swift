@@ -58,8 +58,43 @@ struct DogSelectionSheet: View {
                                 .foregroundColor(dogVM.selectedDog?.id == dog.id ? Color("main") : .black)
                         }
                         .onTapGesture {
+                            // 로그 추가: 현재 강아지 및 선택된 강아지 정보
+                            print("[DogSelectionSheet] 현재 강아지 ID: \(dog.id), 이름: \(dog.name)")
+                            print("[DogSelectionSheet] 이전 선택된 강아지: \(String(describing: dogVM.selectedDog))")
+                            print("[DogSelectionSheet] 이전 메인 강아지: \(String(describing: dogVM.mainDog))")
+                            
+                            // 로그: 현재 선택한 강아지 및 현재 메인 강아지 정보
+                            print("[DogSelectionSheet] 선택한 강아지: ID=\(dog.id), 이름=\(dog.name)")
+                            print("[DogSelectionSheet] 이전 메인 강아지: \(String(describing: dogVM.mainDog))")
+                            
+                            // UI에 미리 반영 (사용자에게 즉시 피드백 제공)
                             dogVM.selectedDog = dog
-                            isPresented = false
+                            dogVM.selectedDogName = dog.name
+                            print("[DogSelectionSheet] UI 업데이트 완료 (API 호출 전)")
+                            
+                            // API 호출을 통한 대표 강아지 변경
+                            Task {
+                                do {
+                                    // 사용자가 인지할 수 있도록 잠시 대기 
+                                    try await Task.sleep(nanoseconds: 300_000_000) // 0.3초
+                                    print("[DogSelectionSheet] setMainDog API 호출 시작 (dogId=\(dog.id))")
+                                    
+                                    // 성공 여부를 반환받음
+                                    let success = await dogVM.setMainDog(dog.id)
+                                    
+                                    if success {
+                                        print("[DogSelectionSheet] 대표 강아지 설정 성공! 메인 강아지=\(String(describing: dogVM.mainDog?.id))")
+                                        // 시트 닫기 (성공 시에만)
+                                        isPresented = false
+                                        print("[DogSelectionSheet] 시트 닫기 완료")
+                                    } else {
+                                        print("[DogSelectionSheet] 대표 강아지 설정 API 실패")                                        
+                                        // 여기서 실패 시 추가적인 처리를 할 수 있음
+                                    }
+                                } catch {
+                                    print("[DogSelectionSheet] 대표 강아지 설정 예외 발생: \(error)")
+                                }
+                            }
                         }
                     }
                 }

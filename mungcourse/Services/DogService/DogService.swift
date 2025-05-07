@@ -523,4 +523,68 @@ class DogService: DogServiceProtocol {
         }
         print("✅ [DogService.deleteDog] Dog with ID \(dogId) deleted successfully.")
     }
+    
+    // PATCH /v1/dogs/{dogId}/main - 대표 강아지 설정
+    func setMainDog(dogId: Int) async throws -> Dog {
+        let endpoint = baseURL.appendingPathComponent("/v1/dogs/\(dogId)/main")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let token = authToken, !token.isEmpty else {
+            print("❌ [DogService.setMainDog] Auth token is missing for PATCH /v1/dogs/{dogId}/main request.")
+            throw NetworkError.missingToken
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        print("➡️ [DogService.setMainDog] PATCH 요청 URL: \(endpoint)")
+        
+        let (data, response, error) = await withCheckedContinuation { continuation in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                continuation.resume(returning: (data, response, error))
+            }
+        }
+        
+        if let error = error {
+            print("❌ [DogService.setMainDog] 네트워크 에러: \(error)")
+            throw error
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+            print("❌ [DogService.setMainDog] Invalid HTTP response")
+            throw NetworkError.invalidResponse
+        }
+        
+        print("⬅️ [DogService.setMainDog] 응답 코드: \(httpResponse.statusCode)")
+        if let responseBody = String(data: data, encoding: .utf8) {
+            print("⬅️ [DogService.setMainDog] 응답 바디: \(responseBody)")
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            print("❌ [DogService.setMainDog] 실패 상태 코드: \(httpResponse.statusCode)")
+            if let errorBody = String(data: data, encoding: .utf8), !errorBody.isEmpty {
+                print("   [DogService.setMainDog] 에러 바디: \(errorBody)")
+            }
+            throw NetworkError.httpError(statusCode: httpResponse.statusCode, data: data)
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            // DogRegistrationResponseData로 받아서 Dog로 변환
+            let apiResponse = try decoder.decode(ServiceAPIResponse<DogRegistrationResponseData>.self, from: data)
+            let responseData = apiResponse.data
+            print("✅ [DogService.setMainDog] Dog with ID \(dogId) set as main successfully.")
+            
+            // DogRegistrationResponseData를 Dog로 변환
+            let dog = Dog(
+                id: dogId, // API 응답에 id가 없으니 dogId 매개변수 사용
+                name: responseData.name,
+                dogImgUrl: responseData.dogImgUrl,
+                isMain: responseData.isMain
+            )
+            
+            return dog
+        } catch {
+            print("❌ [DogService.setMainDog] Error decoding response: \(error)")
+            throw NetworkError.decodingError(error)
+        }
+    }
 }
