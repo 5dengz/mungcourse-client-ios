@@ -87,7 +87,7 @@ class StartWalkViewModel: ObservableObject {
             .store(in: &cancellables)
         walkTrackingService.$walkPath
             .sink { [weak self] path in
-                print("[StartWalkViewModel] pathCoordinates 변경: count=\(path.count), 값=\(path)")
+                print("[StartWalkViewModel] pathCoordinates 변경: count=\(path.count)")
                 self?.pathCoordinates = path
             }
             .store(in: &cancellables)

@@ -44,8 +44,8 @@ struct NaverMapWrapper: View {
             dogPlaceCoordinates: routeWaypoints ?? [],
             centerCoordinate: $viewModel.centerCoordinate,
             zoomLevel: $viewModel.zoomLevel,
-            // AI 경로가 있으면 무조건 그것을 표시
-            pathCoordinates: .constant(plannedPathCoordinates ?? []),
+            // AI 경로가 있으면 그것을 표시, 없으면 실시간 경로 표시
+            pathCoordinates: plannedPathCoordinates != nil ? .constant(plannedPathCoordinates!) : $viewModel.pathCoordinates,
             userLocation: $viewModel.userLocation,
             showUserLocation: true,
             trackingMode: .direction
