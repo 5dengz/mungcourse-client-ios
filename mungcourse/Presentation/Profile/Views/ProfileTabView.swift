@@ -220,7 +220,18 @@ struct ProfileTabView: View {
         .fullScreenCover(isPresented: $showEditDog) {
             if let detail = dogVM.dogDetail {
                 RegisterDogView(initialDetail: detail, onComplete: {
+                    print("[ProfileTabView] 강아지 정보 수정 완료")
+                    // 모든 강아지 다시 가져오기
                     dogVM.fetchDogs()
+                    
+                    // 강아지 정보 변경된 강아지가 현재 mainDog/selectedDog인 경우 업데이트
+                    if dogVM.mainDog?.id == detail.id {
+                        print("[ProfileTabView] 메인 강아지 정보 변경 감지. 다시 가져오기 시도")
+                        Task {
+                            try? await dogVM.fetchMainDog()
+                            print("[ProfileTabView] 메인 강아지 새로 가져오기 완료")
+                        }
+                    }
                 }, showBackButton: true)
                 .environmentObject(dogVM)
             } else {
@@ -242,18 +253,46 @@ struct ProfileTabView: View {
     // MARK: - 삭제 로직
     private func deleteMainDog() {
         guard let id = dogVM.mainDog?.id else { return }
+        print("[ProfileTabView] 강아지 삭제 시작 (ID: \(id))")
+        
         Task {
             do {
+                // 1. 강아지 삭제 API 호출
                 try await DogService.shared.deleteDog(dogId: id)
-                // 삭제 후 목록 갱신 및 메인 반려견 설정
-                dogVM.fetchDogs()
-                if let first = dogVM.dogs.first {
-                    dogVM.mainDog = first
+                print("[ProfileTabView] 강아지 삭제 성공 (ID: \(id))")
+                
+                // 2. 로컬 dogs 상태 수정 (강아지 목록에서 삭제된 강아지 제거)
+                let remainingDogs = dogVM.dogs.filter { $0.id != id }
+                
+                // 3. 다음 대표 강아지 찾기
+                if let serverMain = remainingDogs.first(where: { $0.isMain }) {
+                    // 3-1. 서버에서 지정된 대표 강아지가 있는 경우
+                    print("[ProfileTabView] 서버 지정 대표 강아지 발견: \(serverMain.name)")
+                    dogVM.mainDog = serverMain
+                    dogVM.selectedDog = serverMain
+                    dogVM.selectedDogName = serverMain.name
+                } else if let first = remainingDogs.first {
+                    // 3-2. 대표가 지정되지 않은 경우 첫 번째 강아지를 대표로 설정
+                    print("[ProfileTabView] 새 대표 강아지로 \(first.name) 설정 시도")
+                    Task {
+                        let success = await dogVM.setMainDog(first.id)
+                        print("[ProfileTabView] 새 대표 강아지 설정 \(success ? "성공" : "실패")")
+                    }
                 } else {
+                    // 3-3. 강아지가 모두 삭제된 경우
+                    print("[ProfileTabView] 모든 강아지가 삭제되었습니다.")
                     dogVM.mainDog = nil
+                    dogVM.selectedDog = nil
+                    dogVM.selectedDogName = ""
+                }
+                
+                // 4. 서버에서 새로 목록 가져오기
+                dogVM.fetchDogs {
+                    print("[ProfileTabView] 강아지 목록 다시 가져오기 완료")
+                    // 추가 작업 필요 시 여기서 처리
                 }
             } catch {
-                print("[ProfileTabView] delete error:", error)
+                print("[ProfileTabView] 강아지 삭제 오류:", error)
             }
         }
     }

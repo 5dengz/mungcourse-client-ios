@@ -42,14 +42,64 @@ class DogViewModel: ObservableObject {
                     print("[DogViewModel] fetchDogs error: \(error)")
                 }
             } receiveValue: { [weak self] dogs in
-                self?.dogs = dogs
+                guard let self = self else { return }
+                self.dogs = dogs
+                print("[DogViewModel] fetchDogs 성공: \(dogs.count)개 강아지 가져옴")
                 
-                // mainDog가 없는 경우에만 dogs 배열에서 isMain=true인 강아지를 찾아서 설정
-                if self?.mainDog == nil, let main = dogs.first(where: { $0.isMain }) {
-                    self?.mainDog = main
-                    self?.selectedDog = main
-                    self?.selectedDogName = main.name
+                // mainDog 상태 관리 개선
+                if let mainDog = self.mainDog {
+                    // 1. 현재 mainDog가 dogs 목록에 있는지 확인 (삭제되었는지 확인)
+                    let mainDogExists = dogs.contains(where: { $0.id == mainDog.id })
+                    print("[DogViewModel] 현재 mainDog(id=\(mainDog.id)) 존재 여부: \(mainDogExists)")
+                    
+                    if !mainDogExists {
+                        // 현재 mainDog가 삭제되었으므로 새로운 mainDog 설정 필요
+                        if let serverMain = dogs.first(where: { $0.isMain }) {
+                            // 서버에서 지정한 대표 강아지가 있으므로 이를 사용
+                            print("[DogViewModel] 서버 지정 대표 강아지 발견: \(serverMain.name)")
+                            self.mainDog = serverMain
+                            self.selectedDog = serverMain
+                            self.selectedDogName = serverMain.name
+                        } else if let first = dogs.first {
+                            // 서버에 대표 강아지가 없으므로 첫 번째 강아지를 대표로 설정
+                            print("[DogViewModel] 서버 지정 대표 강아지 없음. 첫 번째 강아지를 대표로 설정: \(first.name)")
+                            Task {
+                                // 서버에도 대표 강아지 설정 요청
+                                await self.setMainDog(first.id)
+                            }
+                        } else {
+                            // 강아지가 없음 - 모든 강아지 관련 상태 초기화
+                            print("[DogViewModel] 모든 강아지가 삭제됨. 상태 초기화")
+                            self.mainDog = nil
+                            self.selectedDog = nil
+                            self.selectedDogName = ""
+                        }
+                    } else {
+                        // mainDog는 존재하지만 정보가 추가 업데이트 되었을 수 있으므로 갱신
+                        if let updatedMainDog = dogs.first(where: { $0.id == mainDog.id }) {
+                            // 같은 ID를 가진 강아지의 최신 정보로 업데이트
+                            if updatedMainDog.name != mainDog.name || updatedMainDog.dogImgUrl != mainDog.dogImgUrl {
+                                print("[DogViewModel] mainDog 정보 갱신: \(mainDog.name) -> \(updatedMainDog.name)")
+                                self.mainDog = updatedMainDog
+                                self.selectedDog = updatedMainDog
+                                self.selectedDogName = updatedMainDog.name
+                            }
+                        }
+                    }
+                } else if let serverMain = dogs.first(where: { $0.isMain }) {
+                    // mainDog가 없지만 서버에 지정된 대표 강아지가 있는 경우
+                    print("[DogViewModel] mainDog 없음. 서버 지정 mainDog 사용: \(serverMain.name)")
+                    self.mainDog = serverMain
+                    self.selectedDog = serverMain
+                    self.selectedDogName = serverMain.name
+                } else if let first = dogs.first {
+                    // 서버에 대표 강아지가 없으므로 첫 번째 강아지를 대표로 설정
+                    print("[DogViewModel] mainDog 없음. 첫 번째 강아지를 mainDog로 설정: \(first.name)")
+                    Task {
+                        await self.setMainDog(first.id)
+                    }
                 }
+                
                 completion?()
             }
             .store(in: &cancellables)
