@@ -50,7 +50,7 @@ struct BasicInfoView: View {
                         .foregroundColor(.red)
                         .font(.system(size: 40))
                         .padding(.bottom, 8)
-                    Text(error)
+                    Text("정보를 불러오는 중 오류가 발생했습니다.")
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
