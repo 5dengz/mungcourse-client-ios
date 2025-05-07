@@ -18,7 +18,7 @@ struct WalkControllerView: View {
                 calories: calories,
                 isActive: state == .active // 산책 중일 때만 main 컬러
             )
-            .padding(.top, 20)
+            .padding(.top, 12)
             WalkControlButton(
                 state: state,
                 onStart: onStart,
@@ -26,8 +26,8 @@ struct WalkControllerView: View {
                 onResume: onResume,
                 onEnd: onEnd
             )
-            .padding(.top, 24)
-            .padding(.bottom, 30)
+            .padding(.top, 12)
+            .padding(.bottom, 24)
             .ignoresSafeArea(.container, edges: .bottom)
         }
         .frame(maxWidth: .infinity)

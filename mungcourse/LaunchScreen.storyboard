@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard" version="3.0" toolsVersion="20523" targetRuntime="iOS.CocoaTouch" useSafeAreas="YES" useTraitCollections="YES" initialViewController="LaunchScreenVC">
+    <device id="retina5_5" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <scenes>
+        <!--Launch Screen--> 
+        <scene sceneID="LaunchScreenScene">
+            <objects>
+                <viewController id="LaunchScreenVC" sceneMemberID="viewController" customClass="UIViewController">
+                    <view key="view" contentMode="scaleToFill" id="LaunchScreenView">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <namedColor key="backgroundColor" name="main"/>
+                        <subviews>
+                            <imageView userLabel="Logo" contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" image="logo_main" id="LogoImage">
+                                <rect key="frame" x="128" y="359" width="119" height="93"/>
+                            </imageView>
+                            <imageView userLabel="EllipseLarge" contentMode="center" translatesAutoresizingMaskIntoConstraints="NO" image="ellipse_large" id="EllipseLarge">
+                                <rect key="frame" x="99.5" y="414.5" width="176" height="69"/>
+                            </imageView>
+                            <imageView userLabel="EllipseMedium" contentMode="center" translatesAutoresizingMaskIntoConstraints="NO" image="ellipse_medium" id="EllipseMedium">
+                                <rect key="frame" x="122" y="426.5" width="131" height="51"/>
+                            </imageView>
+                            <imageView userLabel="EllipseSmall" contentMode="center" translatesAutoresizingMaskIntoConstraints="NO" image="ellipse_small" id="EllipseSmall">
+                                <rect key="frame" x="144.5" y="438.5" width="86" height="34"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="SafeArea"/>
+                        <constraints>
+                            <constraint firstItem="LogoImage" firstAttribute="centerX" secondItem="LaunchScreenView" secondAttribute="centerX" id="LogoCenterX"/>
+                            <constraint firstItem="LogoImage" firstAttribute="centerY" secondItem="LaunchScreenView" secondAttribute="centerY" id="LogoCenterY"/>
+                            <!-- ellipses are positioned by explicit frame above -->
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="FirstResponder" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+</document>
