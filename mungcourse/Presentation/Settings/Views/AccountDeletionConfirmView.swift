@@ -132,7 +132,8 @@ struct AccountDeletionConfirmView: View {
                             foregroundColor: Color("gray700"),
                             cornerRadius: 8
                         )
-                        .padding(.horizontal, 16)
+                        .frame(width: UIScreen.main.bounds.width - 32)
+                        .frame(height: 55)
                     }
 
                     // 취소 버튼 (두 번째)
@@ -146,7 +147,7 @@ struct AccountDeletionConfirmView: View {
                         foregroundColor: Color("pointwhite"),
                         cornerRadius: 8
                     )
-                    .padding(.horizontal, 16)
+                    .frame(width: UIScreen.main.bounds.width - 32)
                     .frame(height: 55)
                 }
                 .padding(.horizontal, 16)
