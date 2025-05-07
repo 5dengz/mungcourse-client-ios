@@ -98,7 +98,7 @@ struct WalkHistoryView: View {
     )
     .overlay(
         Circle()
-            .stroke(date.isToday() ? Color("main") : (viewModel.hasWalkRecord(for: date) ? Color("main") : Color.clear), lineWidth: date.isToday() ? 2 : (viewModel.hasWalkRecord(for: date) ? 2 : 0))
+            .stroke(getBorderColor(date), lineWidth: 2)
     )
                                 }
                                 .disabled(date > Date()) // 미래 날짜는 비활성화만, 숫자는 항상 보임
@@ -131,25 +131,32 @@ struct WalkHistoryView: View {
     
     // 날짜 텍스트 색상 결정
     private func getDateTextColor(_ date: Date) -> Color {
-    if viewModel.hasWalkRecord(for: date) {
-        return Color("pointwhite")
-    } else if date.isToday() {
-        return Color("main")
-    } else {
-        return Color("gray400")
+        if viewModel.hasWalkRecord(for: date) {
+            return Color("pointwhite")
+        } else {
+            return Color("gray400")
+        }
     }
-}
     
     // 날짜 배경 색상 결정
     private func getDateBackgroundColor(_ date: Date) -> Color {
-    if viewModel.hasWalkRecord(for: date) {
-        return Color("main")
-    } else if date.isToday() {
-        return Color("main")
-    } else {
-        return Color("gray200")
+        if viewModel.hasWalkRecord(for: date) {
+            return Color("main")
+        } else {
+            return Color("gray200")
+        }
     }
-}
+    
+    // 날짜 테두리 색상 결정
+    private func getBorderColor(_ date: Date) -> Color {
+        if date.isToday() {
+            return Color("pointYellow")
+        } else if viewModel.hasWalkRecord(for: date) {
+            return Color("main")
+        } else {
+            return Color("gray300")
+        }
+    }
 }
 
 #Preview {

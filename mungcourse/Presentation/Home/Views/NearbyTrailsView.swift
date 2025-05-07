@@ -36,6 +36,7 @@ struct NearbyTrailsView: View {
                 Text("주변에 강아지 동반 장소가 없어요!")
                     .font(.custom("Pretendard-Regular", size: 16))
                     .foregroundColor(Color("gray800"))
+                    .padding(.top, 25)
                     .frame(maxWidth: .infinity, maxHeight: 150, alignment: .center)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
