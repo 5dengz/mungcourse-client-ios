@@ -43,6 +43,7 @@ struct ContentView: View {
     @State private var userLocation: NMGLatLng? = nil
     @State private var selectedRouteOption: RouteOption? = nil
     @State private var cancellables = Set<AnyCancellable>()
+    @State private var tabBarHeight: CGFloat = 0
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -59,7 +60,7 @@ struct ContentView: View {
                     )
                     .environmentObject(dogVM)
                 case .routine:
-                    RoutineSettingsView()
+                    RoutineSettingsView(tabBarHeight: tabBarHeight)
                 case .history:
                     WalkHistoryView()
                 case .profile:
@@ -100,6 +101,17 @@ struct ContentView: View {
             }
             .padding(.vertical, 2)
             .background(Color("pointwhite").ignoresSafeArea(edges: .bottom))
+            .overlay(
+                GeometryReader { geo in
+                    Color.clear
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                tabBarHeight = geo.size.height
+                                print("[ContentView] measured tabBarHeight: \(geo.size.height)")
+                            }
+                        }
+                }
+            )
             .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
             .safeAreaInset(edge: .bottom) {
                 Color.clear.frame(height: 0)

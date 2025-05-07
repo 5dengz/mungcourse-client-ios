@@ -143,6 +143,7 @@ class RoutineViewModel: ObservableObject {
 }
 
 struct RoutineSettingsView: View {
+    var tabBarHeight: CGFloat
     @StateObject private var viewModel = RoutineViewModel()
     @State private var showDatePicker = false
     @State private var selectedDate = Date()
@@ -150,65 +151,74 @@ struct RoutineSettingsView: View {
     
     var body: some View {
         let routines = viewModel.filteredRoutines()
-        ZStack {
-            Color("pointwhite").ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // 공통 헤더 (요일 선택 포함)
-                CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
-                    //Image("icon_calendar")
-                    //    .onTapGesture {
-                    //        showDatePicker = true
-                    //    }
-                }
-                .padding(.top, 16)
+        GeometryReader { fullProxy in
+            ZStack {
+                Color("pointwhite").ignoresSafeArea()
                 
-                RoutineDaySelector(selectedDay: $viewModel.selectedDay)
-                .padding(.top, 2)
-                
-                // 루틴 리스트
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        if routines.isEmpty {
-                            EmptyRoutineView()
-                        } else {
-                            ForEach(routines.indices, id: \.self) { index in
-                                let routine = routines[index]
-                                RoutineListItem(
-                                    routine: routine,
-                                    onToggle: { viewModel.toggleRoutineCompletion(routine: routine) },
-                                    onEdit: {
-                                        viewModel.editingRoutine = routine
-                                    },
-                                    onDelete: {
-                                        viewModel.deleteRoutine(routine)
+                VStack(spacing: 0) {
+                    // 공통 헤더 (요일 선택 포함)
+                    CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
+                        //Image("icon_calendar")
+                        //    .onTapGesture {
+                        //        showDatePicker = true
+                        //    }
+                    }
+                    .padding(.top, 16)
+                    
+                    RoutineDaySelector(selectedDay: $viewModel.selectedDay)
+                    
+                    // 루틴 리스트
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 0) {
+                            if routines.isEmpty {
+                                EmptyRoutineView()
+                            } else {
+                                ForEach(routines.indices, id: \.self) { index in
+                                    let routine = routines[index]
+                                    RoutineListItem(
+                                        routine: routine,
+                                        onToggle: { viewModel.toggleRoutineCompletion(routine: routine) },
+                                        onEdit: {
+                                            viewModel.editingRoutine = routine
+                                        },
+                                        onDelete: {
+                                            viewModel.deleteRoutine(routine)
+                                        }
+                                    )
+                                    if index < routines.count - 1 {
+                                        Divider()
+                                            .padding(.horizontal)
                                     }
-                                )
-                                if index < routines.count - 1 {
-                                    Divider()
-                                        .padding(.horizontal)
                                 }
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.top, 12)
+                    .padding(.bottom, tabBarHeight)
+                    .onAppear {
+                        print("[RoutineSettingsView] fullProxy.safeAreaInsets.bottom: \(fullProxy.safeAreaInsets.bottom)")
+                        print("[RoutineSettingsView] tabBarHeight: \(tabBarHeight)")
+                    }
+                    
+                    Spacer()
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.top, 12)
-
-                Spacer()
+                
+                // 루틴 추가 버튼 (플로팅 버튼)
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        RoutineAddButton(action: {
+                            viewModel.showAddRoutine = true
+                        })
+                        Spacer()
+                    }
+                    .padding(.bottom, 90)
+                }
             }
-            
-            // 루틴 추가 버튼 (플로팅 버튼)
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    RoutineAddButton(action: {
-                        viewModel.showAddRoutine = true
-                    })
-                    Spacer()
-                }
-                .padding(.bottom, 90)
+            .onAppear {
+                print("[RoutineSettingsView] ZStack appeared with fullProxy.safeAreaInsets.bottom: \(fullProxy.safeAreaInsets.bottom), tabBarHeight: \(tabBarHeight)")
             }
         }
         .sheet(isPresented: $viewModel.showAddRoutine) {
@@ -233,5 +243,5 @@ struct RoutineSettingsView: View {
 }
 
 #Preview {
-    RoutineSettingsView()
+    RoutineSettingsView(tabBarHeight: 0)
 }
