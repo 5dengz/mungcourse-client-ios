@@ -44,15 +44,6 @@ struct ContentView: View {
     @State private var selectedRouteOption: RouteOption? = nil
     @State private var cancellables = Set<AnyCancellable>()
 
-    private let imageHeight: CGFloat = 24
-    private let imageToBorder: CGFloat = 10
-    private let imageToText: CGFloat = 3
-    private let textToSafeArea: CGFloat = 1
-    private let tabFontSize: CGFloat = 12
-    private var tabBarHeight: CGFloat {
-        imageToBorder + imageHeight + imageToText + tabFontSize + textToSafeArea
-    }
-
     var body: some View {
         ZStack(alignment: .bottom) {
             Group {
@@ -76,42 +67,42 @@ struct ContentView: View {
                 }
             }
 
-            VStack(spacing: 0) {
-                Spacer()
-                HStack {
-                    ForEach(Tab.allCases, id: \.self) { tab in
-                        Button(action: {
-                            if tab == .startWalk {
-                                showSelectWaypoint = true
-                            } else {
-                                selectedTab = tab
-                            }
-                        }) {
-                            VStack(spacing: 0) {
-                                Spacer().frame(height: imageToBorder)
-                                Image(tab.icon)
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(height: imageHeight)
-                                    .foregroundColor(
-                                        selectedTab == tab ? Color("main") : Color("gray400")
-                                    )
-                                Spacer().frame(height: imageToText)
-                                Text(tab.title)
-                                    .font(.custom("Pretendard", size: tabFontSize))
-                                    .foregroundColor(
-                                        selectedTab == tab ? Color("main") : Color("gray400")
-                                    )
-                                Spacer().frame(height: textToSafeArea)
-                            }
-                            .frame(maxWidth: .infinity)
+            // 동적 탭바 구현
+            HStack {
+                ForEach(Tab.allCases, id: \.self) { tab in
+                    Button(action: {
+                        if tab == .startWalk {
+                            showSelectWaypoint = true
+                        } else {
+                            selectedTab = tab
                         }
+                    }) {
+                        VStack(spacing: 4) {
+                            Image(tab.icon)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 24)
+                                .foregroundColor(
+                                    selectedTab == tab ? Color("main") : Color("gray400")
+                                )
+                                .padding(.top, 4)
+                            Text(tab.title)
+                                .font(.custom("Pretendard", size: 12))
+                                .foregroundColor(
+                                    selectedTab == tab ? Color("main") : Color("gray400")
+                                )
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                 }
-                .frame(height: tabBarHeight)
-                .background(Color("pointwhite").ignoresSafeArea(edges: .bottom))
-                .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
+                .padding(.top, 4)
+            }
+            .padding(.vertical, 2)
+            .background(Color("pointwhite").ignoresSafeArea(edges: .bottom))
+            .shadow(color: Color.black.opacity(0.05), radius: 4, y: -2)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 0)
             }
         }
         .fullScreenCover(isPresented: $showWalkDogSelection) {
