@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BasicInfoView: View {
+    let tabBarHeight: CGFloat
     @EnvironmentObject var dogVM: DogViewModel
 
     var body: some View {
@@ -65,5 +66,6 @@ struct BasicInfoView: View {
             .font(.custom("Pretendard-Regular", size: 14))
             .padding()
             .background(Color("pointwhite"))
+            .padding(.bottom, tabBarHeight)
     }
 }

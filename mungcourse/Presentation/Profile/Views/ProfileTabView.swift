@@ -95,6 +95,7 @@ class ProfileViewModel: ObservableObject {
 }
 
 struct ProfileTabView: View {
+    let tabBarHeight: CGFloat
     @EnvironmentObject var dogVM: DogViewModel
     @StateObject private var viewModel = ProfileViewModel()
     @State private var selectedTab: ProfileTabSelectorView.InfoTab = .basic
@@ -161,7 +162,7 @@ struct ProfileTabView: View {
                 ProfileTabSelectorView(selectedTab: $selectedTab)
                     .padding(.bottom, 24)
                 // 정보 영역
-                ProfileInfoSectionView(selectedTab: selectedTab)
+                ProfileInfoSectionView(selectedTab: selectedTab, tabBarHeight: tabBarHeight)
                 Spacer()
             }
             // 삭제 확인 팝업
@@ -259,6 +260,6 @@ struct ProfileTabView: View {
 }
 
 #Preview {
-    ProfileTabView()
+    ProfileTabView(tabBarHeight: 0)
         .environmentObject(DogViewModel())
 }

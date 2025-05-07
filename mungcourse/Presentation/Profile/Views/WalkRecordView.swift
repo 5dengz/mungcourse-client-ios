@@ -3,6 +3,7 @@ import struct Combine.Published
 import Combine
 // DogViewModel 및 WalkRecordData 사용
 struct WalkRecordView: View {
+    let tabBarHeight: CGFloat
     @EnvironmentObject var dogVM: DogViewModel
     var body: some View {
         // 집계값 계산
@@ -47,6 +48,7 @@ struct WalkRecordView: View {
             .font(.custom("Pretendard-Regular", size: 14))
             .padding()
             .background(Color("pointwhite"))
+            .padding(.bottom, tabBarHeight)
         }
         .onAppear {
             if let dogId = dogVM.selectedDog?.id {
