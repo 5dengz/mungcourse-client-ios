@@ -1,7 +1,5 @@
 import SwiftUI
 import Combine
-import RoutineModels
-import RoutineViewModels
 
 // 루틴 뷰모델
 class RoutineViewModel: ObservableObject {

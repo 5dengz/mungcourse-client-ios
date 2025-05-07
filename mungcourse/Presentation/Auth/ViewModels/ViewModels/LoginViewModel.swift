@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import SwiftUI
-import Domain
 
 // MARK: - 데이터 모델
 // DogRegistrationData는 이제 RegisterDog/Models/DogRegistrationData.swift에서 import하여 사용합니다.
