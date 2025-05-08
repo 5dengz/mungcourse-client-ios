@@ -33,8 +33,10 @@ struct AccountDeletionView: View {
                                 toggleSelection(reason)
                             }
                         )
+                        .padding(.horizontal, 4) // 그림자를 위한 여백 추가
                     }
                 }
+                .padding(.horizontal, 12) // 바깥쪽 여백 추가
                 
                 Spacer()
                 
@@ -107,7 +109,8 @@ struct ReasonItemView: View {
             }
             .padding(.trailing, 16)
         }
-        .frame(width: 330, height: 57)
+        .frame(maxWidth: .infinity)
+        .frame(height: 57)
         .background(
             Rectangle()
                 .foregroundColor(Color("pointwhite"))
@@ -115,6 +118,7 @@ struct ReasonItemView: View {
                 .shadow(
                     color: Color(red: 0, green: 0, blue: 0, opacity: 0.05), 
                     radius: 12, 
+                    x: 0,
                     y: 2
                 )
         )
