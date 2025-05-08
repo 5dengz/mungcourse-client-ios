@@ -156,8 +156,16 @@ class StartWalkViewModel: ObservableObject {
         walkTrackingService.resumeWalk()
     }
     func endWalk() -> WalkSession? {
-        print("[StartWalkViewModel] endWalk() 호출")
-        return walkTrackingService.endWalk()
+        print("[StartWalkViewModel] endWalk() \(pathCoordinates.count)")
+        
+        isWalking = false
+        
+        let session = walkTrackingService.endWalk()
+        
+        // 산책 종료 시 자동으로 맵 리소스 정리 수행
+        clearMapResources()
+        
+        return session
     }
     
     // MARK: - Formatted Outputs
@@ -245,6 +253,26 @@ class StartWalkViewModel: ObservableObject {
                 }
             })
             .store(in: &cancellables)
+    }
+    
+    // MARK: - 지도 리소스 정리
+    func clearMapResources() {
+        print("🧹 [StartWalkViewModel] 지도 리소스 정리 시작")
+        
+        // 경로 데이터 초기화
+        pathCoordinates = []
+        
+        // 마커 데이터 초기화
+        smokingZones = []
+        
+        // 위치 추적 중지 (산책 종료 후 필요없음)
+        // pauseWalk 메서드를 통해 locationManager를 중지합니다
+        walkTrackingService.pauseWalk()
+        
+        // 구독 취소 (메모리 누수 방지)
+        cancellables.removeAll()
+        
+        print("✅ [StartWalkViewModel] 지도 리소스 정리 완료")
     }
     
 }

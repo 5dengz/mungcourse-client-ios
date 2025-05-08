@@ -35,6 +35,9 @@ struct StartWalkView: View {
     let routeOption: RouteOption?
     var onForceHome: (() -> Void)? = nil
     
+    // 하나의 바인딩을 동시에 false로 만들어 네비게이션 스택을 지우기 위해 사용
+    @Environment(\.presentationMode) var presentationMode
+    
     @StateObject private var viewModel = StartWalkViewModel()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var dogVM: DogViewModel
@@ -88,7 +91,7 @@ struct StartWalkView: View {
             .environmentObject(dogVM)
             
             // 산책 완료 화면 네비게이션
-            NavigationLink(
+            let walkCompleteLink = NavigationLink(
                 destination: WalkCompleteView(
                     walkData: completedSession, // completedSession 자체를 전달
                     onForceDismiss: onForceHome // onForceHome 콜백을 WalkCompleteView에 전달
@@ -96,6 +99,13 @@ struct StartWalkView: View {
                 isActive: $isCompleteActive
             ) {
                 EmptyView()
+            }
+        }
+        .onChange(of: isCompleteActive) { active in
+            if active {
+                // 산책 완료 화면으로 이동할 때
+                // 지도와 관련된 모든 데이터 소거
+                viewModel.clearMapResources()
             }
         }
         .ignoresSafeArea(.container, edges: .bottom)

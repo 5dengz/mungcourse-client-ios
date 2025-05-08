@@ -41,31 +41,34 @@ struct RoutePreviewView: View {
             .padding(.vertical, 16)
         }
         .navigationBarHidden(true)
-        .fullScreenCover(isPresented: $showStartWalk) {
-            NavigationStack {
-                StartWalkView(
-                    routeOption: RouteOption(
-                        type: .recommended,
-                        totalDistance: distance,
-                        estimatedTime: estimatedTime,
-                        waypoints: waypoints,
-                        coordinates: {
-                            // 좌표 로그 출력
-                            print("🗺️ [RoutePreviewView] 경로 좌표 목록:")
-                            for (index, coord) in coordinates.enumerated() {
-                                print("🗺️ [RoutePreviewView]   [\(index)] lat: \(coord.lat), lng: \(coord.lng)")
-                            }
-                            print("🗺️ [RoutePreviewView] 총 \(coordinates.count)개의 좌표 전달")
-                            return coordinates
-                        }()
-                    ),
-                    onForceHome: {
-                        showStartWalk = false
+        .navigationDestination(isPresented: $showStartWalk) {
+            StartWalkView(
+                routeOption: RouteOption(
+                    type: .recommended,
+                    totalDistance: distance,
+                    estimatedTime: estimatedTime,
+                    waypoints: waypoints,
+                    coordinates: {
+                        // 좌표 로그 출력
+                        print("🗯️ [RoutePreviewView] 경로 좌표 목록:")
+                        for (index, coord) in coordinates.enumerated() {
+                            print("🗯️ [RoutePreviewView]   [\(index)] lat: \(coord.lat), lng: \(coord.lng)")
+                        }
+                        print("🗯️ [RoutePreviewView] 총 \(coordinates.count)개의 좌표 전달")
+                        return coordinates
+                    }()
+                ),
+                onForceHome: { 
+                    // 모든 메뉴를 다 닫고 홈으로 가도록 한번에 처리
+                    showStartWalk = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        dismiss()
                         onForceHome?()
                     }
-                )
-                .environmentObject(dogVM)
-            }
+                }
+            )
+            .environmentObject(dogVM)
+            .navigationBarBackButtonHidden(true)
         }
     }
 }
