@@ -19,12 +19,8 @@ struct VersionInfoView: View {
             .padding(.bottom, 28)
             
             VStack(spacing: 24) {
-                Text("멍코스")
+                Text("멍코스(Mungcourse)")
                     .font(.custom("Pretendard-Bold", size: 24))
-                    .foregroundColor(Color("pointblack"))
-                
-                Text("Mungcourse")
-                    .font(.custom("Pretendard-Regular", size: 18))
                     .foregroundColor(Color("pointblack"))
                 
                 Text("Odengz")
