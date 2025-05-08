@@ -30,6 +30,20 @@ struct SettingsView: View {
                 //    .background(Color.white)
                 //    .padding(.bottom, 35)
                 //}
+                NavigationLink(destination: VersionInfoView().navigationBarHidden(true)) {
+                    HStack {
+                        Text("버전 정보")
+                            .font(.custom("Pretendard-Regular", size: 16))
+                            .foregroundColor(Color("pointblack"))
+                        Spacer()
+                        Image("arrow_right")
+                            .renderingMode(.template)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.horizontal, 16)
+                    .background(Color("pointwhite"))
+                    .padding(.bottom, 35)
+                }
                 Button(action: {
                     if let url = URL(string: "https://coral-writer-5f2.notion.site/1e9f1b75a64e80ecb128e4ffb351fdcf?pvs=4") {
                         openURL(url)
