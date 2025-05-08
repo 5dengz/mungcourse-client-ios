@@ -21,6 +21,9 @@ class StartWalkViewModel: ObservableObject {
     @Published var isWalking: Bool = false
     @Published var isPaused: Bool = false
     @Published var userLocation: NMGLatLng? = nil
+    
+    // 초기 위치 설정 여부 추적
+    private var initialLocationSet: Bool = false
 
     // Services
     private let walkTrackingService: WalkTrackingService
@@ -50,17 +53,26 @@ class StartWalkViewModel: ObservableObject {
         GlobalLocationManager.shared.$lastLocation
             .compactMap { $0 }
             .sink { [weak self] location in
+                guard let self = self else { return }
                 let coord = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
                 print("[StartWalkViewModel] GlobalLocationManager lastLocation 갱신: \(coord)")
-                self?.userLocation = coord
-                // 첫 위치 수신 시 흡연구역 및 dogPlaces 조회
-                if (self?.smokingZones.isEmpty ?? true) {
-                    print("🚭 [StartWalkViewModel] 첫 위치 수신, 흡연구역 조회")
-                    self?.fetchSmokingZones(center: coord)
+                self.userLocation = coord
+                
+                // 첫 위치 수신 시 카메라 중심 위치 설정
+                if !self.initialLocationSet {
+                    print("📍 [StartWalkViewModel] 첫 위치 수신, 카메라 위치 설정: \(coord)")
+                    self.centerCoordinate = coord
+                    self.initialLocationSet = true
                 }
-                if (self?.dogPlaces.isEmpty ?? true) {
+                
+                // 첫 위치 수신 시 흡연구역 및 dogPlaces 조회
+                if self.smokingZones.isEmpty {
+                    print("🚭 [StartWalkViewModel] 첫 위치 수신, 흡연구역 조회")
+                    self.fetchSmokingZones(center: coord)
+                }
+                if self.dogPlaces.isEmpty {
                     print("🐶 [StartWalkViewModel] 첫 위치 수신, 반려견 장소 조회")
-                    self?.fetchDogPlaces(center: coord)
+                    self.fetchDogPlaces(center: coord)
                 }
             }
             .store(in: &cancellables)
