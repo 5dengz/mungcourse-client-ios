@@ -4,28 +4,32 @@ import SwiftUI
 struct RoutineDaySelector: View {
     @Binding var selectedDay: DayOfWeek
     
-    // 이번 주 각 요일에 해당하는 날짜 배열
+    // 오늘부터 시작하는 7일의 날짜 배열
     private var weekDates: [Date] {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.firstWeekday = 2
+        let calendar = Calendar.current
         let today = Date()
-        guard let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)) else { return [] }
-        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
+        // 오늘부터 7일간의 날짜 생성
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
     }
     
     var body: some View {
         // 요일 선택 버튼 스크롤
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 11) {
-                ForEach(0..<DayOfWeek.allCases.count, id: \.self) { index in
-                    let day = DayOfWeek.allCases[index]
+            HStack(spacing: 8) {
+                ForEach(0..<7, id: \.self) { index in
                     let date = weekDates[index]
-                    let dateNumber = Calendar.current.component(.day, from: date)
+                    let calendar = Calendar.current
+                    let weekdayNum = calendar.component(.weekday, from: date)
+                    // weekday는 1(일요일)부터 7(토요일)까지이므로 DayOfWeek 값으로 변환
+                    // DayOfWeek는 0(월요일)부터 6(일요일)이므로 조정 필요
+                    let adjustedIndex = (weekdayNum + 5) % 7 // 일요일(1)을 6으로, 월요일(2)을 0으로 변환
+                    let day = DayOfWeek.allCases[adjustedIndex]
+                    let dateNumber = calendar.component(.day, from: date)
                     DayButton(
                         day: day,
                         dateNumber: dateNumber,
                         isSelected: selectedDay == day,
-                        isToday: Calendar.current.isDateInToday(date)
+                        isToday: calendar.isDateInToday(date)
                     ) {
                         selectedDay = day
                     }
