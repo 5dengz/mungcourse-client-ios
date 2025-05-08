@@ -11,6 +11,9 @@ struct WalkCompleteView: View {
     var body: some View {
         VStack(spacing: 0) {
             // 상단 헤더 (날짜 데이터 ViewModel에서 사용)
+            // DogViewModel 상태 로깅
+            let _ = print("📱 [WalkCompleteView] DogVM 상태: selectedDog=\(dogVM.selectedDog?.name ?? "nil"), mainDog=\(dogVM.mainDog?.name ?? "nil")")
+            
             WalkCompleteHeader(walkDate: viewModel.walkDate, onClose: {
                 dismiss()
             }, dogViewModel: dogVM) // DogViewModel을 매개변수로 직접 전달
@@ -67,6 +70,13 @@ struct WalkCompleteView: View {
     
     // 사용자 정의 이니셜라이저로 ViewModel 초기화 가능
     init(walkData: WalkSession? = nil, onForceDismiss: (() -> Void)? = nil) {
+        // WalkSession 데이터 로깅
+        if let session = walkData {
+            print("📱 [WalkCompleteView] WalkSession 데이터: distance=\(session.distance), duration=\(session.duration)")
+        } else {
+            print("📱 [WalkCompleteView] WalkSession 데이터: nil")
+        }
+        
         // WalkSession에서 필요한 데이터 추출
         let sessionData: WalkSessionData? = walkData.map { session in
             // WalkSession에서 WalkSessionData로 변환
