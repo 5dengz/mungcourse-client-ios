@@ -36,7 +36,8 @@ struct WalkCompleteView: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 2)
                 )
                 .padding(.horizontal, 20)
-                .padding(.vertical, 12)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
             }
 
             Spacer(minLength: 0)
