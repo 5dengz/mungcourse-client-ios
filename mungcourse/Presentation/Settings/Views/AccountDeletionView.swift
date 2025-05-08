@@ -48,6 +48,7 @@ struct AccountDeletionView: View {
                     backgroundColor: Color("main"),
                     cornerRadius: 8
                 )
+                .frame(width: UIScreen.main.bounds.width - 32)
                 .padding(.bottom, 48)
             }
         }
