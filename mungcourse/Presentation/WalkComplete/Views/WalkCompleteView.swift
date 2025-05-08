@@ -44,10 +44,8 @@ struct WalkCompleteView: View {
 
             // 홈으로 이동 버튼
             CommonFilledButton(title: "홈으로 이동", action: {
-                dismiss() // 1차 해제
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    onForceDismiss?() // 2차 해제(최상위)
-                }
+                // dismiss() 호출을 제거하고 바로 onForceDismiss?() 호출
+                onForceDismiss?() // 모든 화면 한 번에 해제
             })
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
@@ -58,13 +56,20 @@ struct WalkCompleteView: View {
     }
     
     // 사용자 정의 이니셜라이저로 ViewModel 초기화 가능
-    init(walkData: WalkSessionData? = nil, onForceDismiss: (() -> Void)? = nil) {
-        let vm = WalkCompleteViewModel(walkData: walkData)
+    init(walkData: WalkSession? = nil, onForceDismiss: (() -> Void)? = nil) {
+        // WalkSession에서 필요한 데이터 추출
+        let sessionData: WalkSessionData? = walkData.map { session in
+            // WalkSession에서 WalkSessionData로 변환
+            WalkSessionData(
+                distance: session.distance,
+                duration: Int(session.duration),
+                date: session.endTime,
+                coordinates: session.path
+            )
+        }
+        
+        let vm = WalkCompleteViewModel(walkData: sessionData)
         _viewModel = StateObject(wrappedValue: vm)
         self.onForceDismiss = onForceDismiss
     }
-}
-
-#Preview {
-    WalkCompleteView()
 }

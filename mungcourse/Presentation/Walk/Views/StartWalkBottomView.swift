@@ -34,13 +34,8 @@ struct StartWalkBottomView: View {
             // 산책 완료 화면 네비게이션
             NavigationLink(isActive: $isCompleteActive) {
                 if let session = completedSession {
-                    let walkData = WalkSessionData(
-                        distance: session.distance,
-                        duration: Int(session.duration),
-                        date: session.endTime,
-                        coordinates: session.path
-                    )
-                    WalkCompleteView(walkData: walkData, onForceDismiss: onForceHome)
+                    // 이제 WalkSessionData를 생성하지 않고 직접 WalkSession 전달
+                    WalkCompleteView(walkData: session, onForceDismiss: onForceHome)
                 } else {
                     EmptyView()
                 }

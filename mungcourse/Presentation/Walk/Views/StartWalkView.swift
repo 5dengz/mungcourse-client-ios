@@ -86,6 +86,17 @@ struct StartWalkView: View {
                 onForceHome: onForceHome
             )
             .environmentObject(dogVM)
+            
+            // 산책 완료 화면 네비게이션
+            NavigationLink(
+                destination: WalkCompleteView(
+                    walkData: completedSession, // completedSession 자체를 전달
+                    onForceDismiss: onForceHome // onForceHome 콜백을 WalkCompleteView에 전달
+                ),
+                isActive: $isCompleteActive
+            ) {
+                EmptyView()
+            }
         }
         .ignoresSafeArea(.container, edges: .bottom)
         .navigationBarHidden(true)
