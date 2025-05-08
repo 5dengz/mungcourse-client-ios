@@ -49,7 +49,7 @@ struct AccountDeletionConfirmView: View {
                                 .foregroundColor(.black)
                         }
                         .multilineTextAlignment(.center)
-                        .padding(.top, 34)
+                        .padding(.top, 18)
                         .padding(.horizontal, 16)
                         
                         // 강아지 프로필 사진들 (65x65 크기로 중앙 배열)
