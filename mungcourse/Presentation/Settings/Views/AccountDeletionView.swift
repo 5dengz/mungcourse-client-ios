@@ -9,6 +9,7 @@ struct AccountDeletionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // 1. 헤더 (상단 고정)
             CommonHeaderView(
                 leftIcon: "arrow_back",
                 leftAction: { dismiss() },
@@ -17,54 +18,49 @@ struct AccountDeletionView: View {
             .padding(.top, 16)
             .padding(.bottom, 28)
             
-            // 주요 콘텐츠는 스크롤뷰에 유지 및 버튼 앞까지 공간 확보
-            ScrollView {
-                VStack(spacing: 0) {
-                    Text("탈퇴 이유를 알려주세요")
-                        .font(.custom("Pretendard-SemiBold", size: 18))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.bottom, 24)
-                    
-                    VStack(spacing: 16) {
-                        ForEach(reasons, id: \.self) { reason in
-                            ReasonItemView(
-                                text: reason,
-                                isSelected: selectedReasons.contains(reason),
-                                onSelect: {
-                                    toggleSelection(reason)
-                                }
-                            )
-                            .padding(.horizontal, 4) // 그림자를 위한 여백 추가
-                        }
-                    }
-                    .padding(.horizontal, 12) // 바깥쪽 여백 추가
-                    
-                    // 버튼이 있는 공간만큼 여백 추가
-                    Spacer(minLength: 80)
-                }
-                .padding(.horizontal, 16)
-                // 버튼 공간 확보를 위한 패딩 추가
-                .padding(.bottom, 80)
-            }
-            
-            // 하단에 고정된 버튼
-            VStack {
-                Spacer()
+            // 2. 중간 영역 (남은 공간 모두 차지)
+            VStack(spacing: 0) {
+                // 제목
+                Text("탈퇴 이유를 알려주세요")
+                    .font(.custom("Pretendard-SemiBold", size: 18))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 24)
                 
-                CommonFilledButton(
-                    title: "계속하기",
-                    action: {
-                        // 탈퇴 확인 화면으로 이동
-                        showConfirmation = true
-                    },
-                    isEnabled: !selectedReasons.isEmpty,
-                    backgroundColor: Color("main"),
-                    cornerRadius: 8
-                )
-                .frame(width: UIScreen.main.bounds.width - 32)
-                .padding(.bottom, 48)
+                // 목록 (남은 공간 모두 차지)
+                VStack(spacing: 16) {
+                    ForEach(reasons, id: \.self) { reason in
+                        ReasonItemView(
+                            text: reason,
+                            isSelected: selectedReasons.contains(reason),
+                            onSelect: {
+                                toggleSelection(reason)
+                            }
+                        )
+                        .padding(.horizontal, 4) // 그림자를 위한 여백 추가
+                    }
+                    
+                    Spacer() // 남은 공간 채우기
+                }
+                .padding(.horizontal, 12) // 바깥쪽 여백 추가
             }
+            .padding(.horizontal, 16)
+            .frame(maxHeight: .infinity) // 중간 영역이 남은 공간 모두 차지
+            
+            // 3. 하단 버튼 (하단 고정)
+            CommonFilledButton(
+                title: "계속하기",
+                action: {
+                    // 탈퇴 확인 화면으로 이동
+                    showConfirmation = true
+                },
+                isEnabled: !selectedReasons.isEmpty,
+                backgroundColor: Color("main"),
+                cornerRadius: 8
+            )
+            .frame(width: UIScreen.main.bounds.width - 32)
+            .padding(.top, 20)
+            .padding(.bottom, 48)
             
         }
         .ignoresSafeArea(edges: .bottom)
@@ -83,6 +79,7 @@ struct AccountDeletionView: View {
             selectedReasons.insert(reason)
         }
     }
+
 }
 
 struct ReasonItemView: View {
@@ -122,15 +119,15 @@ struct ReasonItemView: View {
             .padding(.trailing, 16)
         }
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 57)
+        .frame(height: 57) // 고정 높이로 변경하여 계산을 정확하게
         .background(
             Rectangle()
                 .foregroundColor(Color("pointwhite"))
                 .cornerRadius(12)
                 .shadow(
                     color: Color(red: 0, green: 0, blue: 0, opacity: 0.05), 
-                    radius: 12, 
-                    x: 0,
+                    radius: 4, 
+                    x: 3,
                     y: 2
                 )
         )
