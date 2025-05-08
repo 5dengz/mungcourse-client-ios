@@ -8,8 +8,6 @@ struct WalkHeaderView: View {
             let topInset = proxy.safeAreaInsets.top
             VStack(spacing: 0) {
                 CommonHeaderView(leftIcon: "arrow_back", leftAction: onBack, title: "산책 시작")
-                    .padding(.horizontal)
-                    .frame(height: 75)
                     .padding(.top, topInset)
                     .background(Color("pointwhite"))
                     .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2)

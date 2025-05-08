@@ -66,25 +66,3 @@ extension CommonHeaderView {
         .padding(.bottom, 10)
     }
 }
-
-#if DEBUG
-struct CommonHeaderView_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(spacing: 32) {
-            CommonHeaderView(leftIcon: "arrow_back", leftAction: {}, title: "테스트")
-
-            CommonHeaderView(leftIcon: "arrow_back", leftAction: {}, title: "프로필") {
-                HStack(spacing: 16) {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.title2)
-                        .foregroundColor(.black)
-                    Image(systemName: "gearshape")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-            }
-        }
-        .previewLayout(.sizeThatFits)
-    }
-}
-#endif

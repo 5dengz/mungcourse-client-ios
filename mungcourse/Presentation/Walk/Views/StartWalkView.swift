@@ -23,7 +23,6 @@ struct NaverMapWrapper: View {
             showUserLocation: true,
             trackingMode: .direction
         )
-        .edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -62,10 +61,13 @@ struct StartWalkView: View {
     
     // MARK: - 바디
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .top) {
             // 메인 콘텐츠
             VStack(spacing: 0) {
-                // 맵 뷰 영역
+                // 상단 여백 (헤더 높이만큼)
+                Spacer(minLength: 44)
+                
+                // 맵 뷰 영역 (남는 공간을 모두 차지)
                 NaverMapWrapper(
                     viewModel: viewModel,
                     // 바로 시작하기면 dogPlaces, 추천경로면 기존대로
@@ -79,19 +81,26 @@ struct StartWalkView: View {
                     // AI 추천 경로는 반드시 plannedPathCoordinates로 전달
                     plannedPathCoordinates: routeOption?.coordinates
                 )
+                .layoutPriority(1)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                // 하단 컨트롤러
+                StartWalkBottomView(
+                    viewModel: viewModel,
+                    completedSession: $completedSession,
+                    isCompleteActive: $isCompleteActive,
+                    onForceHome: onForceHome
+                )
+                .environmentObject(dogVM)
+                .background(Color("pointwhite"))
+                .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: -2) // 상단 방향 그림자
             }
             
-            // 하단 컨트롤러
-            StartWalkBottomView(
-                viewModel: viewModel,
-                completedSession: $completedSession,
-                isCompleteActive: $isCompleteActive,
-                onForceHome: onForceHome
-            )
-            .environmentObject(dogVM)
+            // 헤더 영역 (최상단에 오버레이)
+            WalkHeaderView(onBack: { dismiss() })
             
-            // 산책 완료 화면 네비게이션
-            let walkCompleteLink = NavigationLink(
+            // 산책 완료 화면 네비게이션 (안보이는 링크)
+            NavigationLink(
                 destination: WalkCompleteView(
                     walkData: completedSession, // completedSession 자체를 전달
                     onForceDismiss: onForceHome // onForceHome 콜백을 WalkCompleteView에 전달
@@ -108,12 +117,8 @@ struct StartWalkView: View {
                 viewModel.clearMapResources()
             }
         }
-        .ignoresSafeArea(.container, edges: .bottom)
         .navigationBarHidden(true)
-        .overlay(
-            WalkHeaderView(onBack: { dismiss() }),
-            alignment: .top
-        )
+        .edgesIgnoringSafeArea([.bottom, .horizontal]) // 상단 SafeArea는 유지하고 하단과 좌우 SafeArea만 무시
         .alert("위치 권한 필요", isPresented: $viewModel.showPermissionAlert) {
             Button("설정으로 이동") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
