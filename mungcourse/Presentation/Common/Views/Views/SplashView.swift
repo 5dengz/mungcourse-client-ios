@@ -104,6 +104,11 @@ struct SplashView: View {
                     print("[SplashView] 반려견 등록 완료: 메인 화면으로 이동")
                     shouldShowMain = true
                 }
+            }, onLogout: {
+                // 로그아웃 시 처리
+                print("[SplashView] 반려견 등록 화면에서 로그아웃")
+                resetCovers()
+                shouldShowLogin = true
             }, showBackButton: false)
             .environmentObject(dogVM)
         }

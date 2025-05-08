@@ -11,10 +11,14 @@ struct RegisterDogView: View {
     @Environment(\.dismiss) private var dismiss
     // 완료 후 처리 클로저 (기본 nil)
     var onComplete: (() -> Void)? = nil
+    // 로그아웃 처리 클로저 (기본 nil)
+    var onLogout: (() -> Void)? = nil
     // 뒤로가기 버튼 노출 여부
     var showBackButton: Bool = true
     // 상단 SafeArea 높이를 저장하는 변수
     @State private var topSafeAreaHeight: CGFloat = 0
+    // 로그아웃 확인 알림창 표시 여부
+    @State private var showLogoutAlert: Bool = false
     
     // 수정 모드 여부 계산
     private var isEditing: Bool {
@@ -24,9 +28,11 @@ struct RegisterDogView: View {
     // MARK: - Initializer
     init(initialDetail: DogRegistrationResponseData? = nil,
          onComplete: (() -> Void)? = nil,
+         onLogout: (() -> Void)? = nil,
          showBackButton: Bool = true) {
         self.initialDetail = initialDetail
         self.onComplete = onComplete
+        self.onLogout = onLogout
         self.showBackButton = showBackButton
         // ViewModel 생성 및 초기값 설정
         let vm = RegisterDogViewModel()
@@ -70,10 +76,22 @@ struct RegisterDogView: View {
             // 키보드 내리기 제스처는 VStack 내부에 추가하여 헤더와 충돌하지 않게 함
             VStack(spacing: 0) {
                 CommonHeaderView(
-                    leftIcon: showBackButton ? "arrow_back" : nil,
-                    leftAction: showBackButton ? { dismiss() } : nil,
+                    leftIcon: showBackButton ? "arrow_back" : "logout",
+                    leftAction: showBackButton ? { dismiss() } : { showLogoutAlert = true },
                     title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
                 )
+                .alert(isPresented: $showLogoutAlert) {
+                    Alert(
+                        title: Text("로그아웃"),
+                        message: Text("로그아웃 하시겠습니까?"),
+                        primaryButton: .destructive(Text("확인")) {
+                            TokenManager.shared.clearTokens()
+                            dismiss()
+                            onLogout?()
+                        },
+                        secondaryButton: .cancel(Text("취소"))
+                    )
+                }
                 .padding(.top, topSafeAreaHeight > 0 ? topSafeAreaHeight : 16)
                 .zIndex(1) // 헤더가 터치 이벤트를 우선 받도록 합니다
                 
