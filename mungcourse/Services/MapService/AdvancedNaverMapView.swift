@@ -191,13 +191,13 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             mapView.mapView.moveCamera(cameraUpdate)
             print("🗺️ [AdvancedNaverMapView] 줌 레벨 업데이트: \(zoomLevel)")
         }
-        // 기본 My-LocationOverlay 숨김 및 마커 위치 업데이트
-        mapView.mapView.positionMode = trackingMode
+        // 기본 내 위치 마커는 표시하되, 위치 추적 모드는 업데이트하지 않음
+        // (초기 positionMode는 makeUIView에서만 설정하고 이후 업데이트에서는 변경하지 않음)
         mapView.mapView.locationOverlay.hidden = false // 기본 내 위치 마커 항상 표시
         
         // 사용자 위치 커스텀 마커 대신 기본 MyLocationOverlay 사용
         mapView.mapView.locationOverlay.hidden = false
-        mapView.mapView.positionMode = trackingMode
+        // positionMode 재설정 제거 - 사용자 지도 조작 유지
         
         // 경로 오버레이 업데이트 (방어 코드 추가)
         DispatchQueue.main.async {
