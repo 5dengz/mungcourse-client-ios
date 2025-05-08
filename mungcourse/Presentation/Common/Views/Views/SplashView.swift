@@ -175,17 +175,60 @@ struct SplashView: View {
     }
 
     private func checkTokenAndNavigate() {
+        // 토큰 존재 및 기본 유효성 확인
         if let token = TokenManager.shared.getAccessToken(), !token.isEmpty, isTokenValid(token) {
-            // 로그인 되어 있으면 강아지 목록 상태로 분기
-            showAfterMinimumSplash {
-                resetCovers()
-                if dogVM.dogs.isEmpty {
-                    shouldShowRegisterDog = true
-                } else {
-                    shouldShowMain = true
+            print("[SplashView] 토큰 기본 검증 성공: 추가 검증 시작")
+            
+            // TokenManager를 통한 추가 토큰 검증
+            if TokenManager.shared.validateTokens() {
+                print("[SplashView] TokenManager 검증 성공: 화면 전환 진행")
+                
+                // 로그인 되어 있으면 강아지 목록 상태로 분기
+                showAfterMinimumSplash {
+                    resetCovers()
+                    if dogVM.dogs.isEmpty {
+                        // 강아지 등록 화면으로 전환 직전에 한번 더 토큰 검증
+                        if TokenManager.shared.validateTokens() {
+                            print("[SplashView] 강아지 등록 화면 전환 직전 토큰 재검증 성공")
+                            shouldShowRegisterDog = true
+                        } else {
+                            print("[SplashView] 강아지 등록 화면 전환 직전 토큰 재검증 실패, 로그인으로 이동")
+                            shouldShowLogin = true
+                        }
+                    } else {
+                        shouldShowMain = true
+                    }
+                }
+            } else {
+                print("[SplashView] TokenManager 검증 실패: 토큰 갱신 시도")
+                // 토큰 갱신 시도
+                TokenManager.shared.refreshAccessToken { success in
+                    if success {
+                        print("[SplashView] 토큰 갱신 성공: 화면 전환 진행")
+                        self.showAfterMinimumSplash {
+                            self.resetCovers()
+                            if self.dogVM.dogs.isEmpty {
+                                // 토큰 갱신 후 강아지 등록 화면으로 전환 직전에 한번 더 검증
+                                if TokenManager.shared.validateTokens() {
+                                    self.shouldShowRegisterDog = true
+                                } else {
+                                    self.shouldShowLogin = true
+                                }
+                            } else {
+                                self.shouldShowMain = true
+                            }
+                        }
+                    } else {
+                        print("[SplashView] 토큰 갱신 실패: 로그인으로 이동")
+                        self.showAfterMinimumSplash {
+                            self.resetCovers()
+                            self.shouldShowLogin = true
+                        }
+                    }
                 }
             }
         } else {
+            print("[SplashView] 토큰 기본 검증 실패: 로그인으로 이동")
             showAfterMinimumSplash {
                 resetCovers()
                 shouldShowLogin = true

@@ -146,15 +146,50 @@ class LoginViewModel: ObservableObject {
     private func checkDogs() {
         isLoading = true
         
-        // 더미 구현 - 항상 빈 배열 반환
+        // 토큰 유효성 먼저 확인
+        guard let token = TokenManager.shared.getAccessToken(), !token.isEmpty else {
+            print("[LoginViewModel] 토큰 없음: 바로 로그인 화면으로 유지")
+            isLoading = false
+            return
+        }
+        
+        if !TokenManager.shared.validateTokens() {
+            print("[LoginViewModel] 토큰 유효하지 않음: 토큰 갱신 시도")
+            TokenManager.shared.refreshAccessToken { [weak self] success in
+                guard let self = self else { return }
+                
+                if !success {
+                    print("[LoginViewModel] 토큰 갱신 실패: 바로 로그인 화면으로 유지")
+                    self.isLoading = false
+                    return
+                }
+                
+                // 토큰 갱신 성공 시 반려견 정보 요청 계속 진행
+                print("[LoginViewModel] 토큰 갱신 성공: 반려견 치크 진행")
+                self.proceedWithDogCheck()
+            }
+        } else {
+            // 토큰이 유효한 경우 바로 반려견 정보 요청
+            print("[LoginViewModel] 토큰 유효함: 반려견 치크 진행")
+            proceedWithDogCheck()
+        }
+    }
+    
+    // 반려견 정보 치크 진행 (토큰 유효성 확인 후 호출되는 메서드)
+    private func proceedWithDogCheck() {
         // 실제 구현에서는 API 호출을 통해 반려견 데이터를 가져옴
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else { return }
             self.isLoading = false
             
-            // 더미 구현: 반려견이 없다고 가정
-            self.needsDogRegistration = true
-            print("반려견 등록 화면으로 이동")
+            // 이곳에서 needsDogRegistration = true를 설정하기 전에 한번 더 토큰 유효성 재확인
+            if TokenManager.shared.validateTokens() {
+                print("[LoginViewModel] 반려견 정보 확인 완료: 반려견 등록 화면으로 이동")
+                self.needsDogRegistration = true
+            } else {
+                print("[LoginViewModel] 반려견 정보 확인 중 토큰 유효성 재검사 실패")
+                NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+            }
         }
     }
     
