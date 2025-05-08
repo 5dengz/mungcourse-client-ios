@@ -5,8 +5,6 @@ import QuartzCore
 struct AdvancedNaverMapView: UIViewRepresentable {
     @Binding var dangerCoordinates: [NMGLatLng]
     var dogPlaceCoordinates: [NMGLatLng] = []
-    private var dangerMarkers: [NMFMarker] = []
-    private var dogPlaceMarkers: [NMFMarker] = []
     @Binding var centerCoordinate: NMGLatLng
     @Binding var zoomLevel: Double
     @Binding var pathCoordinates: [NMGLatLng]
@@ -16,9 +14,9 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     var onUserLocationUpdated: ((NMGLatLng) -> Void)?
     
     var showUserLocation: Bool = true
-    var trackingMode: NMFMyPositionMode = .direction // 기본값: 위치 추적 활성화(NMFMyPositionDirection)
+    var trackingMode: NMFMyPositionMode = .direction // 기본값: 위치 추적 활성화
     
-    // 명시적인 public initializer 추가
+    // 초기화
     init(dangerCoordinates: Binding<[NMGLatLng]>,
          dogPlaceCoordinates: [NMGLatLng] = [],
          centerCoordinate: Binding<NMGLatLng>,
@@ -29,7 +27,6 @@ struct AdvancedNaverMapView: UIViewRepresentable {
          onUserLocationUpdated: ((NMGLatLng) -> Void)? = nil,
          showUserLocation: Bool = true,
          trackingMode: NMFMyPositionMode = .direction) {
-        print("🗺️ [AdvancedNaverMapView] 초기화: danger=\(dangerCoordinates.wrappedValue.count)개, dogPlace=\(dogPlaceCoordinates.count)개")
         self._dangerCoordinates = dangerCoordinates
         self.dogPlaceCoordinates = dogPlaceCoordinates
         self._centerCoordinate = centerCoordinate
@@ -43,23 +40,18 @@ struct AdvancedNaverMapView: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> NMFNaverMapView {
-        print("🗺️ [AdvancedNaverMapView] makeUIView 호출")
-        print("🗺️ [AdvancedNaverMapView] dangerCoordinates: \(dangerCoordinates.count)개")
-        print("🗺️ [AdvancedNaverMapView] dogPlaceCoordinates: \(dogPlaceCoordinates.count)개")
-        
-        // 먼저 mapView를 생성
+        // 맵뷰 생성
         let mapView = NMFNaverMapView()
         
+        // 기본 설정
         mapView.showLocationButton = showUserLocation
         mapView.mapView.positionMode = trackingMode
         mapView.showZoomControls = true
         mapView.showCompass = true
         mapView.showScaleBar = true
         
-        // danger 마커 표시 (mapView 선언 이후로 이동)
-        print("🗺️ [AdvancedNaverMapView] danger 마커 생성 시작...")
-        for (index, coord) in dangerCoordinates.enumerated() {
-            print("🗺️ [AdvancedNaverMapView] danger 마커 #\(index): (\(coord.lat), \(coord.lng))")
+        // danger 마커 표시
+        for coord in dangerCoordinates {
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
             marker.width = 25
@@ -70,9 +62,7 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         }
         
         // dogPlaces 마커 표시
-        print("🗺️ [AdvancedNaverMapView] dogPlace 마커 생성 시작...")
-        for (index, coord) in dogPlaceCoordinates.enumerated() {
-            print("🗺️ [AdvancedNaverMapView] dogPlace 마커 #\(index): (\(coord.lat), \(coord.lng))")
+        for coord in dogPlaceCoordinates {
             let marker = NMFMarker(position: coord)
             marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
             marker.width = 25
@@ -82,138 +72,123 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             context.coordinator.dogPlaceMarkers.append(marker)
         }
         
-        // 현위치 버튼 위치 조정(상단 우측, 여백 80, 16)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        // 위치 버튼 조정
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             let buttons = mapView.subviews.compactMap { $0 as? UIButton }
-            print("[디버그] NaverMapView 내 버튼 개수: \(buttons.count)")
             for btn in buttons {
-                let label = btn.accessibilityLabel ?? "nil"
-                let id = btn.accessibilityIdentifier ?? "nil"
-                print("[디버그] 버튼 label: \(label), id: \(id)")
-            }
-            if let locationButton = buttons.first(where: { $0.accessibilityLabel == "내 위치" || $0.accessibilityIdentifier == "NMFLocationButton" }) {
-                print("[디버그] 현위치 버튼 발견! 위치 조정 시도")
-                locationButton.translatesAutoresizingMaskIntoConstraints = false
-                NSLayoutConstraint.deactivate(locationButton.constraints)
-                NSLayoutConstraint.activate([
-                    locationButton.topAnchor.constraint(equalTo: mapView.topAnchor, constant: 10),
-                    locationButton.trailingAnchor.constraint(equalTo: mapView.trailingAnchor, constant: -16)
-                ])
-            } else {
-                print("[디버그] 현위치 버튼을 찾지 못함")
+                if btn.bounds.width == 48 && btn.bounds.height == 48 {
+                    // 현위치 버튼으로 추정
+                    btn.frame.origin = CGPoint(x: mapView.frame.width - 48 - 16, y: 16)
+                }
             }
         }
         
+        // 델리게이트 설정
         mapView.mapView.touchDelegate = context.coordinator
         mapView.mapView.addCameraDelegate(delegate: context.coordinator)
         
-        // effect 및 paw 마커는 updateUIView에서 생성 및 업데이트합니다.
-
-        // 카메라 이동
+        // 카메라 초기 설정
         let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate, zoomTo: zoomLevel)
         mapView.mapView.moveCamera(cameraUpdate)
-        print("🗺️ [AdvancedNaverMapView] 초기 카메라 이동: center=(\(centerCoordinate.lat), \(centerCoordinate.lng)), zoom=\(zoomLevel)")
         
-        // 경로 오버레이 업데이트
-        print("🗺️ [AdvancedNaverMapView] makeUIView - pathCoordinates: count=\(pathCoordinates.count)")
+        // 경로 초기 설정 (2개 이상의 좌표가 있을 때만)
         if pathCoordinates.count >= 2 {
-            DispatchQueue.main.async {
-                context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
-            }
-        } else {
-            print("🗺️ [AdvancedNaverMapView] makeUIView - Polyline 생략: 좌표가 2개 미만임")
+            context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
         }
         
-        print("🗺️ [AdvancedNaverMapView] makeUIView 완료, 마커 개수: danger=\(context.coordinator.dangerMarkers.count), dogPlace=\(context.coordinator.dogPlaceMarkers.count)")
         return mapView
     }
-
+    
     func updateUIView(_ mapView: NMFNaverMapView, context: Context) {
-        print("🗺️ [AdvancedNaverMapView] updateUIView 호출")
-        print("🗺️ [AdvancedNaverMapView] 현재 dangerCoordinates: \(dangerCoordinates.count)개")
-        print("🗺️ [AdvancedNaverMapView] 현재 dogPlaceCoordinates: \(dogPlaceCoordinates.count)개")
-        print("🗺️ [AdvancedNaverMapView] 기존 마커: danger=\(context.coordinator.dangerMarkers.count)개, dogPlace=\(context.coordinator.dogPlaceMarkers.count)개")
+        // 마커 업데이트 - 실제 변경이 있을 때만 수행
+        let isDangerChanged = !context.coordinator.areSameCoordinates(
+            context.coordinator.prevDangerCoordinates, 
+            dangerCoordinates
+        )
         
-        // danger 마커 업데이트
-        // 기존 dangerMarkers 제거
-        for marker in context.coordinator.dangerMarkers {
-            marker.mapView = nil
-        }
-        context.coordinator.dangerMarkers.removeAll()
-        print("🗺️ [AdvancedNaverMapView] 기존 danger 마커 제거 완료")
+        let isDogPlaceChanged = !context.coordinator.areSameCoordinates(
+            context.coordinator.prevDogPlaceCoordinates, 
+            dogPlaceCoordinates
+        )
         
-        // 기존 dogPlaces 마커 제거
-        for marker in context.coordinator.dogPlaceMarkers {
-            marker.mapView = nil
-        }
-        context.coordinator.dogPlaceMarkers.removeAll()
-        print("🗺️ [AdvancedNaverMapView] 기존 dogPlace 마커 제거 완료")
+        // 카메라 변경 감지
+        let isCameraChanged = context.coordinator.prevCenterCoordinate != centerCoordinate || 
+                              context.coordinator.prevZoomLevel != zoomLevel
         
-        // danger 마커 다시 추가
-        print("🗺️ [AdvancedNaverMapView] danger 마커 다시 추가 시작...")
-        for (index, coord) in self.dangerCoordinates.enumerated() {
-            print("🗺️ [AdvancedNaverMapView] danger 마커 #\(index): (\(coord.lat), \(coord.lng))")
-            let marker = NMFMarker(position: coord)
-            marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
-            marker.width = 25
-            marker.height = 32
-            marker.zIndex = 100
-            marker.mapView = mapView.mapView
-            context.coordinator.dangerMarkers.append(marker)
-        }
-        print("🗺️ [AdvancedNaverMapView] danger 마커 다시 추가 완료: \(context.coordinator.dangerMarkers.count)개")
+        // 경로 변경 감지
+        let isPathChanged = !context.coordinator.areSameCoordinates(
+            context.coordinator.prevPathCoordinates, 
+            pathCoordinates
+        )
         
-        // dogPlaces 마커 다시 추가
-        print("🗺️ [AdvancedNaverMapView] dogPlace 마커 다시 추가 시작...")
-        for (index, coord) in self.dogPlaceCoordinates.enumerated() {
-            print("🗺️ [AdvancedNaverMapView] dogPlace 마커 #\(index): (\(coord.lat), \(coord.lng))")
-            let marker = NMFMarker(position: coord)
-            marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
-            marker.width = 25
-            marker.height = 32
-            marker.zIndex = 99
-            marker.mapView = mapView.mapView
-            context.coordinator.dogPlaceMarkers.append(marker)
-        }
-        print("🗺️ [AdvancedNaverMapView] dogPlace 마커 다시 추가 완료: \(context.coordinator.dogPlaceMarkers.count)개")
-        
-        print("🗺️ [AdvancedNaverMapView] updateUIView - centerCoordinate: \(centerCoordinate), zoomLevel: \(zoomLevel)")
-        print("🗺️ [AdvancedNaverMapView] updateUIView - pathCoordinates: count=\(pathCoordinates.count)")
-        if mapView.mapView.cameraPosition.target != centerCoordinate {
-            let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate)
-            cameraUpdate.animation = .easeIn
-            mapView.mapView.moveCamera(cameraUpdate)
-            print("🗺️ [AdvancedNaverMapView] 카메라 위치 업데이트: \(centerCoordinate)")
-        }
-        if mapView.mapView.cameraPosition.zoom != zoomLevel {
-            let cameraUpdate = NMFCameraUpdate(zoomTo: zoomLevel)
-            cameraUpdate.animation = .easeIn
-            mapView.mapView.moveCamera(cameraUpdate)
-            print("🗺️ [AdvancedNaverMapView] 줌 레벨 업데이트: \(zoomLevel)")
-        }
-        // 기본 내 위치 마커는 표시하되, 위치 추적 모드는 업데이트하지 않음
-        // (초기 positionMode는 makeUIView에서만 설정하고 이후 업데이트에서는 변경하지 않음)
-        mapView.mapView.locationOverlay.hidden = false // 기본 내 위치 마커 항상 표시
-        
-        // 사용자 위치 커스텀 마커 대신 기본 MyLocationOverlay 사용
-        mapView.mapView.locationOverlay.hidden = false
-        // positionMode 재설정 제거 - 사용자 지도 조작 유지
-        
-        // 경로 오버레이 업데이트 (방어 코드 추가)
-        DispatchQueue.main.async {
-            print("🚩 [AdvancedNaverMapView] 경로 오버레이 업데이트 시도 - 좌표 개수: \(pathCoordinates.count)")
-            if pathCoordinates.count >= 2 {
-                context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
-            } else {
-                print("🚩 [AdvancedNaverMapView] 경로 오버레이 업데이트 실패 - 좌표가 2개 미만")
+        // 마커 업데이트
+        if isDangerChanged || isDogPlaceChanged {
+            // 기존 마커 제거
+            for marker in context.coordinator.dangerMarkers {
+                marker.mapView = nil
             }
+            context.coordinator.dangerMarkers.removeAll()
+            
+            for marker in context.coordinator.dogPlaceMarkers {
+                marker.mapView = nil
+            }
+            context.coordinator.dogPlaceMarkers.removeAll()
+            
+            // 마커 새로 추가
+            for coord in dangerCoordinates {
+                let marker = NMFMarker(position: coord)
+                marker.iconImage = NMFOverlayImage(name: "pinpoint_danger")
+                marker.width = 25
+                marker.height = 32
+                marker.zIndex = 100
+                marker.mapView = mapView.mapView
+                context.coordinator.dangerMarkers.append(marker)
+            }
+            
+            for coord in dogPlaceCoordinates {
+                let marker = NMFMarker(position: coord)
+                marker.iconImage = NMFOverlayImage(name: "pinpoint_paw")
+                marker.width = 25
+                marker.height = 32
+                marker.zIndex = 99
+                marker.mapView = mapView.mapView
+                context.coordinator.dogPlaceMarkers.append(marker)
+            }
+            
+            // 상태 저장
+            context.coordinator.prevDangerCoordinates = dangerCoordinates
+            context.coordinator.prevDogPlaceCoordinates = dogPlaceCoordinates
         }
         
-        print("🗺️ [AdvancedNaverMapView] updateUIView 완료")
+        // 카메라 위치 업데이트
+        if isCameraChanged {
+            let cameraUpdate = NMFCameraUpdate(scrollTo: centerCoordinate, zoomTo: zoomLevel)
+            mapView.mapView.moveCamera(cameraUpdate)
+            
+            // 상태 저장
+            context.coordinator.prevCenterCoordinate = centerCoordinate
+            context.coordinator.prevZoomLevel = zoomLevel
+        }
+        
+        // 사용자 위치 업데이트
+        if let userLoc = userLocation, showUserLocation {
+            mapView.mapView.locationOverlay.location = NMGLatLng(lat: userLoc.lat, lng: userLoc.lng)
+            onUserLocationUpdated?(userLoc)
+        }
+        
+        // 위치 표시 설정
+        mapView.mapView.locationOverlay.hidden = !showUserLocation
+        
+        // 경로 업데이트
+        if isPathChanged && pathCoordinates.count >= 2 {
+            context.coordinator.updatePathOverlay(mapView: mapView.mapView, coordinates: pathCoordinates)
+            
+            // 상태 저장
+            context.coordinator.prevPathCoordinates = pathCoordinates
+        }
     }
     
     func makeCoordinator() -> Coordinator {
-        print("🗺️ [AdvancedNaverMapView] makeCoordinator 호출")
         return Coordinator(self)
     }
     
@@ -223,33 +198,48 @@ struct AdvancedNaverMapView: UIViewRepresentable {
         let parent: AdvancedNaverMapView
         weak var pathOverlay: NMFPath?
         
+        // 이전 상태 추적을 위한 변수
+        var prevDangerCoordinates: [NMGLatLng] = []
+        var prevDogPlaceCoordinates: [NMGLatLng] = []
+        var prevPathCoordinates: [NMGLatLng] = []
+        var prevCenterCoordinate: NMGLatLng?
+        var prevZoomLevel: Double = 0.0
+        
         init(_ parent: AdvancedNaverMapView) {
             self.parent = parent
-            print("🗺️ [AdvancedNaverMapView.Coordinator] 초기화")
         }
         
-        // Update or add a new path overlay.
-        func updatePathOverlay(mapView: NMFMapView, coordinates: [NMGLatLng]) {
-            print("🗺️ [AdvancedNaverMapView.Coordinator] updatePathOverlay 호출 - coordinates: count=\(coordinates.count)")
-            // 좌표 유효성 검사
-            for (i, coord) in coordinates.enumerated() {
-                guard abs(coord.lat) <= 90, abs(coord.lng) <= 180 else {
-                    print("❌ [AdvancedNaverMapView.Coordinator] 유효하지 않은 좌표 (index \(i)): \(coord)")
-                    return
+        // 두 좌표 배열이 동일한지 비교하는 헬퍼 함수
+        func areSameCoordinates(_ array1: [NMGLatLng], _ array2: [NMGLatLng]) -> Bool {
+            // 배열 길이가 다르면 다른 경로
+            if array1.count != array2.count {
+                return false
+            }
+            
+            // 각 좌표의 값 비교 - 참조 비교가 아닌 실제 값 비교로 변경
+            for i in 0..<array1.count {
+                if array1[i].lat != array2[i].lat || array1[i].lng != array2[i].lng {
+                    return false
                 }
             }
-            // 기존 오버레이 완전 제거
+            
+            return true
+        }
+        
+        // 경로 오버레이 업데이트
+        func updatePathOverlay(mapView: NMFMapView, coordinates: [NMGLatLng]) {
+            // 기존 오버레이가 있으면 제거
             if let existingPath = pathOverlay {
-                print("🗺️ [AdvancedNaverMapView.Coordinator] 기존 pathOverlay 제거")
                 existingPath.mapView = nil
                 pathOverlay = nil
             }
+            
             // 2개 미만 좌표면 오버레이 생성하지 않음
             guard coordinates.count >= 2 else {
-                print("🗺️ [AdvancedNaverMapView.Coordinator] 좌표가 2개 미만이라 Polyline 생성하지 않음")
                 return
             }
-            print("🗺️ [AdvancedNaverMapView.Coordinator] NMFPath 생성 및 NMGLineString 할당 시도")
+            
+            // 새 경로 생성
             let newPath = NMFPath()
             newPath.path = NMGLineString(points: coordinates)
             newPath.color = UIColor(red: 0.28, green: 0.81, blue: 0.43, alpha: 1.0)
@@ -257,18 +247,32 @@ struct AdvancedNaverMapView: UIViewRepresentable {
             newPath.outlineWidth = 1
             newPath.mapView = mapView
             pathOverlay = newPath
-            print("🗺️ [AdvancedNaverMapView.Coordinator] Polyline 정상 생성 및 지도에 추가 완료")
         }
         
+        // 지도 탭 이벤트
         func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
-            print("🗺️ [AdvancedNaverMapView.Coordinator] 지도 탭: \(latlng)")
             parent.onMapTapped?(latlng)
         }
         
+        // 카메라 이동 완료 이벤트
         func mapViewCameraIdle(_ mapView: NMFMapView) {
-            print("🗺️ [AdvancedNaverMapView.Coordinator] 카메라 이동 완료: center=\(mapView.cameraPosition.target), zoom=\(mapView.cameraPosition.zoom)")
-            parent.centerCoordinate = mapView.cameraPosition.target
-            parent.zoomLevel = mapView.cameraPosition.zoom
+            // 바인딩 상태 변경으로 무한 루프를 방지하기 위해 상태 값과 비교
+            if !areSameLatLng(mapView.cameraPosition.target, prevCenterCoordinate) ||
+               mapView.cameraPosition.zoom != prevZoomLevel {
+                // 카메라가 실제로 바뀌었을 때만 업데이트
+                prevCenterCoordinate = mapView.cameraPosition.target
+                prevZoomLevel = mapView.cameraPosition.zoom
+                
+                // 부모에게 알림
+                parent.centerCoordinate = mapView.cameraPosition.target
+                parent.zoomLevel = mapView.cameraPosition.zoom
+            }
+        }
+        
+        // 좌표값 비교
+        private func areSameLatLng(_ latlng1: NMGLatLng, _ latlng2: NMGLatLng?) -> Bool {
+            guard let latlng2 = latlng2 else { return false }
+            return latlng1.lat == latlng2.lat && latlng1.lng == latlng2.lng
         }
     }
 }
