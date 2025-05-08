@@ -51,15 +51,7 @@ struct RoutePreviewView: View {
                     totalDistance: distance,
                     estimatedTime: estimatedTime,
                     waypoints: waypoints,
-                    coordinates: {
-                        // 좌표 로그 출력
-                        print("🗯️ [RoutePreviewView] 경로 좌표 목록:")
-                        for (index, coord) in coordinates.enumerated() {
-                            print("🗯️ [RoutePreviewView]   [\(index)] lat: \(coord.lat), lng: \(coord.lng)")
-                        }
-                        print("🗯️ [RoutePreviewView] 총 \(coordinates.count)개의 좌표 전달")
-                        return coordinates
-                    }()
+                    coordinates: coordinates
                 ),
                 onForceHome: { 
                     // 모든 메뉴를 다 닫고 홈으로 가도록 한번에 처리
@@ -80,7 +72,7 @@ struct RoutePreviewView: View {
                 object: nil,
                 queue: .main
             ) { _ in
-                print("🔥 [RoutePreviewView] 화면 해제 알림 수신")
+                // 화면 해제 알림 수신
                 showStartWalk = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     // 경유지 화면 해제
