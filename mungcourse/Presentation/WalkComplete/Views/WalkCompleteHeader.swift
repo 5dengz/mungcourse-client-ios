@@ -2,7 +2,8 @@ import SwiftUI
 import Combine
 
 struct WalkCompleteHeader: View {
-    @EnvironmentObject var dogViewModel: DogViewModel
+    // 직접 DogViewModel 인스턴스를 받도록 변경
+    var dogViewModel: DogViewModel
     let walkDate: Date
     let onClose: () -> Void
     
@@ -95,9 +96,10 @@ struct WalkCompleteHeader: View {
         }
     }
     
-    init(walkDate: Date, onClose: @escaping () -> Void) {
+    init(walkDate: Date, onClose: @escaping () -> Void, dogViewModel: DogViewModel) {
         self.walkDate = walkDate
         self.onClose = onClose
+        self.dogViewModel = dogViewModel
         // 뷰가 생성될 때 메인 반려견 이미지 로딩
         loadMainDog()
     }

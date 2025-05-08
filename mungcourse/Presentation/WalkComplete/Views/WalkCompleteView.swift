@@ -13,8 +13,7 @@ struct WalkCompleteView: View {
             // 상단 헤더 (날짜 데이터 ViewModel에서 사용)
             WalkCompleteHeader(walkDate: viewModel.walkDate, onClose: {
                 dismiss()
-            })
-            .environmentObject(dogVM) // DogViewModel 주입
+            }, dogViewModel: dogVM) // DogViewModel을 매개변수로 직접 전달
             .padding(.bottom, 8)
 
             ScrollView {
