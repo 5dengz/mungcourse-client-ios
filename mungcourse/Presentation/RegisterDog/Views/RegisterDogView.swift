@@ -19,6 +19,10 @@ struct RegisterDogView: View {
     @State private var topSafeAreaHeight: CGFloat = 0
     // 로그아웃 확인 알림창 표시 여부
     @State private var showLogoutAlert: Bool = false
+    // 로그인 필요 알림창 표시 여부
+    @State private var showLoginAlert: Bool = false
+    // 로그인 필요 알림 메시지
+    @State private var loginErrorMessage: String = "로그인이 필요합니다"
     
     // 수정 모드 여부 계산
     private var isEditing: Bool {
@@ -72,6 +76,18 @@ struct RegisterDogView: View {
     
     // MARK: - Body
     var body: some View {
+        // 화면 나타날 때 토큰 검증
+        .onAppear {
+            verifyTokenAndProceed()
+        }
+        // 로그인 필요 알림
+        .alert("로그인 필요", isPresented: $showLoginAlert) {
+            Button("확인") {
+                resetToLoginScreen()
+            }
+        } message: {
+            Text(loginErrorMessage)
+        }
         ZStack {
             // 키보드 내리기 제스처는 VStack 내부에 추가하여 헤더와 충돌하지 않게 함
             VStack(spacing: 0) {
@@ -218,5 +234,40 @@ struct RegisterDogView: View {
 extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+// MARK: - 토큰 검증 및 로그인 화면 리셋 관련 메서드
+extension RegisterDogView {
+    // 토큰 검증 수행 메서드
+    private func verifyTokenAndProceed() {
+        if !TokenManager.shared.validateTokens() {
+            // 토큰이 유효하지 않은 경우 갱신 시도
+            print("[RegisterDogView] 토큰 유효하지 않음, 갱신 시도")
+            TokenManager.shared.refreshAccessToken { success in
+                if !success {
+                    DispatchQueue.main.async {
+                        self.loginErrorMessage = "로그인이 만료되었습니다. 다시 로그인해주세요."
+                        self.showLoginAlert = true
+                    }
+                } else {
+                    print("[RegisterDogView] 토큰 갱신 성공")
+                }
+            }
+        } else {
+            print("[RegisterDogView] 토큰 검증 성공")
+        }
+    }
+    
+    // 로그인 화면으로 리셋
+    private func resetToLoginScreen() {
+        // 토큰 클리어
+        TokenManager.shared.clearTokens()
+        
+        // 앱 데이터 리셋 알림 발생
+        NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+        
+        // 현재 화면 닫기
+        dismiss()
     }
 }
