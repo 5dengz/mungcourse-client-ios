@@ -76,18 +76,6 @@ struct RegisterDogView: View {
     
     // MARK: - Body
     var body: some View {
-        // 화면 나타날 때 토큰 검증
-        .onAppear {
-            verifyTokenAndProceed()
-        }
-        // 로그인 필요 알림
-        .alert("로그인 필요", isPresented: $showLoginAlert) {
-            Button("확인") {
-                resetToLoginScreen()
-            }
-        } message: {
-            Text(loginErrorMessage)
-        }
         ZStack {
             // 키보드 내리기 제스처는 VStack 내부에 추가하여 헤더와 충돌하지 않게 함
             VStack(spacing: 0) {
@@ -200,6 +188,18 @@ struct RegisterDogView: View {
                 }
             }
             .ignoresSafeArea() // 기타 설정
+        }
+        // 화면 나타날 때 토큰 검증
+        .onAppear {
+            verifyTokenAndProceed()
+        }
+        // 로그인 필요 알림
+        .alert("로그인 필요", isPresented: $showLoginAlert) {
+            Button("확인") {
+                resetToLoginScreen()
+            }
+        } message: {
+            Text(loginErrorMessage)
         }
     }
     
