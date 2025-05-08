@@ -88,6 +88,8 @@ struct RoutineSettingsView: View {
                 viewModel.showAddRoutine = false
                 viewModel.fetchRoutines(for: viewModel.selectedDay)
             })
+            .presentationDetents([.height(435)])
+            .presentationDragIndicator(.visible)
         }
         .sheet(item: $viewModel.editingRoutine) { routine in
             EditRoutineView(routine: routine) {

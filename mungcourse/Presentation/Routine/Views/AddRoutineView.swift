@@ -20,7 +20,16 @@ struct AddRoutineView: View {
             CommonHeaderView(
                 leftIcon: "",
                 leftAction: { },
-                title: "루틴 추가"
+                title: "루틴 추가",
+                rightContent: {
+                    Button(action: addRoutine) {
+                        Image("icon_plus")
+                            .renderingMode(.template)
+                            .foregroundColor(Color("main"))
+                    }
+                    .disabled(!isFormValid)
+                    .opacity(isFormValid ? 1.0 : 0.3)
+                }
             )
             .padding(.bottom, 12)
             .padding(.top, 32)
@@ -92,6 +101,7 @@ struct AddRoutineView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
                 }
                 
                 /* 알림 설정 섹션 주석 처리
@@ -108,17 +118,6 @@ struct AddRoutineView: View {
             }
             .padding(.vertical, 24)
             .padding(.horizontal, 20)
-
-            Spacer()  // 버튼을 하단으로 밀기 위한 Spacer 삽입
-
-            // '추가하기' 버튼
-            CommonFilledButton(
-                title: "추가하기",
-                action: addRoutine,
-                isEnabled: isFormValid
-            )
-            .padding(.horizontal, 40)
-            .padding(.bottom, 28)
         }
     }
 
