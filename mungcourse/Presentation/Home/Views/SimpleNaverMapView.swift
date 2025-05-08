@@ -26,8 +26,8 @@ struct SimpleNaverMapView: UIViewRepresentable {
         mapView.locationOverlay.hidden = true
         
         // 네이버 로고 숨기기
-        mapView.logoAlign = .leftTop
-        mapView.logoMargin = UIEdgeInsets(top: -100, left: -100, bottom: 0, right: 0)
+        // mapView.logoAlign = .leftTop
+        // mapView.logoMargin = UIEdgeInsets(top: -100, left: -100, bottom: 0, right: 0)
         
         // UI 설정
         mapView.isRotateGestureEnabled = false // 회전 제스처 비활성화

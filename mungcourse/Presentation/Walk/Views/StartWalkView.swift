@@ -85,30 +85,47 @@ struct StartWalkView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // 하단 컨트롤러
-                StartWalkBottomView(
-                    viewModel: viewModel,
-                    completedSession: $completedSession,
-                    isCompleteActive: $isCompleteActive,
-                    onForceHome: onForceHome
+                WalkControllerView(
+                    distance: viewModel.formattedDistance,
+                    duration: viewModel.formattedDuration,
+                    calories: viewModel.formattedCalories,
+                    state: viewModel.isPaused ? .paused : (viewModel.isWalking ? .active : .notStarted),
+                    onStart: { viewModel.startWalk() },
+                    onPause: { viewModel.pauseWalk() },
+                    onResume: { viewModel.resumeWalk() },
+                    onEnd: {
+                        // 산책 종료
+                        completedSession = viewModel.endWalk()
+                        
+                        // 즉시 네비게이션 활성화
+                        isCompleteActive = true
+                        
+                        // 백그라운드로 세션 업로드
+                        if let session = completedSession, let mainId = dogVM.mainDog?.id {
+                            let dogIds = [mainId]
+                            DispatchQueue.global(qos: .background).async {
+                                viewModel.uploadWalkSession(session, dogIds: dogIds) { _ in }
+                            }
+                        }
+                    }
                 )
-                .environmentObject(dogVM)
-                .background(Color("pointwhite"))
-                .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: -2) // 상단 방향 그림자
             }
             
             // 헤더 영역 (최상단에 오버레이)
             WalkHeaderView(onBack: { dismiss() })
             
             // 산책 완료 화면 네비게이션 (안보이는 링크)
-            NavigationLink(
-                destination: WalkCompleteView(
-                    walkData: completedSession, // completedSession 자체를 전달
-                    onForceDismiss: onForceHome // onForceHome 콜백을 WalkCompleteView에 전달
-                ),
-                isActive: $isCompleteActive
-            ) {
+            NavigationLink(isActive: $isCompleteActive) {
+                if let session = completedSession {
+                    // 세션 데이터 전달
+                    WalkCompleteView(walkData: session, onForceDismiss: onForceHome)
+                } else {
+                    EmptyView()
+                }
+            } label: {
                 EmptyView()
             }
+            .hidden()
         }
         .onChange(of: isCompleteActive) { active in
             if active {
