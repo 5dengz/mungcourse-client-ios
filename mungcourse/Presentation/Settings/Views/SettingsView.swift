@@ -13,7 +13,6 @@ struct SettingsView: View {
             )
             .padding(.top, 16)
             .padding(.bottom, 16)
-            //.padding(.horizontal, 12)
 
             VStack(spacing: 0) {
                 //NavigationLink(destination: NotificationSettingsView().navigationBarHidden(true)) {
@@ -108,10 +107,10 @@ struct SettingsView: View {
                     .background(Color("pointwhite"))
                 }
             }
+            .padding(.horizontal, 16)
             .background(Color("pointwhite"))
             Spacer()
         }
-        .padding(.horizontal, 16)
         .navigationBarHidden(true)
         .ignoresSafeArea(edges: .bottom)
     }

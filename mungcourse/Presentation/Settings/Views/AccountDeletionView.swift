@@ -53,8 +53,8 @@ struct AccountDeletionView: View {
                 .frame(width: UIScreen.main.bounds.width - 32)
                 .padding(.bottom, 48)
             }
+            .padding(.horizontal, 16)
         }
-        .padding(.horizontal, 16)
         .ignoresSafeArea(edges: .bottom)
         .fullScreenCover(isPresented: $showConfirmation) {
             AccountDeletionConfirmView(onDelete: {
