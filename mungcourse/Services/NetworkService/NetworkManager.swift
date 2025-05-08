@@ -5,8 +5,35 @@ final class NetworkManager {
     static let shared = NetworkManager()
     private init() {}
     
-    /// 공통 API 요청 함수
+    /// 요청 전 토큰 검증 후 API 요청 실행 함수
     func performAPIRequest(_ request: URLRequest, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+        // API 요청 전 토큰 유효성 검사
+        if !TokenManager.shared.validateTokens() {
+            print("[NetworkManager] 토큰 만료 감지, 갱신 시도")
+            // 토큰 갱신 시도
+            TokenManager.shared.refreshAccessToken { success in
+                if success {
+                    print("[NetworkManager] 토큰 갱신 성공, 요청 진행")
+                    // 갱신 성공 시 실제 요청 실행
+                    self.performActualRequest(request, completion: completion)
+                } else {
+                    print("[NetworkManager] 토큰 갱신 실패, 로그인 필요 알림 발생")
+                    // 갱신 실패 시 앱 데이터 리셋 알림 발생
+                    DispatchQueue.main.async {
+                        AuthService.shared.logout()
+                        NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+                        completion(nil, nil, AuthError.invalidCredentials)
+                    }
+                }
+            }
+        } else {
+            // 토큰 유효하면 바로 요청 진행
+            performActualRequest(request, completion: completion)
+        }
+    }
+    
+    /// 실제 API 요청 실행 함수 (내부용)
+    private func performActualRequest(_ request: URLRequest, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
         var request = request
         // accessToken이 있으면 Authorization 헤더에 추가
         if let accessToken = TokenManager.shared.getAccessToken() {
@@ -76,8 +103,38 @@ final class NetworkManager {
         task.resume()
     }
     
-    /// 토큰이 포함된 Combine Publisher 기반 API 요청 함수
+    /// 토큰 검증 후 Combine Publisher 기반 API 요청 함수
     func requestWithTokenPublisher(_ request: URLRequest) -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> {
+        // API 요청 전 토큰 유효성 검사
+        if !TokenManager.shared.validateTokens() {
+            // 토큰 갱신 시도 후 요청
+            return Future<Void, Error> { promise in
+                TokenManager.shared.refreshAccessToken { success in
+                    if success {
+                        promise(.success(()))
+                    } else {
+                        // 갱신 실패 시 앱 데이터 리셋 알림 발생
+                        DispatchQueue.main.async {
+                            AuthService.shared.logout()
+                            NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+                        }
+                        promise(.failure(AuthError.invalidCredentials))
+                    }
+                }
+            }
+            .flatMap { _ -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> in
+                // 갱신 성공 시 실제 요청 진행
+                return self.performActualRequestPublisher(request)
+            }
+            .eraseToAnyPublisher()
+        } else {
+            // 토큰 유효하면 바로 요청 진행
+            return performActualRequestPublisher(request)
+        }
+    }
+    
+    /// 실제 Combine Publisher 기반 API 요청 실행 함수 (내부용)
+    private func performActualRequestPublisher(_ request: URLRequest) -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> {
         var request = request
         
         // accessToken이 있으면 Authorization 헤더에 추가
@@ -131,7 +188,7 @@ final class NetworkManager {
             .eraseToAnyPublisher()
     }
     
-    /// 토큰 갱신 후 요청 재시도 함수
+    /// 토큰 갱신 후 요청 재시도 함수 (401 응답 후 호출됨)
     private func refreshTokenAndRetry(_ request: URLRequest) -> AnyPublisher<URLSession.DataTaskPublisher.Output, Error> {
         return Future<String, Error> { promise in
             TokenManager.shared.refreshAccessToken { success in
