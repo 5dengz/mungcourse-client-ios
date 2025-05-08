@@ -47,11 +47,11 @@ struct BasicInfoView: View {
             } else if let error = dogVM.dogDetailError {
                 VStack {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.red)
+                        .foregroundColor(Color("gray500"))
                         .font(.system(size: 40))
                         .padding(.bottom, 8)
-                    Text("정보를 불러오는 중 오류가 발생했습니다.")
-                        .foregroundColor(.red)
+                    Text("정보를 불러올 수 없습니다.")
+                        .foregroundColor(Color("gray500"))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
