@@ -10,6 +10,9 @@ struct RoutePreviewView: View {
     var onForceHome: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var showStartWalk = false
+    
+    // 알림 처리용 ID
+    private let notificationId = UUID()
     // 환경객체 전달
     @EnvironmentObject var dogVM: DogViewModel
 
@@ -69,6 +72,25 @@ struct RoutePreviewView: View {
             )
             .environmentObject(dogVM)
             .navigationBarBackButtonHidden(true)
+        }
+        .onAppear {
+            // 산책 완료 화면에서 홈 버튼 클릭 시 dismissAllScreens 알림 수신을 위한 옵저버 추가
+            NotificationCenter.default.addObserver(
+                forName: .dismissAllScreens,
+                object: nil,
+                queue: .main
+            ) { _ in
+                print("🔥 [RoutePreviewView] 화면 해제 알림 수신")
+                showStartWalk = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    // 경유지 화면 해제
+                    dismiss()
+                }
+            }
+        }
+        .onDisappear {
+            // 알림 옵저버 제거
+            NotificationCenter.default.removeObserver(notificationId)
         }
     }
 }

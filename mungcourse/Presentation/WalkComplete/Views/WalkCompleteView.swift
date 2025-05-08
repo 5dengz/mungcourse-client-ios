@@ -44,8 +44,18 @@ struct WalkCompleteView: View {
 
             // 홈으로 이동 버튼
             CommonFilledButton(title: "홈으로 이동", action: {
-                // dismiss() 호출을 제거하고 바로 onForceDismiss?() 호출
-                onForceDismiss?() // 모든 화면 한 번에 해제
+                // 중간 화면을 모두 비동기적으로 해제하고 완료 화면 해제 전 미리 준비
+                print("🔥 [WalkCompleteView] 홈으로 이동 시도 - 네비게이션 스택 정리 시작")
+                
+                // NotificationCenter를 통해 모든 화면에 해제 신호 전송 (중간 화면 해제 시간 확보)
+                NotificationCenter.default.post(name: .dismissAllScreens, object: nil)
+                
+                // 약간의 지연 후 최종 해제
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    // 스택 정리 후 홈으로 이동
+                    print("🔥 [WalkCompleteView] 최종 스택 해제 실행")
+                    onForceDismiss?() // 모든 화면 한 번에 해제
+                }
             })
             .padding(.horizontal, 20)
             .padding(.bottom, 24)

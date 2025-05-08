@@ -135,7 +135,20 @@ struct StartWalkView: View {
             // 앱 실행 시 바로 산책 시작하여 위치 추적을 활성화
             viewModel.startWalk()
             
-
+            // 산책 완료 화면에서 홈 버튼 클릭 시 dismissAllScreens 알림 수신을 위한 옵저버 추가
+            let observer = NotificationCenter.default.addObserver(
+                forName: .dismissAllScreens,
+                object: nil,
+                queue: .main
+            ) { _ in
+                print("🔥 [StartWalkView] 화면 해제 알림 수신")
+                dismiss()
+            }
+            
+            // 메모리 누수 방지를 위해 onDisappear에서 옵저버 제거
+            NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: .main) { _ in
+                NotificationCenter.default.removeObserver(observer)
+            }
         }
 
     }
