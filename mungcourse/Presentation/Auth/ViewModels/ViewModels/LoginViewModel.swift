@@ -101,8 +101,15 @@ class LoginViewModel: ObservableObject {
                 self.isLoading = false
                 switch completion {
                 case .finished:
-                    self.checkDogs()
+                    // 로그인 성공 시에만 강아지 체크
+                    if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
+                        print("[LoginViewModel] 구글 로그인 성공: 반려견 정보 확인")
+                        self.checkDogs()
+                    } else {
+                        print("[LoginViewModel] 구글 로그인 완료되었으나 토큰이 없음")
+                    }
                 case .failure(let error):
+                    print("[LoginViewModel] 구글 로그인 실패 또는 취소: \(error.localizedDescription)")
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
                 }
             } receiveValue: { _ in }
@@ -120,8 +127,15 @@ class LoginViewModel: ObservableObject {
                 self.isLoading = false
                 switch completion {
                 case .finished:
-                    self.checkDogs()
+                    // 로그인 성공 시에만 강아지 체크
+                    if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
+                        print("[LoginViewModel] 애플 로그인 성공: 반려견 정보 확인")
+                        self.checkDogs()
+                    } else {
+                        print("[LoginViewModel] 애플 로그인 완료되었으나 토큰이 없음")
+                    }
                 case .failure(let error):
+                    print("[LoginViewModel] 애플 로그인 실패 또는 취소: \(error.localizedDescription)")
                     self.errorMessage = IdentifiableError(message: error.localizedDescription)
                 }
             } receiveValue: { _ in }
