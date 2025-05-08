@@ -17,27 +17,37 @@ struct AccountDeletionView: View {
             .padding(.top, 16)
             .padding(.bottom, 28)
             
-            VStack(spacing: 0) {
-                Text("탈퇴 이유를 알려주세요")
-                    .font(.custom("Pretendard-SemiBold", size: 18))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.bottom, 24)
-                
-                VStack(spacing: 16) {
-                    ForEach(reasons, id: \.self) { reason in
-                        ReasonItemView(
-                            text: reason,
-                            isSelected: selectedReasons.contains(reason),
-                            onSelect: {
-                                toggleSelection(reason)
-                            }
-                        )
-                        .padding(.horizontal, 4) // 그림자를 위한 여백 추가
+            // 주요 콘텐츠는 스크롤뷰에 유지
+            ScrollView {
+                VStack(spacing: 0) {
+                    Text("탈퇴 이유를 알려주세요")
+                        .font(.custom("Pretendard-SemiBold", size: 18))
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.bottom, 24)
+                    
+                    VStack(spacing: 16) {
+                        ForEach(reasons, id: \.self) { reason in
+                            ReasonItemView(
+                                text: reason,
+                                isSelected: selectedReasons.contains(reason),
+                                onSelect: {
+                                    toggleSelection(reason)
+                                }
+                            )
+                            .padding(.horizontal, 4) // 그림자를 위한 여백 추가
+                        }
                     }
+                    .padding(.horizontal, 12) // 바깥쪽 여백 추가
+                    
+                    // 내용물이 적을 때 추가 공간 확보
+                    Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 12) // 바깥쪽 여백 추가
-                
+                .padding(.horizontal, 16)
+            }
+            
+            // 하단에 고정된 버튼
+            VStack {
                 Spacer()
                 
                 CommonFilledButton(
@@ -53,7 +63,7 @@ struct AccountDeletionView: View {
                 .frame(width: UIScreen.main.bounds.width - 32)
                 .padding(.bottom, 48)
             }
-            .padding(.horizontal, 16)
+            
         }
         .ignoresSafeArea(edges: .bottom)
         .fullScreenCover(isPresented: $showConfirmation) {
