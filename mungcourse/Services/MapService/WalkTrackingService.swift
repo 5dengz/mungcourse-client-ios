@@ -103,10 +103,11 @@ class WalkTrackingService: NSObject, ObservableObject {
         print("[WalkTrackingService] resumeWalk() 호출")
         guard !isTracking else { return }
         
-        // 새로운 시작 시간 설정
+        // 새로운 시작 시간 설정 (현재 시간으로 변경)
         startTime = Date()
         locationManager.startUpdatingLocation()
         
+        // 타이머 설정 - 누적 시간과 현재 세션 시간을 합산하도록 수정
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let startTime = self.startTime else { return }
             // 누적된 시간 + 현재 세션의 경과 시간
@@ -119,17 +120,27 @@ class WalkTrackingService: NSObject, ObservableObject {
     }
     func endWalk() -> WalkSession? {
         print("[WalkTrackingService] endWalk() 호출")
+        
+        // 현재 활성 상태인 경우 먼저 일시 중지하여 누적 시간 업데이트
         if isTracking {
             pauseWalk() // First pause to stop tracking
         }
+        
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
         timer = nil
         isTracking = false
+        
+        // 경과 시간이 이미 pauseWalk()에서 누적되었으므로
+        // 일시 중지 상태에서도 세션 생성 가능
+        
+        // 마지막으로 위치 추적 중지
+        GlobalLocationManager.shared.stopUpdatingLocation()
+        
+        // 시작 시간이 초기화되었더라도 현재까지 누적된 시간과 거리 정보를 사용
         let session = WalkSession(
             id: UUID(),
-            startTime: startTime ?? Date(),
-            startTime: startTime!,
+            startTime: Date().addingTimeInterval(-duration), // 현재 시간에서 총 경과 시간을 뺀 시간
             endTime: Date(),
             duration: duration,
             distance: distance,
@@ -137,7 +148,11 @@ class WalkTrackingService: NSObject, ObservableObject {
             path: walkPath,
             averageSpeed: averageSpeed
         )
+        
+        // 상태 초기화
         startTime = nil
+        elapsedTime = 0
+        
         return session
     }
     private func updateAverageSpeed() {
