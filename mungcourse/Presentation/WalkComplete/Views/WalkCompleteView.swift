@@ -47,17 +47,18 @@ struct WalkCompleteView: View {
 
             // 홈으로 이동 버튼
             CommonFilledButton(title: "홈으로 이동", action: {
-                // 중간 화면을 모두 비동기적으로 해제하고 완료 화면 해제 전 미리 준비
-                print("🔥 [WalkCompleteView] 홈으로 이동 시도 - 네비게이션 스택 정리 시작")
+                print("🌟 [WalkCompleteView] 홈으로 이동 버튼 클릭 - 화면 해제 시작")
                 
-                // NotificationCenter를 통해 모든 화면에 해제 신호 전송 (중간 화면 해제 시간 확보)
-                NotificationCenter.default.post(name: .dismissAllScreens, object: nil)
-                
-                // 약간의 지연 후 최종 해제
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    // 스택 정리 후 홈으로 이동
-                    print("🔥 [WalkCompleteView] 최종 스택 해제 실행")
-                    onForceDismiss?() // 모든 화면 한 번에 해제
+                // onForceDismiss 콜백이 있는 경우
+                if let dismissAction = onForceDismiss {
+                    print("🌟 [WalkCompleteView] onForceDismiss 콜백 발견, 즉시 실행")
+                    
+                    // 즉시 콜백 실행 - 지연 없이
+                    dismissAction()  // 이 콜백은 StartWalkView에서 수신하여 모든 화면 해제 처리
+                } else {
+                    // 콜백이 없는 경우 보호 조치
+                    print("🌟 [WalkCompleteView] onForceDismiss 콜백 없음, 현재 화면만 dismiss() 실행")
+                    dismiss()  // 이 경우는 발생하지 않아야 하지만 보호 조치로 추가
                 }
             })
             .padding(.horizontal, 20)

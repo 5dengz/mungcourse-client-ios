@@ -64,33 +64,3 @@ struct WalkControlButton: View {
         .padding(.vertical, 16)
     }
 }
-
-#Preview("Not Started") {
-    WalkControlButton(
-        state: .notStarted,
-        onStart: {},
-        onPause: {},
-        onResume: {},
-        onEnd: {}
-    )
-}
-
-#Preview("Active") {
-    WalkControlButton(
-        state: .active,
-        onStart: {},
-        onPause: {},
-        onResume: {},
-        onEnd: {}
-    )
-}
-
-#Preview("Paused", traits: .sizeThatFitsLayout) {
-    WalkControlButton(
-        state: .paused,
-        onStart: {},
-        onPause: {},
-        onResume: {},
-        onEnd: {}
-    )
-}

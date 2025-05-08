@@ -94,37 +94,39 @@ struct StartWalkView: View {
                     onPause: { viewModel.pauseWalk() },
                     onResume: { viewModel.resumeWalk() },
                     onEnd: {
-                        // 산책 종료
+                        print("🍾 [StartWalkView] onEnd 콜백 실행 - 산책 종료 시작")
+                        
+                        // 1. 가장 먼저 산책 종료
                         completedSession = viewModel.endWalk()
                         
-                        // DogViewModel 상태 로깅
-                        print("🚡 [StartWalkView] 산책 종료 전 DogVM 상태: selectedDog=\(dogVM.selectedDog?.name ?? "nil"), mainDog=\(dogVM.mainDog?.name ?? "nil")")
-                        
-                        // mainDog이 없으면 fetchMainDog 호출
-                        if dogVM.mainDog == nil {
-                            print("🚡 [StartWalkView] mainDog이 없음, fetchMainDog 시도...")
-                            Task {
+                        // 2. 중요 - Task 블록으로 비동기 작업 순차적 처리
+                        Task { @MainActor in
+                            print("🍾 [StartWalkView] 데이터 처리 시작, DogVM 상태: selectedDog=\(dogVM.selectedDog?.name ?? "nil"), mainDog=\(dogVM.mainDog?.name ?? "nil")")
+                            
+                            // mainDog 데이터 확인 및 로드
+                            if dogVM.mainDog == nil {
+                                print("🍾 [StartWalkView] mainDog이 없음, 로드 시도")
                                 do {
                                     try await dogVM.fetchMainDog()
-                                    print("🚡 [StartWalkView] fetchMainDog 성공: \(dogVM.mainDog?.name ?? "nil")")
+                                    print("🍾 [StartWalkView] mainDog 로드 성공: \(dogVM.mainDog?.name ?? "nil")")
                                 } catch {
-                                    print("🚡 [StartWalkView] fetchMainDog 실패: \(error)")
+                                    print("🍾 [StartWalkView] mainDog 로드 실패: \(error)")
                                 }
                             }
-                        }
-                        
-                        // 즉시 네비게이션 활성화
-                        isCompleteActive = true
-                        
-                        // 백그라운드로 세션 업로드
-                        if let session = completedSession, let mainId = dogVM.mainDog?.id {
-                            let dogIds = [mainId]
-                            print("🚡 [StartWalkView] 세션 업로드 시도: dogIds=\(dogIds)")
-                            DispatchQueue.global(qos: .background).async {
+                            
+                            // 세션 업로드 시도
+                            if let session = completedSession, let mainId = dogVM.mainDog?.id {
+                                // 데이터가 있으면 업로드
+                                let dogIds = [mainId]
+                                print("🍾 [StartWalkView] 세션 업로드 시도: session=\(session), dogIds=\(dogIds)")
                                 viewModel.uploadWalkSession(session, dogIds: dogIds) { _ in }
+                            } else {
+                                print("🍾 [StartWalkView] 세션 업로드 불가: session=\(completedSession != nil), mainDog=\(dogVM.mainDog?.id ?? nil)")
                             }
-                        } else {
-                            print("🚡 [StartWalkView] 세션 업로드 불가: session=\(completedSession != nil), mainDog=\(dogVM.mainDog?.id ?? nil)")
+                            
+                            // 중요 - 모든 데이터 처리가 끝나고 난 후 화면 전환 시작
+                            print("🍾 [StartWalkView] 산책 완료 화면으로 이동 시작")
+                            isCompleteActive = true
                         }
                     }
                 )
@@ -132,25 +134,32 @@ struct StartWalkView: View {
             
             // 헤더 영역 (최상단에 오버레이)
             WalkHeaderView(onBack: { dismiss() })
-            
-            // FullScreenCover를 사용하여 NavigationLink 대신 변경
-            // 이것은 네비게이션 스택에 영향을 주지 않아 무한 루프 방지
-            EmptyView()
-                .fullScreenCover(isPresented: $isCompleteActive) {
-                    if let session = completedSession {
-                        NavigationStack {
-                            // 세션 데이터 전달 전 DogVM 상태 확인
-                            let _ = print("🚡 [StartWalkView] WalkCompleteView 이동 전 DogVM 상태: selectedDog=\(dogVM.selectedDog?.name ?? "nil"), mainDog=\(dogVM.mainDog?.name ?? "nil")")
+        }
+        .fullScreenCover(isPresented: $isCompleteActive) {
+            if let session = completedSession {
+                NavigationStack {
+                    WalkCompleteView(walkData: session, onForceDismiss: { 
+                        print("🎉 [StartWalkView] WalkCompleteView에서 onForceDismiss 호출됨 - 화면 해제 시작")
+                        
+                        // 현재 화면 먼저 닫기
+                        isCompleteActive = false
+                        
+                        // 홈으로 강제 이동 실행
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            print("🎉 [StartWalkView] 홈으로 강제 이동 실행")
+                            // dismiss 사용
+                            dismiss()
                             
-                            // 세션 데이터 전달 - 새로운 네비게이션 스택에서 시작하기 때문에 무한 루프 방지
-                            WalkCompleteView(walkData: session, onForceDismiss: {
-                                isCompleteActive = false
-                                onForceHome?()
-                            })
-                            .environmentObject(dogVM) // dogVM을 명시적으로 다시 전달하여 확실히 넘어가도록 함
+                            // 원본 콜백도 호출
+                            if let forceHome = onForceHome {
+                                print("🎉 [StartWalkView] onForceHome 콜백 호출")
+                                forceHome()
+                            }
                         }
-                    }
+                    })
+                    .environmentObject(dogVM) // dogVM 데이터 전달 확실히
                 }
+            }
         }
         .onChange(of: isCompleteActive) { active in
             if active {
