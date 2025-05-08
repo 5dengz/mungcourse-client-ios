@@ -58,10 +58,7 @@ struct WalkCompleteHeader: View {
                     .clipShape(Circle())
                     .background(Circle().fill(Color("gray200")))
                 } else {
-                    // dog나 URL이 nil인 경우 로그 추가
-                    let _ = dogViewModel.mainDog == nil ? 
-                        print("[WalkCompleteHeader] mainDog이 nil입니다.") : 
-                        print("[WalkCompleteHeader] dogImgUrl이 없거나 유효하지 않습니다: \(dogViewModel.mainDog?.dogImgUrl ?? "nil")")
+                    // dogImgUrl이 없을 때 기본 이미지만 표시 (로그 출력 제거)
                     Image("profile_empty")
                         .resizable()
                         .scaledToFill()
@@ -78,6 +75,10 @@ struct WalkCompleteHeader: View {
         .frame(height: 160)
         .background(Color("pointhite"))
         .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2)
+        // onAppear에서 한 번만 메인 반려견을 로드하도록 수정
+        .onAppear {
+            loadMainDog()
+        }
     }
     
     // MARK: - 메인 반려견 이미지 관련
@@ -86,10 +87,18 @@ struct WalkCompleteHeader: View {
     }
     
     private func loadMainDog() {
+        // 이미 메인 반려견 정보가 있다면 불필요한 재로딩 방지
+        if dogViewModel.mainDog != nil {
+            return
+        }
+        
         Task {
             do {
                 try await dogViewModel.fetchMainDog()
-                print("[WalkCompleteHeader] 메인 반려견 정보 로드 성공: \(dogViewModel.mainDog?.name ?? "없음")")
+                // 필요한 경우에만 로그 출력
+                if dogViewModel.mainDog != nil {
+                    print("[WalkCompleteHeader] 메인 반려견 정보 로드 성공: \(dogViewModel.mainDog?.name ?? "없음")")
+                }
             } catch {
                 print("[WalkCompleteHeader] 메인 반려견 정보 불러오기 실패: \(error)")
             }
@@ -100,8 +109,7 @@ struct WalkCompleteHeader: View {
         self.walkDate = walkDate
         self.onClose = onClose
         self.dogViewModel = dogViewModel
-        // 뷰가 생성될 때 메인 반려견 이미지 로딩
-        loadMainDog()
+        // 초기화 과정에서 메인 반려견 이미지 로딩을 하지 않음 (onAppear에서 처리)
     }
 }
 
