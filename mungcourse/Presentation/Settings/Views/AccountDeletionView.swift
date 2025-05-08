@@ -17,7 +17,7 @@ struct AccountDeletionView: View {
             .padding(.top, 16)
             .padding(.bottom, 28)
             
-            // 주요 콘텐츠는 스크롤뷰에 유지
+            // 주요 콘텐츠는 스크롤뷰에 유지 및 버튼 앞까지 공간 확보
             ScrollView {
                 VStack(spacing: 0) {
                     Text("탈퇴 이유를 알려주세요")
@@ -40,10 +40,12 @@ struct AccountDeletionView: View {
                     }
                     .padding(.horizontal, 12) // 바깥쪽 여백 추가
                     
-                    // 내용물이 적을 때 추가 공간 확보
-                    Spacer(minLength: 100)
+                    // 버튼이 있는 공간만큼 여백 추가
+                    Spacer(minLength: 80)
                 }
                 .padding(.horizontal, 16)
+                // 버튼 공간 확보를 위한 패딩 추가
+                .padding(.bottom, 80)
             }
             
             // 하단에 고정된 버튼
@@ -120,7 +122,7 @@ struct ReasonItemView: View {
             .padding(.trailing, 16)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 57)
+        .frame(minHeight: 57)
         .background(
             Rectangle()
                 .foregroundColor(Color("pointwhite"))
