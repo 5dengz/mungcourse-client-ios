@@ -105,7 +105,6 @@ struct DogSelectionSheet: View {
             Spacer()
         }
         .presentationDetents([.height(230)])
-        .presentationCornerRadius(.topLeadingTopTrailing(radius: 20))
         .onDisappear {
             // 시트가 사라질 때 필요한 작업이 있다면 여기에 추가
         }
