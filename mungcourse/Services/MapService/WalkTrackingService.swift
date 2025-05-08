@@ -21,6 +21,8 @@ class WalkTrackingService: NSObject, ObservableObject {
     private var locationManager: CLLocationManager
     private var timer: Timer?
     private var startTime: Date?
+    private var pausedTime: Date? // 일시정지한 시간을 저장
+    private var elapsedTime: TimeInterval = 0 // 누적된 산책 시간
     private var lastLocation: CLLocation?
     private var caloriesPerKmMultiplier: Double = 50.0 // This is a simplified approximation, can be adjusted based on average dog weight and intensity
     
@@ -68,43 +70,65 @@ class WalkTrackingService: NSObject, ObservableObject {
         averageSpeed = 0.0
         lastLocation = nil
         isTracking = true
+        elapsedTime = 0 // 누적 시간 초기화
+        pausedTime = nil // 일시정지 시간 초기화
         startTime = Date()
         locationManager.startUpdatingLocation()
         print("[WalkTrackingService] 위치 추적 시작!")
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let startTime = self.startTime else { return }
-            self.duration = Date().timeIntervalSince(startTime)
+            // 누적된 시간 + 현재 세션의 경과 시간
+            self.duration = self.elapsedTime + Date().timeIntervalSince(startTime)
             self.updateAverageSpeed()
         }
     }
     func pauseWalk() {
         print("[WalkTrackingService] pauseWalk() 호출")
-        guard isTracking else { return }
+        guard isTracking, let startTime = startTime else { return }
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
         timer = nil
         isTracking = false
+        pausedTime = Date()
+        
+        // 현재까지 경과된 시간을 누적
+        let currentSessionDuration = pausedTime!.timeIntervalSince(startTime)
+        elapsedTime += currentSessionDuration
+        print("[WalkTrackingService] 산책 일시 중지, 누적 시간: \(elapsedTime)초")
+        
+        // startTime을 nil로 설정하여 산책이 일시 중지되었음을 표시
+        self.startTime = nil
     }
     func resumeWalk() {
         print("[WalkTrackingService] resumeWalk() 호출")
-        guard !isTracking, startTime != nil else { return }
+        guard !isTracking else { return }
+        
+        // 새로운 시작 시간 설정
+        startTime = Date()
         locationManager.startUpdatingLocation()
+        
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let startTime = self.startTime else { return }
-            self.duration = Date().timeIntervalSince(startTime)
+            // 누적된 시간 + 현재 세션의 경과 시간
+            self.duration = self.elapsedTime + Date().timeIntervalSince(startTime)
             self.updateAverageSpeed()
         }
+        
         isTracking = true
+        print("[WalkTrackingService] 산책 재개, 현재 누적 시간: \(elapsedTime)초")
     }
     func endWalk() -> WalkSession? {
         print("[WalkTrackingService] endWalk() 호출")
-        guard startTime != nil else { return nil }
+        if isTracking {
+            pauseWalk() // First pause to stop tracking
+        }
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
         timer = nil
         isTracking = false
         let session = WalkSession(
             id: UUID(),
+            startTime: startTime ?? Date(),
             startTime: startTime!,
             endTime: Date(),
             duration: duration,

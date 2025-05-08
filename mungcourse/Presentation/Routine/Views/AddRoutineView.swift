@@ -33,7 +33,7 @@ struct AddRoutineView: View {
             )
             .padding(.bottom, 12)
             .padding(.top, 32)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             
             VStack(spacing: 28) {
                 RequiredTextField(title: "루틴명", placeholder: "입력하기", text: $title)
