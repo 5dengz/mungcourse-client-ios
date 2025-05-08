@@ -69,9 +69,10 @@ struct SimpleNaverMapView: UIViewRepresentable {
             // dog place 마커 추가
             addPlaceMarkers(on: mapView, context: context)
             
-            // 경로에 맞게 지도 영역 조정
-            if let firstCoord = coordinates.first {
+            // 경로에 맞게 지도 영역 조정 (첫 로드시에만)
+            if !context.coordinator.initialCameraSet, let firstCoord = coordinates.first {
                 mapView.moveCamera(NMFCameraUpdate(scrollTo: firstCoord))
+                context.coordinator.initialCameraSet = true
             }
         }
     }
@@ -82,6 +83,7 @@ struct SimpleNaverMapView: UIViewRepresentable {
     
     class Coordinator {
         var overlayHolder: OverlayHolder?
+        var initialCameraSet = false
     }
     
     // 경로 그리기
