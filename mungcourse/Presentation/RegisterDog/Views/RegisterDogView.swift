@@ -76,7 +76,7 @@ struct RegisterDogView: View {
             // 키보드 내리기 제스처는 VStack 내부에 추가하여 헤더와 충돌하지 않게 함
             VStack(spacing: 0) {
                 CommonHeaderView(
-                    leftIcon: showBackButton ? "arrow_back" : "logout",
+                    leftIcon: showBackButton ? "arrow_back" : "arrow_back",
                     leftAction: showBackButton ? { dismiss() } : { showLogoutAlert = true },
                     title: isEditing ? "반려견 정보 수정" : "반려견 정보 등록"
                 )
