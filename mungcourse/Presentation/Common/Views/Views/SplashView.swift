@@ -83,9 +83,25 @@ struct SplashView: View {
         }
         .fullScreenCover(isPresented: $shouldShowRegisterDog) {
             RegisterDogView(onComplete: {
-                // 강아지 등록 완료 후 강아지 목록을 새로 fetch한 뒤 홈 화면으로 이동
+                // 강아지 등록 완료 후 콜백 처리: 무조건 메인화면으로 이동
+                print("[SplashView] 반려견 등록 완료: 콜백 실행")
+                
+                // 안전천막: 토큰 유효성을 확인하지만 결과에 상관없이 메인화면으로 이동
+                TokenManager.shared.validateTokens()
+                
+                // 추가 디버깅 로그
+                if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
+                    print("[SplashView] 토큰 존재: \(token.prefix(10))... (유효성 \(isTokenValid(token) ? "있음" : "없음"))")
+                } else {
+                    print("[SplashView] 토큰 없음")
+                }
+                
+                // 화면 전환 중복 방지
                 resetCovers()
-                dogVM.fetchDogs {
+                
+                // 강아지 정보 가져오기 후 무조건 메인 화면으로 이동
+                dogVM.fetchDogs { 
+                    print("[SplashView] 반려견 등록 완료: 메인 화면으로 이동")
                     shouldShowMain = true
                 }
             }, showBackButton: false)

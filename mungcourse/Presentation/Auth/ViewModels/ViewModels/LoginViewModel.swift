@@ -207,11 +207,18 @@ class LoginViewModel: ObservableObject {
                 
                 print("반려견 등록 성공: \(dogData.name)")
                 
-                // 3. 로그인 완료
+                // 3. 토큰 유효성 확인
+                if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
+                    print("[LoginViewModel] 반려견 등록 완료: 토큰 유효함 - \(token.prefix(10))...")
+                } else {
+                    print("[LoginViewModel] 반려견 등록 완료: 토큰 상태 이상")
+                }
+                
+                // 4. 로그인 완료
                 await MainActor.run {
                     self.needsDogRegistration = false
                     self.isLoading = false
-                    print("Registration complete.")
+                    print("[LoginViewModel] Registration complete.")
                 }
             } catch {
                 print("반려견 등록 중 오류 발생: \(error.localizedDescription)")

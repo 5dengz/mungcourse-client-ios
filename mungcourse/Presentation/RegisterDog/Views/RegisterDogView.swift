@@ -136,9 +136,33 @@ struct RegisterDogView: View {
             )
             .onChange(of: viewModel.isRegistrationComplete) { _, isComplete in
                 if isComplete {
-                    // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
-                    dismiss()
-                    onComplete?()
+                    // 등록 완료 시 토큰 유효성 확인 후 처리
+                    if let token = TokenManager.shared.getAccessToken(), !token.isEmpty {
+                        print("[RegisterDogView] 등록 완료: 토큰 확인 성공 - \(token.prefix(10))...")
+                        
+                        // 토큰 유효성 확인 한번 더
+                        TokenManager.shared.validateTokens()
+                        
+                        // 등록 완료 시 처리: 우선 dismiss, 그 후 parent에게도 알림
+                        dismiss()
+                        
+                        // 토큰 상태를 한번 더 확인하고 콜백 호출
+                        DispatchQueue.main.async {
+                            if TokenManager.shared.validateTokens() {
+                                print("[RegisterDogView] onComplete 콜백 호출 전 토큰 확인 성공")
+                                onComplete?()
+                            } else {
+                                print("[RegisterDogView] ⚠️ 경고: onComplete 콜백 호출 전 토큰 확인 실패")
+                                // 토큰 상태에 상관없이 콜백은 호출하여 화면 전환
+                                onComplete?()
+                            }
+                        }
+                    } else {
+                        print("[RegisterDogView] ⚠️ 경고: 등록 완료됐으나 토큰이 없거나 비어있음")
+                        // 토큰 상태에 상관없이 dismiss 및 콜백 호출
+                        dismiss()
+                        onComplete?()
+                    }
                 }
             }
             .ignoresSafeArea() // 기타 설정
