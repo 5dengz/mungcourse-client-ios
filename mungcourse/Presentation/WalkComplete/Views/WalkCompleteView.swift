@@ -14,6 +14,7 @@ struct WalkCompleteView: View {
             WalkCompleteHeader(walkDate: viewModel.walkDate, onClose: {
                 dismiss()
             })
+            .environmentObject(dogVM) // DogViewModel 주입
             .padding(.bottom, 8)
 
             ScrollView {

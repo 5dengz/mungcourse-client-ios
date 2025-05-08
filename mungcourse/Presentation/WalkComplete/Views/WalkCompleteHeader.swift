@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 
 struct WalkCompleteHeader: View {
+    @EnvironmentObject var dogViewModel: DogViewModel
     let walkDate: Date
     let onClose: () -> Void
     
@@ -32,7 +33,7 @@ struct WalkCompleteHeader: View {
             Spacer()
             VStack {
                 Spacer()
-                if let url = mainDogImgUrl, let imgUrl = URL(string: url) {
+                if let dog = dogViewModel.mainDog, let url = dog.dogImgUrl, !url.isEmpty, let imgUrl = URL(string: url) {
                     AsyncImage(url: imgUrl) { phase in
                         switch phase {
                         case .empty:
@@ -40,7 +41,9 @@ struct WalkCompleteHeader: View {
                         case .success(let image):
                             image.resizable()
                                 .scaledToFill()
-                        case .failure:
+                        case .failure(let error):
+                            // 이미지 로드 실패 시 로그 추가
+                            let _ = print("[WalkCompleteHeader] 이미지 로드 실패: \(error), URL: \(url)")
                             Image("profile_empty")
                                 .resizable()
                                 .scaledToFill()
@@ -54,6 +57,10 @@ struct WalkCompleteHeader: View {
                     .clipShape(Circle())
                     .background(Circle().fill(Color("gray200")))
                 } else {
+                    // dog나 URL이 nil인 경우 로그 추가
+                    let _ = dogViewModel.mainDog == nil ? 
+                        print("[WalkCompleteHeader] mainDog이 nil입니다.") : 
+                        print("[WalkCompleteHeader] dogImgUrl이 없거나 유효하지 않습니다: \(dogViewModel.mainDog?.dogImgUrl ?? "nil")")
                     Image("profile_empty")
                         .resizable()
                         .scaledToFill()
@@ -72,20 +79,20 @@ struct WalkCompleteHeader: View {
         .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2)
     }
     
-    // MARK: - 메인 반려견 이미지 비동기 로딩
-    @State private var mainDogImgUrl: String? = nil
+    // MARK: - 메인 반려견 이미지 관련
+    private var mainDogImgUrl: String? {
+        dogViewModel.mainDog?.dogImgUrl
+    }
     
-    @State private var cancellables = Set<AnyCancellable>()
     private func loadMainDog() {
-        DogService.shared.fetchMainDog()
-            .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    print("[WalkCompleteHeader] 메인 반려견 정보 불러오기 실패: \(error)")
-                }
-            }, receiveValue: { dog in
-                mainDogImgUrl = dog.dogImgUrl
-            })
-            .store(in: &cancellables)
+        Task {
+            do {
+                try await dogViewModel.fetchMainDog()
+                print("[WalkCompleteHeader] 메인 반려견 정보 로드 성공: \(dogViewModel.mainDog?.name ?? "없음")")
+            } catch {
+                print("[WalkCompleteHeader] 메인 반려견 정보 불러오기 실패: \(error)")
+            }
+        }
     }
     
     init(walkDate: Date, onClose: @escaping () -> Void) {
