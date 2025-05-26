@@ -2,7 +2,7 @@ import SwiftUI
 
 // 시간 형식 변환 확장
 extension String {
-    // "08:00" 형식을 "오전 8시 00분" 형식으로 변환
+    // "08:00" 형식을 "오전 8시" 또는 "오전 8시 30분" 형식으로 변환
     func toKoreanTimeFormat() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
@@ -11,9 +11,17 @@ extension String {
             return self
         }
         
+        let calendar = Calendar.current
+        let minutes = calendar.component(.minute, from: date)
+        
         let outputFormatter = DateFormatter()
         outputFormatter.locale = Locale(identifier: "ko_KR")
-        outputFormatter.dateFormat = "a h시 mm분"
+        
+        if minutes == 0 {
+            outputFormatter.dateFormat = "a h시"
+        } else {
+            outputFormatter.dateFormat = "a h시 mm분"
+        }
         
         return outputFormatter.string(from: date)
     }
@@ -39,7 +47,7 @@ struct RoutineListItem: View {
                         Image("icon_check_white")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 12, height: 12)
+                            .frame(width: 17, height: 17)
                     }
                 }
             }
