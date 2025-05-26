@@ -12,11 +12,11 @@ struct RoutineListItem: View {
             Button(action: onToggle) {
                 ZStack {
                     Ellipse()
-                        .stroke(Color(red: 0.15, green: 0.75, blue: 0), lineWidth: 0.5)
-                        .background(false ? Ellipse().fill(Color(red: 0.15, green: 0.75, blue: 0)) : Ellipse().fill(Color.clear))
+                        .stroke(Color("main"), lineWidth: 0.5)
+                        .background(routine.isDone ? Ellipse().fill(Color("main")) : Ellipse().fill(Color.clear))
                         .frame(width: 22, height: 22)
                     
-                    if false {
+                    if routine.isDone {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12))
                             .foregroundColor(Color("pointwhite"))
@@ -27,7 +27,7 @@ struct RoutineListItem: View {
                 Text(routine.title)
                     .font(.custom("Pretendard", size: 17).weight(.semibold))
                     .foregroundColor(.black)
-                    .strikethrough(false)
+                    .strikethrough(routine.isDone)
                 Text(routine.time)
                     .font(.custom("Pretendard", size: 14))
                     .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.5))
@@ -51,3 +51,4 @@ struct RoutineListItem: View {
         }
     }
 }
+
