@@ -1,5 +1,24 @@
 import SwiftUI
 
+// 시간 형식 변환 확장
+extension String {
+    // "08:00" 형식을 "오전 8시 00분" 형식으로 변환
+    func toKoreanTimeFormat() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        guard let date = formatter.date(from: self) else {
+            return self
+        }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.locale = Locale(identifier: "ko_KR")
+        outputFormatter.dateFormat = "a h시 mm분"
+        
+        return outputFormatter.string(from: date)
+    }
+}
+
 // 루틴 리스트 아이템 컴포넌트
 struct RoutineListItem: View {
     let routine: Routine
@@ -17,20 +36,21 @@ struct RoutineListItem: View {
                         .frame(width: 22, height: 22)
                     
                     if routine.isDone {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("pointwhite"))
+                        Image("icon_check_white")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
                     }
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(routine.title)
                     .font(.custom("Pretendard", size: 17).weight(.semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(routine.isDone ? Color("gray600") : .black)
                     .strikethrough(routine.isDone)
-                Text(routine.time)
+                Text(routine.time.toKoreanTimeFormat())
                     .font(.custom("Pretendard", size: 14))
-                    .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.5))
+                    .foregroundColor(routine.isDone ? Color("gray600") : Color(red: 0.5, green: 0.5, blue: 0.5))
             }
             Spacer()
         }
