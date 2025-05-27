@@ -57,19 +57,30 @@ class RoutineViewModel: ObservableObject {
     }
 
     func toggleRoutineCompletion(routine: Routine) {
+        print("[RoutineViewModel] Toggling routine: \(routine.title), routineCheckId: \(routine.routineCheckId)")
+        
+        // 낙관적 업데이트 (Optimistic Update)
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {
             routines[index].isDone.toggle()
         }
+        
         RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
-                    print("Error toggling routine check: \(error)")
+                    print("[RoutineViewModel] Toggle failed: \(error.localizedDescription)")
+                    // 실패시 원상복구
                     if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
                         self.routines[index].isDone.toggle()
                     }
                 }
-            }, receiveValue: { _ in })
+            }, receiveValue: { toggleResponse in
+                print("[RoutineViewModel] Toggle success from server: isCompleted=\(toggleResponse.isCompleted)")
+                // 서버 응답으로 최종 상태 확정
+                if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
+                    self.routines[index].isDone = toggleResponse.isCompleted
+                }
+            })
             .store(in: &cancellables)
     }
 

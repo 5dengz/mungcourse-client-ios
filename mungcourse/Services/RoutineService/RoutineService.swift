@@ -14,12 +14,13 @@ struct RoutineData: Decodable {
     let name: String
     let alarmTime: String
     let isCompleted: Bool
+    let isAlarmActive: Bool
     let date: String
     let routineCheckId: Int
     let routineId: Int
 
     enum CodingKeys: String, CodingKey {
-        case name, alarmTime, date, routineCheckId, routineId, isCompleted
+        case name, alarmTime, date, routineCheckId, routineId, isCompleted, isAlarmActive
     }
 }
 
@@ -31,6 +32,7 @@ struct CreateRoutineRequest: Encodable {
 }
 
 struct CreateRoutineResponse: Decodable {
+    let id: Int
     let name: String
     let alarmTime: String
     let repeatDays: [String]
@@ -49,6 +51,20 @@ struct UpdateRoutineRequest: Encodable {
     let repeatDays: [String]
     let isAlarmActive: Bool
     let applyFromDate: String
+}
+
+// MARK: - Toggle Routine Response
+struct ToggleRoutineResponse: Decodable {
+    let isCompleted: Bool
+    let routineCheckId: Int
+}
+
+struct ToggleRoutineResponseWrapper: Decodable {
+    let timestamp: String
+    let statusCode: Int
+    let message: String
+    let data: ToggleRoutineResponse
+    let success: Bool
 }
 
 // MARK: - RoutineService
@@ -191,27 +207,45 @@ class RoutineService {
     }
 
     /// Toggle routine check/uncheck
-    func toggleRoutineCheck(routineCheckId: Int) -> AnyPublisher<Void, Error> {
+    func toggleRoutineCheck(routineCheckId: Int) -> AnyPublisher<ToggleRoutineResponse, Error> {
         let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineCheckId)/toggle")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "PATCH"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let body = ["routineCheckId": routineCheckId]
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
-        return Future<Void, Error> { promise in
+        
+        print("[RoutineService] Toggling routine check for routineCheckId: \(routineCheckId)")
+        
+        return Future<ToggleRoutineResponse, Error> { promise in
             NetworkManager.shared.performAPIRequest(request) { data, response, error in
                 if let error = error {
-                    promise(.failure(error)); return
+                    print("[RoutineService] Toggle error: \(error.localizedDescription)")
+                    promise(.failure(error))
+                    return
                 }
                 guard let httpResp = response as? HTTPURLResponse,
-                      (200...299).contains(httpResp.statusCode) else {
-                    promise(.failure(URLError(.badServerResponse))); return
+                      let data = data else {
+                    print("[RoutineService] Toggle bad response")
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
                 }
-                promise(.success(()))
+                guard (200...299).contains(httpResp.statusCode) else {
+                    print("[RoutineService] Toggle HTTP error: \(httpResp.statusCode)")
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("[RoutineService] Toggle error response: \(responseString)")
+                    }
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                do {
+                    let wrapper = try JSONDecoder().decode(ToggleRoutineResponseWrapper.self, from: data)
+                    print("[RoutineService] Toggle success: isCompleted=\(wrapper.data.isCompleted)")
+                    promise(.success(wrapper.data))
+                } catch {
+                    print("[RoutineService] Toggle JSON error: \(error.localizedDescription)")
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("[RoutineService] Toggle response data: \(responseString)")
+                    }
+                    promise(.failure(error))
+                }
             }
         }
         .eraseToAnyPublisher()
