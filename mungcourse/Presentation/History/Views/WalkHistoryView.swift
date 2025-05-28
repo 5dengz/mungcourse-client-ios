@@ -23,7 +23,7 @@ struct WalkHistoryView: View {
                             .frame(maxWidth: .infinity)
                             .multilineTextAlignment(.center)
                     }
-                    .frame(height: 85)
+                    .frame(height: 59)
                     .background(Color("pointwhite")) // 명시적으로 흰색 배경 지정
                     .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
                     
