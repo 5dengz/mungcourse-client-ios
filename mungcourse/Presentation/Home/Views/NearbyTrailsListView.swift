@@ -34,7 +34,7 @@ struct NearbyTrailsListView: View {
                     }
                     .padding(.bottom, 8)
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 32)
                 .padding(.vertical, 8)
             }
             Divider()

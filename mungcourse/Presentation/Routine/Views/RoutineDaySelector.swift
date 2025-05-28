@@ -14,7 +14,7 @@ struct RoutineDaySelector: View {
     
     var body: some View {
         // 요일 선택 버튼
-        HStack(spacing: 8) {
+        HStack(spacing: 16) {
             ForEach(0..<7, id: \.self) { index in
                 let date = weekDates[index]
                 let calendar = Calendar.current
