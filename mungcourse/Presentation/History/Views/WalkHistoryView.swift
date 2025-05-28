@@ -150,7 +150,7 @@ struct WalkHistoryView: View {
     // 날짜 테두리 색상 결정
     private func getBorderColor(_ date: Date) -> Color {
         if date.isToday() {
-            return Color("pointYellow")
+            return Color("main")
         } else if viewModel.hasWalkRecord(for: date) {
             return Color("main")
         } else {
