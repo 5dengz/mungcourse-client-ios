@@ -36,7 +36,7 @@ struct RoutineSettingsView: View {
                     // 루틴 리스트
                     ScrollView {
                         VStack(alignment: .leading, spacing: 0) {
-                            if routines.isEmpty {
+                            if routines.isEmpty && !viewModel.isLoadingRoutines {
                                 EmptyRoutineView()
                             } else {
                                 ForEach(Array(routines.indices), id: \Int.self) { index in

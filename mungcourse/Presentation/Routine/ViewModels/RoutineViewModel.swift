@@ -15,6 +15,7 @@ class RoutineViewModel: ObservableObject {
     
     // 로딩 상태 추적 (UI에서 사용 가능)
     @Published var loadingRoutineIds = Set<Int>()
+    @Published var isLoadingRoutines = false
 
     init() {
         fetchRoutines(for: selectedDay)
@@ -29,13 +30,17 @@ class RoutineViewModel: ObservableObject {
         let dateStr = dateString(for: day)
         print("[RoutineViewModel] Fetching routines for date: \(dateStr)")
         
+        isLoadingRoutines = true
+        
         RoutineService.shared.fetchRoutines(date: dateStr)
             .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
+            .sink(receiveCompletion: { [weak self] completion in
+                self?.isLoadingRoutines = false
                 if case .failure(let error) = completion {
                     print("Error fetching routines: \(error.localizedDescription)")
                 }
             }, receiveValue: { [weak self] dataList in
+                self?.isLoadingRoutines = false
                 print("[RoutineViewModel] Received \(dataList.count) routines from server")
                 dataList.forEach { data in
                     print("  - Routine: \(data.name), routineId: \(data.routineId), routineCheckId: \(data.routineCheckId), isCompleted: \(data.isCompleted)")
