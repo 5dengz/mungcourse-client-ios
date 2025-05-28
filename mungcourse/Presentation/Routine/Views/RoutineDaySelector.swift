@@ -14,7 +14,7 @@ struct RoutineDaySelector: View {
     
     var body: some View {
         // 요일 선택 버튼
-        HStack(spacing: 16) {
+        HStack(spacing: 0) {
             ForEach(0..<7, id: \.self) { index in
                 let date = weekDates[index]
                 let calendar = Calendar.current
@@ -31,6 +31,11 @@ struct RoutineDaySelector: View {
                     isToday: calendar.isDateInToday(date)
                 ) {
                     selectedDay = day
+                }
+                
+                // 마지막 버튼이 아니면 Spacer 추가 (space-between 효과)
+                if index < 6 {
+                    Spacer()
                 }
             }
         }
