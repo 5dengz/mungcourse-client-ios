@@ -180,34 +180,41 @@ class LoginViewModel: ObservableObject {
         print("[LoginViewModel] 반려견 정보 확인 시작")
         
         // DogService를 통해 실제 반려견 데이터 확인
-        Task { @MainActor in
-            do {
-                let dogs = try await DogService.shared.fetchDogs()
-                self.isLoading = false
-                
-                // 반려견이 존재하는지 확인
-                if dogs.isEmpty {
-                    print("[LoginViewModel] 등록된 반려견이 없음: 반려견 등록 화면으로 이동")
-                    self.needsDogRegistration = true
-                } else {
-                    print("[LoginViewModel] 등록된 반려견 \(dogs.count)마리 확인: 메인 화면으로 이동")
-                    self.needsDogRegistration = false
+        DogService.shared.fetchDogs()
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    guard let self = self else { return }
+                    self.isLoading = false
+                    
+                    if case .failure(let error) = completion {
+                        print("[LoginViewModel] 반려견 정보 확인 실패: \(error.localizedDescription)")
+                        
+                        // 네트워크 오류 등의 경우 토큰 유효성을 다시 확인
+                        if TokenManager.shared.validateTokens() {
+                            // 토큰은 유효하지만 API 호출 실패 시, 안전하게 등록 화면으로 이동
+                            print("[LoginViewModel] API 오류로 인해 반려견 등록 화면으로 이동")
+                            self.needsDogRegistration = true
+                        } else {
+                            print("[LoginViewModel] 토큰 무효화로 인한 데이터 리셋")
+                            NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+                        }
+                    }
+                },
+                receiveValue: { [weak self] dogs in
+                    guard let self = self else { return }
+                    
+                    // 반려견이 존재하는지 확인
+                    if dogs.isEmpty {
+                        print("[LoginViewModel] 등록된 반려견이 없음: 반려견 등록 화면으로 이동")
+                        self.needsDogRegistration = true
+                    } else {
+                        print("[LoginViewModel] 등록된 반려견 \(dogs.count)마리 확인: 메인 화면으로 이동")
+                        self.needsDogRegistration = false
+                    }
                 }
-            } catch {
-                print("[LoginViewModel] 반려견 정보 확인 실패: \(error.localizedDescription)")
-                self.isLoading = false
-                
-                // 네트워크 오류 등의 경우 토큰 유효성을 다시 확인
-                if TokenManager.shared.validateTokens() {
-                    // 토큰은 유효하지만 API 호출 실패 시, 안전하게 등록 화면으로 이동
-                    print("[LoginViewModel] API 오류로 인해 반려견 등록 화면으로 이동")
-                    self.needsDogRegistration = true
-                } else {
-                    print("[LoginViewModel] 토큰 무효화로 인한 데이터 리셋")
-                    NotificationCenter.default.post(name: .appDataDidReset, object: nil)
-                }
-            }
-        }
+            )
+            .store(in: &cancellables)
     }
     
     func registerDog(name: String, age: Int, breed: String) {
