@@ -24,6 +24,7 @@ struct WalkHistoryView: View {
                             .multilineTextAlignment(.center)
                     }
                     .frame(height: 59)
+                    .padding(.bottom, 12)
                     .background(Color("pointwhite")) // 명시적으로 흰색 배경 지정
                     .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
                     

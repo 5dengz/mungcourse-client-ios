@@ -142,7 +142,6 @@ struct ProfileTabView: View {
                         }
                     }
                 }
-                .padding(.top, 16)
                 .padding(.bottom, 16)
                 // 프로필 영역
                 ProfileSectionView(
