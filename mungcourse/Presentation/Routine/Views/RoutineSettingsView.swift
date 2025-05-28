@@ -19,13 +19,17 @@ struct RoutineSettingsView: View {
                 
                 VStack(spacing: 0) {
                     // 공통 헤더 (요일 선택 포함)
-                    CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
-                        //Image("icon_calendar")
-                        //    .onTapGesture {
-                        //        showDatePicker = true
-                        //    }
+                    ZStack {
+                        CommonHeaderView(leftIcon: nil, title: "루틴 설정") {
+                            //Image("icon_calendar")
+                            //    .onTapGesture {
+                            //        showDatePicker = true
+                            //    }
+                        }
                     }
                     .padding(.top, 16)
+                    .background(Color("pointwhite")) // 명시적으로 흰색 배경 지정
+                    .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
                     
                     RoutineDaySelector(selectedDay: $viewModel.selectedDay)
                     
