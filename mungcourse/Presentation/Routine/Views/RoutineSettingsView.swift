@@ -50,7 +50,7 @@ struct RoutineSettingsView: View {
                                     )
                                     if index < routines.count - 1 {
                                         Divider()
-                                            .padding(.horizontal)
+                                            .padding(.horizontal, 20)
                                     }
                                 }
                             }
