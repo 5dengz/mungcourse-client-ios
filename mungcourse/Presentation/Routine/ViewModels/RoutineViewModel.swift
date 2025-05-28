@@ -21,6 +21,8 @@ class RoutineViewModel: ObservableObject {
 
     func fetchRoutines(for day: DayOfWeek) {
         let dateStr = dateString(for: day)
+        print("[RoutineViewModel] Fetching routines for date: \(dateStr)")
+        
         RoutineService.shared.fetchRoutines(date: dateStr)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
@@ -28,6 +30,11 @@ class RoutineViewModel: ObservableObject {
                     print("Error fetching routines: \(error.localizedDescription)")
                 }
             }, receiveValue: { [weak self] dataList in
+                print("[RoutineViewModel] Received \(dataList.count) routines from server")
+                dataList.forEach { data in
+                    print("  - Routine: \(data.name), routineId: \(data.routineId), routineCheckId: \(data.routineCheckId), isCompleted: \(data.isCompleted)")
+                }
+                
                 self?.routines = dataList.map {
                     Routine(routineId: $0.routineId,
                             routineCheckId: $0.routineCheckId,
@@ -80,6 +87,9 @@ class RoutineViewModel: ObservableObject {
                 if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
                     self.routines[index].isDone = toggleResponse.isCompleted
                 }
+                
+                // 토글 성공 후 서버 데이터로 재동기화
+                self.fetchRoutines(for: self.selectedDay)
             })
             .store(in: &cancellables)
     }
