@@ -16,6 +16,11 @@ class RoutineViewModel: ObservableObject {
     // 로딩 상태 추적 (UI에서 사용 가능)
     @Published var loadingRoutineIds = Set<Int>()
     @Published var isLoadingRoutines = false
+    
+    // 선택된 날짜에 해당하는 루틴만 필터링
+    var filteredRoutines: [Routine] {
+        return routines.filter { $0.days.contains(selectedDay) }
+    }
 
     init() {
         fetchRoutines(for: selectedDay)
@@ -75,26 +80,18 @@ class RoutineViewModel: ObservableObject {
     }
 
     func toggleRoutineCompletion(routine: Routine) {
-        let timestamp = DateFormatter().string(from: Date())
-        print("[RoutineViewModel] [\(timestamp)] toggleRoutineCompletion CALLED for: \(routine.title), routineCheckId: \(routine.routineCheckId)")
-        
-        // 이미 처리 중인 루틴인지 확인
+        // 이미 처리 중인 루틴인지 확인 (로깅 최소화)
         guard !togglingRoutineIds.contains(routine.routineCheckId) else {
-            print("[RoutineViewModel] ❌ Toggle already in progress for routineCheckId: \(routine.routineCheckId)")
             return
         }
         
-        print("[RoutineViewModel] ✅ Starting toggle for routine: \(routine.title), routineCheckId: \(routine.routineCheckId), current state: \(routine.isDone)")
-        
         // 처리 중으로 표시
         togglingRoutineIds.insert(routine.routineCheckId)
-        print("[RoutineViewModel] 🔄 Added routineCheckId \(routine.routineCheckId) to togglingRoutineIds. Current set: \(togglingRoutineIds)")
         
         // 낙관적 업데이트: 즉시 UI 상태 변경
         if let index = routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
             let newState = !routines[index].isDone
             routines[index].isDone = newState
-            print("[RoutineViewModel] 🚀 Optimistic update: routineCheckId=\(routine.routineCheckId), new state=\(newState)")
         }
         
         RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
@@ -102,32 +99,21 @@ class RoutineViewModel: ObservableObject {
             .sink(receiveCompletion: { [weak self] completion in
                 // 처리 완료 후 제거
                 self?.togglingRoutineIds.remove(routine.routineCheckId)
-                print("[RoutineViewModel] 🔄 Removed routineCheckId \(routine.routineCheckId) from togglingRoutineIds")
                 
                 if case .failure(let error) = completion {
-                    print("[RoutineViewModel] ❌ Toggle failed: \(error.localizedDescription)")
-                    
                     // 실패 시 낙관적 업데이트 롤백
                     if let index = self?.routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
                         let rollbackState = !self!.routines[index].isDone
                         self?.routines[index].isDone = rollbackState
-                        print("[RoutineViewModel] 🔄 Rollback optimistic update: routineCheckId=\(routine.routineCheckId), rollback to=\(rollbackState)")
                     }
                 }
             }, receiveValue: { [weak self] toggleResponse in
-                print("[RoutineViewModel] ✅ Toggle success from server: routineCheckId=\(toggleResponse.routineCheckId), isCompleted=\(toggleResponse.isCompleted)")
-                
                 // 서버 응답과 로컬 상태 동기화 (낙관적 업데이트 검증)
                 if let index = self?.routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
                     let currentState = self?.routines[index].isDone
                     if currentState != toggleResponse.isCompleted {
-                        print("[RoutineViewModel] 🔄 Correcting optimistic update: routineCheckId=\(routine.routineCheckId), server=\(toggleResponse.isCompleted), local=\(currentState ?? false)")
                         self?.routines[index].isDone = toggleResponse.isCompleted
-                    } else {
-                        print("[RoutineViewModel] ✅ Optimistic update was correct")
                     }
-                } else {
-                    print("[RoutineViewModel] ⚠️ Could not find routine with routineCheckId=\(routine.routineCheckId) in local array")
                 }
                 
                 // 즉시 서버 상태 검증을 위한 GET 요청 (서버 DB 업데이트 시간 고려하여 2초로 연장)

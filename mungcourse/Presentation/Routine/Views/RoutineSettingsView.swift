@@ -9,10 +9,7 @@ struct RoutineSettingsView: View {
     
     var body: some View {
         GeometryReader { fullProxy in
-            let allRoutines: [Routine] = viewModel.routines
-            let routines: [Routine] = allRoutines.filter { (routine: Routine) -> Bool in
-                routine.days.contains(viewModel.selectedDay)
-            }
+            let routines = viewModel.filteredRoutines
 
             ZStack {
                 Color("pointwhite").ignoresSafeArea()
@@ -51,7 +48,7 @@ struct RoutineSettingsView: View {
                                             viewModel.deleteRoutine(routine)
                                         }
                                     )
-                                    if index < viewModel.routines.count - 1 {
+                                    if index < routines.count - 1 {
                                         Divider()
                                             .padding(.horizontal)
                                     }

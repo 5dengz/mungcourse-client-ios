@@ -39,21 +39,8 @@ struct RoutineListItem: View {
     var body: some View {
         HStack(spacing: 12) {
             Button(action: {
-                // 중복 클릭 방지
-                guard !isToggling else {
-                    print("[RoutineListItem] ⚠️ Toggle button already processing, ignoring tap")
-                    return
-                }
-                
                 print("[RoutineListItem] ✅ Toggle button tapped for routine: \(routine.title)")
-                isToggling = true
-                
                 onToggle()
-                
-                // 0.5초 후 다시 클릭 가능하도록 설정 (빠른 반응성)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isToggling = false
-                }
             }) {
                 ZStack {
                     Ellipse()
