@@ -9,6 +9,9 @@ class RoutineViewModel: ObservableObject {
     @Published var editingRoutine: Routine? = nil
 
     private var cancellables = Set<AnyCancellable>()
+    
+    // 중복 토글 방지를 위한 처리 중인 루틴 ID 추적
+    private var togglingRoutineIds = Set<Int>()
 
     init() {
         fetchRoutines(for: selectedDay)
@@ -64,32 +67,41 @@ class RoutineViewModel: ObservableObject {
     }
 
     func toggleRoutineCompletion(routine: Routine) {
-        print("[RoutineViewModel] Toggling routine: \(routine.title), routineCheckId: \(routine.routineCheckId)")
-        
-        // 낙관적 업데이트 (Optimistic Update)
-        if let index = routines.firstIndex(where: { $0.id == routine.id }) {
-            routines[index].isDone.toggle()
+        // 이미 처리 중인 루틴인지 확인
+        guard !togglingRoutineIds.contains(routine.routineCheckId) else {
+            print("[RoutineViewModel] Toggle already in progress for routineCheckId: \(routine.routineCheckId)")
+            return
         }
+        
+        print("[RoutineViewModel] Toggling routine: \(routine.title), routineCheckId: \(routine.routineCheckId), current state: \(routine.isDone)")
+        
+        // 처리 중으로 표시
+        togglingRoutineIds.insert(routine.routineCheckId)
+        
+        // 낙관적 업데이트 제거 - 서버 응답 후 UI 업데이트
+        // 대신 로딩 상태 표시 가능 (선택사항)
         
         RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
             .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
+            .sink(receiveCompletion: { [weak self] completion in
+                // 처리 완료 후 제거
+                self?.togglingRoutineIds.remove(routine.routineCheckId)
+                
                 if case .failure(let error) = completion {
                     print("[RoutineViewModel] Toggle failed: \(error.localizedDescription)")
-                    // 실패시 원상복구
-                    if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
-                        self.routines[index].isDone.toggle()
-                    }
+                    // 실패시 에러 상태 표시 (원상복구 불필요)
                 }
-            }, receiveValue: { toggleResponse in
+            }, receiveValue: { [weak self] toggleResponse in
                 print("[RoutineViewModel] Toggle success from server: isCompleted=\(toggleResponse.isCompleted)")
-                // 서버 응답으로 최종 상태 확정
-                if let index = self.routines.firstIndex(where: { $0.id == routine.id }) {
-                    self.routines[index].isDone = toggleResponse.isCompleted
+                // 서버 응답으로 UI 상태 업데이트
+                if let index = self?.routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
+                    self?.routines[index].isDone = toggleResponse.isCompleted
                 }
                 
-                // 토글 성공 후 서버 데이터로 재동기화
-                self.fetchRoutines(for: self.selectedDay)
+                // 재검증 로직 제거 (더 이상 필요 없음)
+                // DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                //     self?.verifyRoutineState(routine: routine, expectedState: toggleResponse.isCompleted)
+                // }
             })
             .store(in: &cancellables)
     }
