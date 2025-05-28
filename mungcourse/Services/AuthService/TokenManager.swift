@@ -15,6 +15,7 @@ final class TokenManager: ObservableObject {
     
     // MARK: - 토큰 저장/조회/삭제
     func saveTokens(accessToken: String, refreshToken: String) {
+        print("[TokenManager] 토큰 저장: \(accessToken.prefix(10))...")
         keychain["accessToken"] = accessToken
         keychain["refreshToken"] = refreshToken
         self.accessToken = accessToken
@@ -23,10 +24,49 @@ final class TokenManager: ObservableObject {
     func getAccessToken() -> String? {
         return accessToken
     }
+    
+    // 토큰 유효성 검증 메서드 추가
+    func validateTokens() -> Bool {
+        if let accessToken = self.accessToken, !accessToken.isEmpty {
+            print("[TokenManager] 토큰 검증: 토큰 존재 (\(accessToken.prefix(10))...)")
+            
+            // 토큰 유효기간 확인
+            let segments = accessToken.split(separator: ".")
+            if segments.count == 3 {
+                var base64 = String(segments[1])
+                    .replacingOccurrences(of: "-", with: "+")
+                    .replacingOccurrences(of: "_", with: "/")
+                let remainder = base64.count % 4
+                if remainder > 0 {
+                    base64 = base64.padding(toLength: base64.count + 4 - remainder, withPad: "=", startingAt: 0)
+                }
+                
+                if let data = Data(base64Encoded: base64),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let exp = json["exp"] as? TimeInterval {
+                    let expiryDate = Date(timeIntervalSince1970: exp)
+                    print("[TokenManager] 토큰 만료시간: \(expiryDate)")
+                    let isValid = expiryDate > Date()
+                    print("[TokenManager] 토큰 유효성: \(isValid ? "유효" : "만료")")
+                    return isValid
+                } else {
+                    print("[TokenManager] 토큰 구문 분석 오류")
+                }
+            } else {
+                print("[TokenManager] 토큰 형식 오류 (segments: \(segments.count))")
+            }
+            
+            // 기본적으로 토큰이 존재하면 유효하다고 간주
+            return true
+        }
+        print("[TokenManager] 토큰 검증: 토큰 없음")
+        return false
+    }
     func getRefreshToken() -> String? {
         return refreshToken
     }
     func clearTokens() {
+        print("[TokenManager] 토큰 삭제")
         keychain["accessToken"] = nil
         keychain["refreshToken"] = nil
         self.accessToken = nil

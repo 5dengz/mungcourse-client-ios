@@ -41,7 +41,7 @@ struct ServiceAPIResponse<T: Decodable>: Decodable {
 
 // 반려견 등록 전용 응답 모델 (서버가 id 없이 반환하는 필드에 맞춤)
 struct DogRegistrationResponseData: Decodable {
-    let id: Int?    // 반려견 ID 추가 (옵셔널로 변경)
+    let id: Int?
     let name: String
     let gender: String
     let breed: String
@@ -82,4 +82,9 @@ protocol DogServiceProtocol {
     func updateDog(dogId: Int, dogData: DogRegistrationData) async throws -> DogRegistrationResponseData
     // 강아지 정보 삭제 추가
     func deleteDog(dogId: Int) async throws
+    // 프로필 이미지(S3) 삭제 추가 (API: key)
+    func deleteProfileImageS3(objectKey: String) async throws
+    
+    // PATCH /v1/dogs/{dogId}/main - 대표 강아지 설정
+    func setMainDog(dogId: Int) async throws -> Dog
 }

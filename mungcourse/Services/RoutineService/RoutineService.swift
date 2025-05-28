@@ -17,18 +17,38 @@ struct RoutineData: Decodable {
     let date: String
     let routineCheckId: Int
     let routineId: Int
+
+    enum CodingKeys: String, CodingKey {
+        case name, alarmTime, date, routineCheckId, routineId, isCompleted
+    }
 }
 
 struct CreateRoutineRequest: Encodable {
     let name: String
     let alarmTime: String
     let repeatDays: [String]
+    let isAlarmActive: Bool
 }
 
 struct CreateRoutineResponse: Decodable {
     let name: String
     let alarmTime: String
     let repeatDays: [String]
+    let isAlarmActive: Bool
+}
+
+// Wrapper for CreateRoutineResponse to match API response structure
+struct CreateRoutineResponseWrapper: Decodable {
+    let data: CreateRoutineResponse
+}
+
+// MARK: - Update Routine
+struct UpdateRoutineRequest: Encodable {
+    let name: String
+    let alarmTime: String
+    let repeatDays: [String]
+    let isAlarmActive: Bool
+    let applyFromDate: String
 }
 
 // MARK: - RoutineService
@@ -71,7 +91,8 @@ class RoutineService {
                     return
                 }
                 do {
-                    let wrapper = try JSONDecoder().decode(RoutineListResponse.self, from: data)
+                    let decoder = JSONDecoder()
+                    let wrapper = try decoder.decode(RoutineListResponse.self, from: data)
                     promise(.success(wrapper.data))
                 } catch {
                     promise(.failure(error))
@@ -109,8 +130,8 @@ class RoutineService {
                     return
                 }
                 do {
-                    let decoded = try JSONDecoder().decode(CreateRoutineResponse.self, from: data)
-                    promise(.success(decoded))
+                    let wrapper = try JSONDecoder().decode(CreateRoutineResponseWrapper.self, from: data)
+                    promise(.success(wrapper.data))
                 } catch {
                     promise(.failure(error))
                 }
@@ -118,4 +139,81 @@ class RoutineService {
         }
         .eraseToAnyPublisher()
     }
-} 
+
+    /// Update an existing routine
+    func updateRoutine(routineId: Int, requestBody: UpdateRoutineRequest) -> AnyPublisher<Void, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            request.httpBody = try JSONEncoder().encode(requestBody)
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+        return Future<Void, Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let httpResp = response as? HTTPURLResponse,
+                      (200...299).contains(httpResp.statusCode) else {
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Delete an existing routine
+    func deleteRoutine(routineId: Int) -> AnyPublisher<Void, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineId)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        return Future<Void, Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let httpResp = response as? HTTPURLResponse,
+                      (200...299).contains(httpResp.statusCode) else {
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    /// Toggle routine check/uncheck
+    func toggleRoutineCheck(routineCheckId: Int) -> AnyPublisher<Void, Error> {
+        let endpoint = baseURL.appendingPathComponent("/v1/routines/\(routineCheckId)/toggle")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body = ["routineCheckId": routineCheckId]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+        return Future<Void, Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error)); return
+                }
+                guard let httpResp = response as? HTTPURLResponse,
+                      (200...299).contains(httpResp.statusCode) else {
+                    promise(.failure(URLError(.badServerResponse))); return
+                }
+                promise(.success(()))
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+}

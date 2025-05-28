@@ -7,18 +7,18 @@ import UIKit  // UIApplication 사용을 위해 추가
 import CryptoKit  // SHA256 해싱을 위해 추가
 
 // 인증 서비스 결과 타입
-enum AuthResult {
+public enum AuthResult {
     case success(token: String)
     case failure(error: Error)
 }
 
 // 인증 관련 에러 정의
-enum AuthError: Error {
+public enum AuthError: LocalizedError {
     case networkError
     case invalidCredentials
     case unknown
-    
-    var localizedDescription: String {
+
+    public var errorDescription: String? {
         switch self {
         case .networkError:
             return "네트워크 연결에 문제가 있습니다."
@@ -31,21 +31,22 @@ enum AuthError: Error {
 }
 
 // 인증 서비스 프로토콜 - 테스트를 위한 모킹이 쉬워짐
-protocol AuthServiceProtocol {
-    func loginWithGoogle() -> AnyPublisher<AuthResult, Never>
-    func loginWithApple() -> AnyPublisher<AuthResult, Never>
+public protocol AuthServiceProtocol {
+    func loginWithKakao() -> AnyPublisher<AuthResult, Error>
+    func loginWithGoogle() -> AnyPublisher<AuthResult, Error>
+    func loginWithApple() -> AnyPublisher<AuthResult, Error>
     func logout()
 }
 
 // 실제 인증 서비스 구현
-class AuthService: AuthServiceProtocol {
+public class AuthService: AuthServiceProtocol {
     // Singleton 패턴 (앱 전체에서 하나의 인스턴스만 사용)
-    static let shared = AuthService()
+    public static let shared = AuthService()
     private let keychain = Keychain(service: "com.mungcourse.app")
     private var appleSignInDelegate: AppleSignInDelegate?  // Apple 로그인 대리자 보관
     private var currentNonce: String?  // Apple Sign-In을 위한 nonce 저장
     
-    private init() {}
+    public init() {}
     
     private static var apiBaseURL: String {
         Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String ?? ""
@@ -77,8 +78,13 @@ class AuthService: AuthServiceProtocol {
         return hashedData.map { String(format: "%02x", $0) }.joined()
     }
     
+    // 카카오 로그인 메소드
+    public func loginWithKakao() -> AnyPublisher<AuthResult, Error> {
+        // 실제 구현 필요
+        return Fail<AuthResult, Error>(error: AuthError.unknown).eraseToAnyPublisher()
+    }
     // 구글 로그인 메소드
-    func loginWithGoogle() -> AnyPublisher<AuthResult, Never> {
+    public func loginWithGoogle() -> AnyPublisher<AuthResult, Error> {
         return Future<AuthResult, Never> { promise in
             DispatchQueue.main.async {
                 guard let rootViewController = UIApplication.shared.connectedScenes
@@ -104,7 +110,7 @@ class AuthService: AuthServiceProtocol {
                 }
             }
         }
-        .eraseToAnyPublisher()
+        .setFailureType(to: Error.self).eraseToAnyPublisher()
     }
 
     // 서버로 idToken 전달 (POST /v1/auth/google/login)
@@ -155,7 +161,7 @@ class AuthService: AuthServiceProtocol {
     }
     
     // 애플 로그인 메소드
-    func loginWithApple() -> AnyPublisher<AuthResult, Never> {
+    public func loginWithApple() -> AnyPublisher<AuthResult, Error> {
         return Future<AuthResult, Never> { [weak self] promise in
             guard let self = self else { return }
             let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -184,7 +190,7 @@ class AuthService: AuthServiceProtocol {
                 authorizationController.performRequests()
             }
         }
-        .eraseToAnyPublisher()
+        .setFailureType(to: Error.self).eraseToAnyPublisher()
     }
     
     // 서버로 identityToken 전달 (POST /v1/auth/apple/login)
@@ -289,18 +295,14 @@ class AuthService: AuthServiceProtocol {
                 promise(.failure(AuthError.unknown))
                 return
             }
-            
+
             var request = URLRequest(url: url)
             request.httpMethod = "DELETE"
-            
-            if let accessToken = TokenManager.shared.getAccessToken() {
-                request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-            }
-            
+
             print("[AuthService] 회원 탈퇴 요청")
             print("URL: \(url.absoluteString)")
-            
-            URLSession.shared.dataTask(with: request) { data, response, error in
+
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
                 if let error = error {
                     print("[AuthService] 회원 탈퇴 통신 에러:", error)
                     DispatchQueue.main.async {
@@ -308,7 +310,7 @@ class AuthService: AuthServiceProtocol {
                     }
                     return
                 }
-                
+
                 guard let http = response as? HTTPURLResponse else {
                     print("[AuthService] 회원 탈퇴 응답이 HTTPURLResponse가 아님")
                     DispatchQueue.main.async {
@@ -316,13 +318,13 @@ class AuthService: AuthServiceProtocol {
                     }
                     return
                 }
-                
+
                 print("[AuthService] 회원 탈퇴 응답 코드:", http.statusCode)
-                
+
                 if let data = data, let bodyStr = String(data: data, encoding: .utf8) {
                     print("[AuthService] 회원 탈퇴 응답 바디:", bodyStr)
                 }
-                
+
                 switch http.statusCode {
                 case 200...299:
                     // 성공 시 토큰 삭제 및 전체 데이터 초기화
@@ -341,7 +343,7 @@ class AuthService: AuthServiceProtocol {
                         promise(.failure(AuthError.unknown))
                     }
                 }
-            }.resume()
+            }
         }.eraseToAnyPublisher()
     }
     
@@ -369,7 +371,7 @@ class AuthService: AuthServiceProtocol {
     }
     
     // 로그아웃 메소드
-    func logout() {
+    public func logout() {
         print("로그아웃 처리")
         performFullAppDataReset()
         guard let url = URL(string: "\(Self.apiBaseURL)/v1/auth/logout") else {

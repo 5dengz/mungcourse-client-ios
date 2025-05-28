@@ -22,7 +22,7 @@ struct mungcourseApp: App {
     @State private var showLoadingScreen = true // 로딩 화면 표시 여부
     @StateObject private var dogVM = DogViewModel()
     @State private var forceUpdate: Bool = false // 강제 업데이트를 위한 상태
-
+    @Environment(\.scenePhase) private var scenePhase // 앱 라이프사이클 감지를 위한 환경 변수
     
     init() {
         GlobalLocationManager.shared.startUpdatingLocation() // 앱 시작 시 위치 업데이트 시작
@@ -99,6 +99,28 @@ struct mungcourseApp: App {
             // forceViewUpdate 알림을 감지하여 forceUpdate 상태 변경
             .onReceive(NotificationCenter.default.publisher(for: .forceViewUpdate)) { _ in
                 forceUpdate.toggle()
+            }
+            // 앱 상태 변경 감지 (백그라운드에서 포그라운드로 전환 시 토큰 검증)
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                if newPhase == .active && oldPhase == .background {
+                    // 백그라운드에서 포그라운드로 전환 시
+                    print("[백그라운드-포그라운드 전환] 토큰 검증 수행")
+                    
+                    if !TokenManager.shared.validateTokens() {
+                        print("[백그라운드-포그라운드 전환] 토큰 만료 감지, 갱신 시도")
+                        TokenManager.shared.refreshAccessToken { success in
+                            if !success {
+                                // 갱신 실패 시 앱 리셋
+                                DispatchQueue.main.async {
+                                    print("[백그라운드-포그라운드 전환] 토큰 갱신 실패, 앱 리셋")
+                                    NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+                                }
+                            } else {
+                                print("[백그라운드-포그라운드 전환] 토큰 갱신 성공")
+                            }
+                        }
+                    }
+                }
             }
         }
     }

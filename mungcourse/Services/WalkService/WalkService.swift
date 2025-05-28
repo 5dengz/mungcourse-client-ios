@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import NMapsMap
 
 class WalkService {
     static let shared = WalkService()
@@ -152,6 +153,68 @@ class WalkService {
         .eraseToAnyPublisher()
     }
     
+    // 추천 경로 가져오기
+    func fetchRecommendRoute(currentLat: Double, currentLng: Double, dogPlaceIds: [Int]) -> AnyPublisher<(coordinates: [NMGLatLng], totalDistance: Double, estimatedTime: Int), Error> {
+        guard let url = URL(string: "\(baseURL)/v1/walks/recommend") else {
+            return Fail(error: URLError(.badURL)).eraseToAnyPublisher()
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = [
+            "currentLat": currentLat,
+            "currentLng": currentLng,
+            "dogPlaceIds": dogPlaceIds
+        ]
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: body)
+            request.httpBody = jsonData
+        } catch {
+            return Fail(error: error).eraseToAnyPublisher()
+        }
+        return Future<(coordinates: [NMGLatLng], totalDistance: Double, estimatedTime: Int), Error> { promise in
+            NetworkManager.shared.performAPIRequest(request) { data, response, error in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode),
+                      let data = data else {
+                    promise(.failure(URLError(.badServerResponse)))
+                    return
+                }
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let dataArr = json["data"] as? [[String: Any]],
+                       let first = dataArr.first,
+                       let routeArr = first["route"] as? [[String: Any]] {
+                        let coordinates: [NMGLatLng] = routeArr.compactMap { item -> NMGLatLng? in
+                            guard let lat = item["lat"] as? Double,
+                                  let lng = item["lng"] as? Double else { return nil }
+                            return NMGLatLng(lat: lat, lng: lng)
+                        }
+                        let totalDistance: Double
+                        if let length = first["route_length"] as? Double {
+                            totalDistance = length
+                        } else if let lengthInt = first["route_length"] as? Int {
+                            totalDistance = Double(lengthInt)
+                        } else {
+                            totalDistance = 0
+                        }
+                        let estimatedTime = 0
+                        promise(.success((coordinates: coordinates, totalDistance: totalDistance, estimatedTime: estimatedTime)))
+                    } else {
+                        promise(.failure(URLError(.cannotParseResponse)))
+                    }
+                } catch {
+                    promise(.failure(error))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
     // MARK: - History 관련 API
     
     // 특정 연도와 월의 산책 날짜 조회 (달력 표시용)
@@ -167,6 +230,12 @@ class WalkService {
         
         return NetworkManager.shared.requestWithTokenPublisher(request)
             .tryMap { data, response -> Data in
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("[fetchWalkDates] statusCode: \(httpResponse.statusCode)")
+                }
+                if let bodyString = String(data: data, encoding: .utf8) {
+                    print("[fetchWalkDates] response body: \(bodyString)")
+                }
                 guard let httpResponse = response as? HTTPURLResponse,
                       (200...299).contains(httpResponse.statusCode) else {
                     throw URLError(.badServerResponse)
