@@ -15,7 +15,6 @@ struct AccountDeletionView: View {
                 leftAction: { dismiss() },
                 title: "회원 탈퇴"
             )
-            .padding(.top, 16)
             .padding(.bottom, 28)
             
             // 2. 중간 영역 (남은 공간 모두 차지)

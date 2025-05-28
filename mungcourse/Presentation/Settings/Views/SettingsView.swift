@@ -11,7 +11,6 @@ struct SettingsView: View {
                 leftAction: { dismiss() },
                 title: "설정"
             )
-            .padding(.top, 16)
             .padding(.bottom, 16)
 
             ScrollView {

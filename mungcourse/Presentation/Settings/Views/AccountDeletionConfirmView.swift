@@ -19,7 +19,6 @@ struct AccountDeletionConfirmView: View {
                     leftAction: { dismiss() },
                     title: "회원 탈퇴"
                 )
-                .padding(.top, 16)
                 .padding(.bottom, 16)
                 
                 ScrollView {
@@ -49,7 +48,7 @@ struct AccountDeletionConfirmView: View {
                                 .foregroundColor(.black)
                         }
                         .multilineTextAlignment(.center)
-                        .padding(.top, 18)
+                        .padding(.top, 8)
                         .padding(.horizontal, 16)
                         
                         // 강아지 프로필 사진들 (65x65 크기로 중앙 배열)

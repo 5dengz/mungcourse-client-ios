@@ -15,7 +15,6 @@ struct VersionInfoView: View {
                 leftAction: { dismiss() },
                 title: "버전 정보"
             )
-            .padding(.top, 16)
             .padding(.bottom, 28)
             
             VStack(spacing: 24) {
@@ -41,7 +40,6 @@ struct VersionInfoView: View {
             
             Spacer()
         }
-        .padding(.horizontal, 16)
         .navigationBarHidden(true)
         .ignoresSafeArea(edges: .bottom)
         .background(Color("pointwhite"))
