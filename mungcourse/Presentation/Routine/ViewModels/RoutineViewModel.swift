@@ -12,6 +12,9 @@ class RoutineViewModel: ObservableObject {
     
     // 중복 토글 방지를 위한 처리 중인 루틴 ID 추적
     private var togglingRoutineIds = Set<Int>()
+    
+    // 로딩 상태 추적 (UI에서 사용 가능)
+    @Published var loadingRoutineIds = Set<Int>()
 
     init() {
         fetchRoutines(for: selectedDay)
@@ -67,41 +70,116 @@ class RoutineViewModel: ObservableObject {
     }
 
     func toggleRoutineCompletion(routine: Routine) {
+        let timestamp = DateFormatter().string(from: Date())
+        print("[RoutineViewModel] [\(timestamp)] toggleRoutineCompletion CALLED for: \(routine.title), routineCheckId: \(routine.routineCheckId)")
+        
         // 이미 처리 중인 루틴인지 확인
         guard !togglingRoutineIds.contains(routine.routineCheckId) else {
-            print("[RoutineViewModel] Toggle already in progress for routineCheckId: \(routine.routineCheckId)")
+            print("[RoutineViewModel] ❌ Toggle already in progress for routineCheckId: \(routine.routineCheckId)")
             return
         }
         
-        print("[RoutineViewModel] Toggling routine: \(routine.title), routineCheckId: \(routine.routineCheckId), current state: \(routine.isDone)")
+        print("[RoutineViewModel] ✅ Starting toggle for routine: \(routine.title), routineCheckId: \(routine.routineCheckId), current state: \(routine.isDone)")
         
         // 처리 중으로 표시
         togglingRoutineIds.insert(routine.routineCheckId)
-        
-        // 낙관적 업데이트 제거 - 서버 응답 후 UI 업데이트
-        // 대신 로딩 상태 표시 가능 (선택사항)
+        print("[RoutineViewModel] 🔄 Added routineCheckId \(routine.routineCheckId) to togglingRoutineIds. Current set: \(togglingRoutineIds)")
         
         RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
                 // 처리 완료 후 제거
                 self?.togglingRoutineIds.remove(routine.routineCheckId)
+                print("[RoutineViewModel] 🔄 Removed routineCheckId \(routine.routineCheckId) from togglingRoutineIds")
                 
                 if case .failure(let error) = completion {
-                    print("[RoutineViewModel] Toggle failed: \(error.localizedDescription)")
-                    // 실패시 에러 상태 표시 (원상복구 불필요)
+                    print("[RoutineViewModel] ❌ Toggle failed: \(error.localizedDescription)")
                 }
             }, receiveValue: { [weak self] toggleResponse in
-                print("[RoutineViewModel] Toggle success from server: isCompleted=\(toggleResponse.isCompleted)")
+                print("[RoutineViewModel] ✅ Toggle success from server: routineCheckId=\(toggleResponse.routineCheckId), isCompleted=\(toggleResponse.isCompleted)")
+                
                 // 서버 응답으로 UI 상태 업데이트
                 if let index = self?.routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
+                    let oldState = self?.routines[index].isDone
                     self?.routines[index].isDone = toggleResponse.isCompleted
+                    print("[RoutineViewModel] 🔄 Updated local state: routineCheckId=\(routine.routineCheckId), old=\(oldState ?? false), new=\(toggleResponse.isCompleted)")
+                } else {
+                    print("[RoutineViewModel] ⚠️ Could not find routine with routineCheckId=\(routine.routineCheckId) in local array")
                 }
                 
-                // 재검증 로직 제거 (더 이상 필요 없음)
-                // DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                //     self?.verifyRoutineState(routine: routine, expectedState: toggleResponse.isCompleted)
-                // }
+                // 즉시 서버 상태 검증을 위한 GET 요청 (서버 DB 업데이트 시간 고려하여 2초로 연장)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    self?.verifyServerState(routineCheckId: routine.routineCheckId, expectedState: toggleResponse.isCompleted)
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+    /// 토글 후 서버 상태 즉시 검증 (재시도 로직 포함)
+    private func verifyServerState(routineCheckId: Int, expectedState: Bool, retryCount: Int = 0) {
+        let maxRetries = 3
+        print("[RoutineViewModel] 🔍 Verifying server state for routineCheckId: \(routineCheckId), expected: \(expectedState), attempt: \(retryCount + 1)/\(maxRetries + 1)")
+        
+        // 현재 선택된 날짜로 검증 요청 (오늘 날짜가 아닌 selectedDay 사용)
+        let currentDateString = dateString(for: selectedDay)
+        print("[RoutineViewModel] 🔍 Verification request for date: \(currentDateString) (selectedDay: \(selectedDay))")
+        print("[RoutineViewModel] 🔍 Looking for routineCheckId: \(routineCheckId) in server response...")
+        
+        RoutineService.shared.fetchRoutines(date: currentDateString)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("[RoutineViewModel] ❌ Failed to verify server state: \(error.localizedDescription)")
+                }
+            }, receiveValue: { [weak self] routinesFromServer in
+                print("[RoutineViewModel] 🔍 Server verification response contains \(routinesFromServer.count) routines:")
+                routinesFromServer.forEach { routine in
+                    print("[RoutineViewModel] 🔍   - routineCheckId: \(routine.routineCheckId), name: \(routine.name), date: \(routine.date), isCompleted: \(routine.isCompleted)")
+                }
+                
+                if let serverRoutine = routinesFromServer.first(where: { $0.routineCheckId == routineCheckId }) {
+                    print("[RoutineViewModel] 🔍 ✅ Found target routine! routineCheckId=\(routineCheckId), server_isCompleted=\(serverRoutine.isCompleted), expected=\(expectedState)")
+                    
+                    if serverRoutine.isCompleted != expectedState {
+                        print("[RoutineViewModel] ⚠️ SERVER STATE MISMATCH! routineCheckId=\(routineCheckId), server=\(serverRoutine.isCompleted), expected=\(expectedState)")
+                        
+                        // 재시도 로직
+                        if retryCount < maxRetries {
+                            let retryDelay = Double(retryCount + 1) * 1.0 // 1초, 2초, 3초 간격으로 재시도
+                            print("[RoutineViewModel] 🔄 Retrying verification in \(retryDelay) seconds... (attempt \(retryCount + 2)/\(maxRetries + 1))")
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
+                                self?.verifyServerState(routineCheckId: routineCheckId, expectedState: expectedState, retryCount: retryCount + 1)
+                            }
+                        } else {
+                            print("[RoutineViewModel] ⚠️ Max retries reached. SERVER INCONSISTENCY DETECTED!")
+                            print("[RoutineViewModel] ⚠️ Toggle API returned: \(expectedState), but Query API consistently returns: \(serverRoutine.isCompleted)")
+                            print("[RoutineViewModel] 🤔 This indicates a server-side issue (DB inconsistency, caching, or different data sources)")
+                            
+                            // 서버 불일치 상황에서는 토글 API 응답을 신뢰하고 클라이언트 상태 유지
+                            print("[RoutineViewModel] 🎯 Keeping client state as per Toggle API response: \(expectedState)")
+                            print("[RoutineViewModel] 📝 Server team should investigate DB/API inconsistency for routineCheckId: \(routineCheckId)")
+                        }
+                    } else {
+                        print("[RoutineViewModel] ✅ Server state matches expected state")
+                    }
+                } else {
+                    print("[RoutineViewModel] ❌ CRITICAL: routineCheckId=\(routineCheckId) NOT FOUND in server response!")
+                    print("[RoutineViewModel] ❌ Available routineCheckIds: \(routinesFromServer.map { $0.routineCheckId })")
+                    print("[RoutineViewModel] ❌ Request date: \(currentDateString), selectedDay: \(self?.selectedDay ?? .today)")
+                    
+                    // 루틴이 응답에 없는 경우에도 재시도 시도
+                    if retryCount < maxRetries {
+                        let retryDelay = Double(retryCount + 1) * 1.0
+                        print("[RoutineViewModel] 🔄 Retrying to find missing routine in \(retryDelay) seconds... (attempt \(retryCount + 2)/\(maxRetries + 1))")
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
+                            self?.verifyServerState(routineCheckId: routineCheckId, expectedState: expectedState, retryCount: retryCount + 1)
+                        }
+                    } else {
+                        print("[RoutineViewModel] ❌ Max retries reached. Routine \(routineCheckId) still not found in server response.")
+                    }
+                }
             })
             .store(in: &cancellables)
     }

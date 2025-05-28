@@ -110,11 +110,7 @@ class RoutineService {
                     let decoder = JSONDecoder()
                     let wrapper = try decoder.decode(RoutineListResponse.self, from: data)
                     
-                    // 디버깅용 로그 추가
-                    print("[RoutineService] fetchRoutines 원시 응답 데이터:")
-                    if let responseString = String(data: data, encoding: .utf8) {
-                        print(responseString)
-                    }
+                    // 디버깅용 로그 (NetworkManager 로그와 중복 제거)
                     print("[RoutineService] 파싱된 루틴 개수: \(wrapper.data.count)")
                     wrapper.data.enumerated().forEach { index, routine in
                         print("[RoutineService] 루틴 \(index): name=\(routine.name), routineId=\(routine.routineId), routineCheckId=\(routine.routineCheckId), isCompleted=\(routine.isCompleted)")
@@ -249,11 +245,7 @@ class RoutineService {
                 do {
                     let wrapper = try JSONDecoder().decode(ToggleRoutineResponseWrapper.self, from: data)
                     
-                    // 디버깅용 로그 추가
-                    print("[RoutineService] toggleRoutineCheck 원시 응답 데이터:")
-                    if let responseString = String(data: data, encoding: .utf8) {
-                        print(responseString)
-                    }
+                    // 디버깅용 로그 (NetworkManager 로그와 중복 제거)
                     print("[RoutineService] Toggle success: routineCheckId=\(wrapper.data.routineCheckId), isCompleted=\(wrapper.data.isCompleted)")
                     
                     promise(.success(wrapper.data))
