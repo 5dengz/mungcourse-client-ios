@@ -50,8 +50,8 @@ struct RoutineListItem: View {
                 
                 onToggle()
                 
-                // 1초 후 다시 클릭 가능하도록 설정
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                // 0.5초 후 다시 클릭 가능하도록 설정 (빠른 반응성)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isToggling = false
                 }
             }) {

@@ -90,6 +90,13 @@ class RoutineViewModel: ObservableObject {
         togglingRoutineIds.insert(routine.routineCheckId)
         print("[RoutineViewModel] 🔄 Added routineCheckId \(routine.routineCheckId) to togglingRoutineIds. Current set: \(togglingRoutineIds)")
         
+        // 낙관적 업데이트: 즉시 UI 상태 변경
+        if let index = routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
+            let newState = !routines[index].isDone
+            routines[index].isDone = newState
+            print("[RoutineViewModel] 🚀 Optimistic update: routineCheckId=\(routine.routineCheckId), new state=\(newState)")
+        }
+        
         RoutineService.shared.toggleRoutineCheck(routineCheckId: routine.routineCheckId)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
@@ -99,15 +106,26 @@ class RoutineViewModel: ObservableObject {
                 
                 if case .failure(let error) = completion {
                     print("[RoutineViewModel] ❌ Toggle failed: \(error.localizedDescription)")
+                    
+                    // 실패 시 낙관적 업데이트 롤백
+                    if let index = self?.routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
+                        let rollbackState = !self!.routines[index].isDone
+                        self?.routines[index].isDone = rollbackState
+                        print("[RoutineViewModel] 🔄 Rollback optimistic update: routineCheckId=\(routine.routineCheckId), rollback to=\(rollbackState)")
+                    }
                 }
             }, receiveValue: { [weak self] toggleResponse in
                 print("[RoutineViewModel] ✅ Toggle success from server: routineCheckId=\(toggleResponse.routineCheckId), isCompleted=\(toggleResponse.isCompleted)")
                 
-                // 서버 응답으로 UI 상태 업데이트
+                // 서버 응답과 로컬 상태 동기화 (낙관적 업데이트 검증)
                 if let index = self?.routines.firstIndex(where: { $0.routineCheckId == routine.routineCheckId }) {
-                    let oldState = self?.routines[index].isDone
-                    self?.routines[index].isDone = toggleResponse.isCompleted
-                    print("[RoutineViewModel] 🔄 Updated local state: routineCheckId=\(routine.routineCheckId), old=\(oldState ?? false), new=\(toggleResponse.isCompleted)")
+                    let currentState = self?.routines[index].isDone
+                    if currentState != toggleResponse.isCompleted {
+                        print("[RoutineViewModel] 🔄 Correcting optimistic update: routineCheckId=\(routine.routineCheckId), server=\(toggleResponse.isCompleted), local=\(currentState ?? false)")
+                        self?.routines[index].isDone = toggleResponse.isCompleted
+                    } else {
+                        print("[RoutineViewModel] ✅ Optimistic update was correct")
+                    }
                 } else {
                     print("[RoutineViewModel] ⚠️ Could not find routine with routineCheckId=\(routine.routineCheckId) in local array")
                 }
