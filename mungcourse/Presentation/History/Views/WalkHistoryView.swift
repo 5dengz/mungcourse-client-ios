@@ -33,7 +33,7 @@ struct WalkHistoryView: View {
                             viewModel.gotoPreviousMonth()
                         }) {
                             Image(systemName: "chevron.left")
-                                .foregroundColor(Color("gray400"))
+                                .foregroundColor(Color("pointBlack"))
                                 .font(.system(size: 20)) // 화살표 크기 증가
                         }
                         
@@ -49,7 +49,7 @@ struct WalkHistoryView: View {
                             viewModel.gotoNextMonth()
                         }) {
                             Image(systemName: "chevron.right")
-                                .foregroundColor(Color("gray400"))
+                                .foregroundColor(Color("pointBlack"))
                                 .font(.system(size: 20)) // 화살표 크기 증가
                         }
                     }

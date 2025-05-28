@@ -25,7 +25,7 @@ struct RoutineSettingsView: View {
                         }
                         
                         RoutineDaySelector(selectedDay: $viewModel.selectedDay)
-                            .padding(.top, 16)
+                            .padding(.bottom, 24)
                     }
                     .background(Color("pointwhite")) // 명시적으로 흰색 배경 지정
                     .shadow(color: Color("pointblack").opacity(0.1), radius: 5, x: 0, y: 2) // 그림자 적용
@@ -57,7 +57,7 @@ struct RoutineSettingsView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.top, 12)
+                    .padding(.top, 4)
                     .padding(.bottom, tabBarHeight)
                     .onAppear {
                         print("[RoutineSettingsView] fullProxy.safeAreaInsets.bottom: \(fullProxy.safeAreaInsets.bottom)")
