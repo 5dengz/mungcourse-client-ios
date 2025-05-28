@@ -177,18 +177,35 @@ class LoginViewModel: ObservableObject {
     
     // 반려견 정보 치크 진행 (토큰 유효성 확인 후 호출되는 메서드)
     private func proceedWithDogCheck() {
-        // 실제 구현에서는 API 호출을 통해 반려견 데이터를 가져옴
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            guard let self = self else { return }
-            self.isLoading = false
-            
-            // 이곳에서 needsDogRegistration = true를 설정하기 전에 한번 더 토큰 유효성 재확인
-            if TokenManager.shared.validateTokens() {
-                print("[LoginViewModel] 반려견 정보 확인 완료: 반려견 등록 화면으로 이동")
-                self.needsDogRegistration = true
-            } else {
-                print("[LoginViewModel] 반려견 정보 확인 중 토큰 유효성 재검사 실패")
-                NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+        print("[LoginViewModel] 반려견 정보 확인 시작")
+        
+        // DogService를 통해 실제 반려견 데이터 확인
+        Task { @MainActor in
+            do {
+                let dogs = try await DogService.shared.fetchDogs()
+                self.isLoading = false
+                
+                // 반려견이 존재하는지 확인
+                if dogs.isEmpty {
+                    print("[LoginViewModel] 등록된 반려견이 없음: 반려견 등록 화면으로 이동")
+                    self.needsDogRegistration = true
+                } else {
+                    print("[LoginViewModel] 등록된 반려견 \(dogs.count)마리 확인: 메인 화면으로 이동")
+                    self.needsDogRegistration = false
+                }
+            } catch {
+                print("[LoginViewModel] 반려견 정보 확인 실패: \(error.localizedDescription)")
+                self.isLoading = false
+                
+                // 네트워크 오류 등의 경우 토큰 유효성을 다시 확인
+                if TokenManager.shared.validateTokens() {
+                    // 토큰은 유효하지만 API 호출 실패 시, 안전하게 등록 화면으로 이동
+                    print("[LoginViewModel] API 오류로 인해 반려견 등록 화면으로 이동")
+                    self.needsDogRegistration = true
+                } else {
+                    print("[LoginViewModel] 토큰 무효화로 인한 데이터 리셋")
+                    NotificationCenter.default.post(name: .appDataDidReset, object: nil)
+                }
             }
         }
     }
